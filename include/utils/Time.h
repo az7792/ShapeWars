@@ -24,7 +24,10 @@ public:
      static Time now();
 
      ///@brief 返回`YYYY-MM-DD HH:MM:SS`格式的字符串。
-     std::string toString() const;
+     std::string toDateTimeString() const;
+
+     ///@brief 返回`HH:MM:SS`格式的字符串。
+     std::string toTimeString() const;
 
      ///@brief 更新 `Time` 对象的时间为当前时间。
      void update();

@@ -11,7 +11,7 @@ Time Time::now()
      return Time();
 }
 
-std::string Time::toString() const
+std::string Time::toDateTimeString() const
 {
      std::ostringstream oss;
      // 输出格式例如 : 2025-01-04 12:17:19
@@ -19,6 +19,16 @@ std::string Time::toString() const
          << std::setw(2) << std::setfill('0') << month << "-"
          << std::setw(2) << std::setfill('0') << day << " "
          << std::setw(2) << std::setfill('0') << hour << ":"
+         << std::setw(2) << std::setfill('0') << minute << ":"
+         << std::setw(2) << std::setfill('0') << second;
+     return oss.str();
+}
+
+std::string Time::toTimeString() const
+{
+     std::ostringstream oss;
+     // 输出格式例如 : 12:17:19
+     oss << std::setw(2) << std::setfill('0') << hour << ":"
          << std::setw(2) << std::setfill('0') << minute << ":"
          << std::setw(2) << std::setfill('0') << second;
      return oss.str();
