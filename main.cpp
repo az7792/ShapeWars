@@ -3,20 +3,18 @@
 #include "box2d/box2d.h"
 #include "utils/Time.h"
 #include "utils/ThreadPool.h"
+#include "utils/Logger.h"
 using namespace std;
 int main()
 {
-     ThreadPool t(16);
-     for (int i = 1; i <= 10; ++i)
+     Logger::instance().setLevel(LogLevel::DEBUG);
+     Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
+     ThreadPool t(2);
+     for(int i=0;i<10;++i)
      {
-          t.submit([i]()
-                   { std::cout << i << endl; });
+          t.submit([&](){
+               LOG_DEBUG(to_string(i));
+          });
      }
-     auto tim = Time::now();
-     cout << tim.toString() << endl;
-     this_thread::sleep_for(chrono::seconds(2));
-     tim.update();
-     cout << tim.toString();
-     t.close();
      return 0;
 }
