@@ -1,0 +1,63 @@
+#include "net/EventLoop.h"
+#include "net/Epoll.h"
+#include "net/Channel.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/eventfd.h>
+
+EventLoop::EventLoop() : epoll_(new Epoll(this)), running_(false)
+{
+     int fd = eventfd(0, EFD_NONBLOCK); // 用于通知epoll
+     if (fd < 0)
+          LOG_ERROR("事件循环用于通知退出的fd初始失败" + std::string(strerror(errno)));
+     quitCh_ = new Channel(this, fd);
+
+     quitCh_->setReadCallback([eventFd = fd]() { // 清空缓冲区
+          uint64_t val;
+          read(eventFd, &val, sizeof(val));
+     });
+     quitCh_->enableReading();
+}
+
+EventLoop::~EventLoop()
+{
+     delete epoll_;
+     LOG_INFO("事件循环退出");
+}
+
+void EventLoop::loop()
+{
+     running_ = true;
+     LOG_INFO("开启事件循环");
+     while (running_)
+     {
+          // TODO 边沿触发
+          std::vector<Channel *> chs = epoll_->wait();
+          for (auto &ch : chs)
+               ch->handleEvent(); // TODO 用线程池执行
+     }
+}
+
+void EventLoop::quit()
+{
+     running_ = false;
+     uint64_t one = 1;
+     ssize_t n = write(quitCh_->fd, &one, sizeof(one)); // 向quitCh_->fd写入一个值，唤醒阻塞的epoll_wait
+     if (n != sizeof(one))
+     {
+          LOG_ERROR("写入失败: " + std::string(strerror(errno)));
+     }
+}
+
+void EventLoop::updateChannel(Channel *ch)
+{
+     if (ch->isInEpoll)
+          epoll_->updateChannel(EPOLL_CTL_MOD, ch); // 如果已经在Epoll里了就修改
+     else
+          epoll_->updateChannel(EPOLL_CTL_ADD, ch); // 否则就添加到Epoll中
+}
+
+void EventLoop::removeChannel(Channel *ch)
+{
+     epoll_->removeChannel(ch);
+}
