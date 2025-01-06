@@ -13,6 +13,7 @@ class Epoll
 {
      int epollFd_;                         // epollID
      EventLoop *loop_;                     // epoll所在的EventLoop
+     std::mutex mutex_;                    // channelMap_与epoll树的互斥锁
      std::map<int, Channel *> channelMap_; // 管理所有的Channel
      std::vector<epoll_event> events_;     // 存放epoll_wait返回的事件
      int maxevents_ = 16;                  // epoll_wait返回的事件的最大长度

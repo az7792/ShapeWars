@@ -64,6 +64,7 @@ void Epoll::updateChannel(int op, Channel *ch)
      ev.events = ch->events;
      ev.data.ptr = ch;
 
+     std::lock_guard<std::mutex> lock(mutex_);
      if (epoll_ctl(epollFd_, op, ch->fd, &ev) == -1)
           LOG_ERROR("epoll_ctl失败:" + std::string(strerror(errno)));
 
