@@ -14,4 +14,5 @@
 - 增加`SocketOps`，封装了部分socket相关操作
 - 更新[`ThreadPool`](https://github.com/az7792/ThreadPool),去掉了管理线程
 - 增加`Acceptor`类，用于监听新连接
+- 增加`ObjectPool`类，用于管理对象
 - TODO: 使用池化技术优化管理连接，避免自己析构自己

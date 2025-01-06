@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 #include "net/SocketOps.h"
 #include "net/Acceptor.h"
+#include "utils/ObjectPool.h"
 using namespace std;
 void F(Channel *ch)
 {
@@ -37,36 +38,73 @@ void F(Channel *ch)
 vector<Channel *> channels;
 int main()
 {
-     Logger::instance().setLevel(LogLevel::DEBUG);
-     Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
+     // Logger::instance().setLevel(LogLevel::DEBUG);
+     // Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
 
-     EventLoop eloop1;                    // 主事件循环
-     EventLoop *eloop2 = new EventLoop(); // 从事件循环
-     Acceptor *acceptor = new Acceptor(&eloop1, InetAddress("127.0.0.1", 7792));
-     acceptor->setNewConnectionCallback([eloop = eloop2](int sockfd, const InetAddress &addr) { // 连接到来时
-          cout << "new connection from " << addr.getIpPort() << endl;
-          Channel *ch = new Channel(eloop, sockfd);
-          channels.push_back(ch);
-          ch->setReadCallback(std::bind(F, ch));
-          ch->enableReading();
+     // EventLoop eloop1;                    // 主事件循环
+     // EventLoop *eloop2 = new EventLoop(); // 从事件循环
+     // Acceptor *acceptor = new Acceptor(&eloop1, InetAddress("127.0.0.1", 7792));
+     // acceptor->setNewConnectionCallback([eloop = eloop2](int sockfd, const InetAddress &addr) { // 连接到来时
+     //      cout << "new connection from " << addr.getIpPort() << endl;
+     //      Channel *ch = new Channel(eloop, sockfd);
+     //      channels.push_back(ch);
+     //      ch->setReadCallback(std::bind(F, ch));
+     //      ch->enableReading();
+     // });
+
+     // thread t([&]() { // 测试关闭
+     //      this_thread::sleep_for(std::chrono::seconds(60));
+     //      delete acceptor; // 先关闭acceptor
+     //      eloop1.quit();
+     //      eloop2->quit();
+     // });
+
+     // thread t2(&EventLoop::loop, eloop2);
+     // eloop1.loop();
+
+     // if (t.joinable())
+     //      t.join();
+     // if (t2.joinable())
+     //      t2.join();
+     // delete eloop2;
+     // for (auto ch : channels)
+     //      delete ch;
+     ObjectPool<int> pool([]() -> int *
+                          { return new int(0); }, 10000, 50);
+     thread t1([&]() { // thread 1
+          vector<int *> vec;
+          for (int i = 0; i < 5000; i++)
+          {
+               vec.push_back(pool.get());
+               *vec[i] = i;
+               cout << "get " << *vec[i] << endl;
+          }
+          for (auto p : vec)
+               pool.release(p);
      });
-
-     thread t([&]() { // 测试关闭
-          this_thread::sleep_for(std::chrono::seconds(60));
-          delete acceptor; // 先关闭acceptor
-          eloop1.quit();
-          eloop2->quit();
+     thread t2([&]() { // thread 2
+          vector<int *> vec;
+          for (int i = 0; i < 5000; i++)
+          {
+               vec.push_back(pool.get());
+               *vec[i] = i;
+               cout << "get " << *vec[i] << endl;
+          }
+          for (auto p : vec)
+               pool.release(p);
      });
+     t1.join();
+     t2.join();
+     vector<int *> vec;
 
-     thread t2(&EventLoop::loop, eloop2);
-     eloop1.loop();
-
-     if (t.joinable())
-          t.join();
-     if (t2.joinable())
-          t2.join();
-     delete eloop2;
-     for (auto ch : channels)
-          delete ch;
+     for (int i = 0; i < 10000; i++)
+          vec.push_back(pool.get());
+     for (int i = 0; i < 10000; i++)
+          cout << *vec[i] << endl;
+     int *p = pool.get();
+     if (p == nullptr)
+          cout << "ok";
+     for (int i = 0; i < 10000; i++)
+          pool.release(vec[i]);
      return 0;
 }
