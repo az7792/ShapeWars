@@ -16,51 +16,57 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "net/SocketOps.h"
+#include "net/Acceptor.h"
 using namespace std;
-void F(int fd)
+void F(Channel *ch)
 {
      char buf[1024] = {0};
-     int n = SocketOps::recv(fd, buf, 1024);
-     SocketOps::send(fd, buf, strlen(buf));
+     int n = SocketOps::recv(ch->fd, buf, 1024);
+     if (n == 0)
+     {
+          cout << "tmp" << endl;
+          ch->remove(); // 此时该channel已经是游离状态，会发生内存泄漏
+          return;
+     }
+     SocketOps::send(ch->fd, buf, strlen(buf));
      printf("%s\n", buf);
 }
 // 测试内存泄漏：
 // 先编译好 server 可执行文件
 // 然后执行 valgrind --leak-check=full ./server
+vector<Channel *> channels;
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
      Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
-     // 1. 创建监听套接字
-     int listenFd = SocketOps::createSocket(true);
 
-     // 2. 绑定地址到套接字
-     SocketOps::bind(listenFd, InetAddress("127.0.0.1", 7792));
+     EventLoop eloop1;                    // 主事件循环
+     EventLoop *eloop2 = new EventLoop(); // 从事件循环
+     Acceptor *acceptor = new Acceptor(&eloop1, InetAddress("127.0.0.1", 7792));
+     acceptor->setNewConnectionCallback([eloop = eloop2](int sockfd, const InetAddress &addr) { // 连接到来时
+          cout << "new connection from " << addr.getIpPort() << endl;
+          Channel *ch = new Channel(eloop, sockfd);
+          channels.push_back(ch);
+          ch->setReadCallback(std::bind(F, ch));
+          ch->enableReading();
+     });
 
-     // 3. 开始监听套接字
-     SocketOps::listen(listenFd, 8);
+     thread t([&]() { // 测试关闭
+          this_thread::sleep_for(std::chrono::seconds(60));
+          delete acceptor; // 先关闭acceptor
+          eloop1.quit();
+          eloop2->quit();
+     });
 
-     cout << "Server listening on port 7792..." << endl;
-     // 阻塞接受客户端连接
-     int clientFd = SocketOps::accept(listenFd, nullptr);
+     thread t2(&EventLoop::loop, eloop2);
+     eloop1.loop();
 
-     cout << "New client connected!" << endl;
-
-     EventLoop eloop;
-
-     Channel *ch = new Channel(&eloop, clientFd);
-     ch->setReadCallback(std::bind(F, ch->fd));
-     ch->enableReading();
-
-     thread t([&]()
-              {
-          this_thread::sleep_for(std::chrono::seconds(5));
-          //eloop.quit();
-           });
-     eloop.loop();
-
-     close(listenFd);
      if (t.joinable())
           t.join();
+     if (t2.joinable())
+          t2.join();
+     delete eloop2;
+     for (auto ch : channels)
+          delete ch;
      return 0;
 }
