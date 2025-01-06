@@ -15,38 +15,34 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include "net/SocketOps.h"
 using namespace std;
 void F(int fd)
 {
      char buf[1024] = {0};
-     int n = read(fd, buf, 1024);
-     if (n <= 0)
-          ;
+     int n = SocketOps::recv(fd, buf, 1024);
+     SocketOps::send(fd, buf, strlen(buf));
      printf("%s\n", buf);
 }
+// 测试内存泄漏：
+// 先编译好 server 可执行文件
+// 然后执行 valgrind --leak-check=full ./server
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
      Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
      // 1. 创建监听套接字
-     int listenFd = socket(AF_INET, SOCK_STREAM, 0);
+     int listenFd = SocketOps::createSocket(true);
 
-     // 2. 设置地址和端口
-     struct sockaddr_in addr;
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = AF_INET;
-     addr.sin_port = htons(7792);       // 设置端口号
-     addr.sin_addr.s_addr = INADDR_ANY; // 监听所有网卡
+     // 2. 绑定地址到套接字
+     SocketOps::bind(listenFd, InetAddress("127.0.0.1", 7792));
 
-     // 3. 绑定地址到套接字
-     bind(listenFd, (struct sockaddr *)&addr, sizeof(addr));
-
-     // 4. 开始监听套接字
-     listen(listenFd, 5);
+     // 3. 开始监听套接字
+     SocketOps::listen(listenFd, 8);
 
      cout << "Server listening on port 7792..." << endl;
      // 阻塞接受客户端连接
-     int clientFd = accept(listenFd, nullptr, nullptr);
+     int clientFd = SocketOps::accept(listenFd, nullptr);
 
      cout << "New client connected!" << endl;
 
@@ -59,7 +55,8 @@ int main()
      thread t([&]()
               {
           this_thread::sleep_for(std::chrono::seconds(5));
-          eloop.quit(); });
+          //eloop.quit();
+           });
      eloop.loop();
 
      close(listenFd);
