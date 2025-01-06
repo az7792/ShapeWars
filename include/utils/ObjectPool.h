@@ -23,6 +23,7 @@ public:
      ObjectPool(ObjectFactory factory, size_t maxSize, size_t initialSize = 0)
          : maxSize(maxSize), factory(factory)
      {
+          initialSize = std::min(initialSize, maxSize);
           for (size_t i = 0; i < initialSize; ++i)
           {
                pool.emplace(factory());
@@ -41,24 +42,23 @@ public:
                pool.pop();
           }
      }
-     
+
      // 获取一个对象
      T *get()
      {
-          if (allocatedCount >= maxSize)
-               return nullptr; // 池已满
-
           std::lock_guard<std::mutex> lock(poolMutex);
 
-          if (pool.empty())
+          if (!pool.empty())
           {
-               allocatedCount++;
-               return factory();
+               auto obj = pool.front();
+               pool.pop();
+               return obj;
           }
 
-          auto obj = pool.front();
-          pool.pop();
-          return obj;
+          if (allocatedCount >= maxSize)
+               return nullptr; // 池已满
+          allocatedCount++;
+          return factory();
      }
 
      // 归还一个对象
