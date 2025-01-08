@@ -12,6 +12,8 @@ Epoll::Epoll(EventLoop *loop) : epollFd_(epoll_create1(EPOLL_CLOEXEC)), // 调�
 Epoll::~Epoll()
 {
      // 使用系统调用关闭epoll
+     for (auto &v : channelMap_)
+          v.second->isInEpoll = false;
      ::close(epollFd_);
 }
 
