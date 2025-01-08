@@ -61,6 +61,11 @@ public:
      bool read(char *data, size_t len);
 
      /**
+      * 从文件描述符读取数据到缓冲区
+      */
+     int readFd(int fd);
+
+     /**
       * @brief 从缓冲区读取一个值(小端序)
       * 支持的类型包括：char、float、double、int8、uint8、int16、uint16、int32、uint32、int64、uint64
       * @tparam T 值的类型

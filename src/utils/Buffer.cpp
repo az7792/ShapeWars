@@ -131,3 +131,16 @@ bool Buffer::read(char *data, size_t len)
     writeSize_ += len;
     return true;
 }
+
+int Buffer::readFd(int fd)
+{
+    std::vector<iovec> iovs = getWriteIovec();
+    int n = ::readv(fd, iovs.data(), iovs.size());
+    if (n >= 0)
+    {
+        readSize_ += n;
+        writeSize_ -= n;
+        writeIndex_ = (writeIndex_ + n) % buffer_.size();
+    }
+    return n;
+}
