@@ -1,20 +1,18 @@
 #pragma once
-
+#include <memory>
 class Epoll;
 class Channel;
 
 class EventLoop
 {
-     Epoll *epoll_; // 管理的Epoll
-     bool running_; // loop是否正在运行
+     std::unique_ptr<Epoll> epoll_; // 管理的Epoll
+     bool running_;                 // eventLoop是否正在运行
 
      /**
-      * @brief 用于通知退出的Channel
-      * running_为false时，loop可能阻塞在wait上
-      * 通过注册一个用于通知的fd，在quit时向该fd写内容，让loop解除阻塞
-      * @warning 该Channel通过epoll_释放
+      * @brief 用于通知唤醒epoll的Channel
+      * 通过注册一个用于通知的fd，在需要通知时向该fd写内容，让loop解除阻塞
       */
-     Channel *quitCh_;
+     std::unique_ptr<Channel> wakeupCh_;
 
 public:
      EventLoop();
@@ -22,6 +20,9 @@ public:
 
      /// @brief 开启事件循环
      void loop();
+
+     /// @brief 通知epoll进行一次唤醒
+     bool wakeup();
 
      /// @brief 退出事件循环
      void quit();

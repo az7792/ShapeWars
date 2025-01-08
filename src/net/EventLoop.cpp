@@ -5,23 +5,22 @@
 #include <netinet/in.h>
 #include <sys/eventfd.h>
 
-EventLoop::EventLoop() : epoll_(new Epoll(this)), running_(false)
+EventLoop::EventLoop() : epoll_(std::make_unique<Epoll>(this)), running_(false)
 {
      int fd = eventfd(0, EFD_NONBLOCK); // 用于通知epoll
      if (fd < 0)
           LOG_ERROR("事件循环用于通知退出的fd初始失败" + std::string(strerror(errno)));
-     quitCh_ = new Channel(this, fd);
+     wakeupCh_ = std::make_unique<Channel>(this, fd);
 
-     quitCh_->setReadCallback([eventFd = fd]() { // 清空缓冲区
+     wakeupCh_->setReadCallback([eventFd = fd]() { // 清空缓冲区
           uint64_t val;
-          read(eventFd, &val, sizeof(val));
+          ::read(eventFd, &val, sizeof(val));
      });
-     quitCh_->enableReading();
+     wakeupCh_->enableReading();
 }
 
 EventLoop::~EventLoop()
 {
-     delete epoll_;
      LOG_INFO("事件循环退出");
 }
 
@@ -38,14 +37,18 @@ void EventLoop::loop()
      }
 }
 
+bool EventLoop::wakeup()
+{
+     uint64_t one = 1;
+     return write(wakeupCh_->fd, &one, sizeof(one)); // 向wakeupCh_->fd写入一个值，唤醒阻塞的epoll_wait
+}
+
 void EventLoop::quit()
 {
      running_ = false;
-     uint64_t one = 1;
-     ssize_t n = write(quitCh_->fd, &one, sizeof(one)); // 向quitCh_->fd写入一个值，唤醒阻塞的epoll_wait
-     if (n != sizeof(one))
+     if (!wakeup())
      {
-          LOG_ERROR("写入失败: " + std::string(strerror(errno)));
+          LOG_ERROR("通知失败: " + std::string(strerror(errno)));
      }
 }
 

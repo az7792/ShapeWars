@@ -3,3 +3,5 @@ logs/
 build/
 server
 main
+client
+client.cpp

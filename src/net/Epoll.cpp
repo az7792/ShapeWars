@@ -11,12 +11,6 @@ Epoll::Epoll(EventLoop *loop) : epollFd_(epoll_create1(EPOLL_CLOEXEC)), // 调�
 
 Epoll::~Epoll()
 {
-     for (auto &v : channelMap_)
-     {
-          // 因为要销毁epoll，可以不用从树上移出，这里假设已经没在树上了，这样析构Channel时就不会调用remove
-          v.second->isInEpoll = false;
-          delete v.second;
-     }
      // 使用系统调用关闭epoll
      ::close(epollFd_);
 }

@@ -10,14 +10,13 @@
  */
 class Acceptor
 {
-     EventLoop *mainLoop_;    // 所在主事件循环
-     int acceptFd_;           // 用于监听的socket描述符
-     Channel *acceptChannel_; // 用于监听的Channel
+     EventLoop *mainLoop_;                    // 所在主事件循环
+     std::unique_ptr<Channel> acceptChannel_; // 用于监听的Channel
      std::function<void(int sockfd, const InetAddress &addr)> newConnectionCallback_;
 
      /// @brief 处理新连接到来事件
      void handleRead();
-     
+
 public:
      /// @param loop 所在主事件循环
      /// @param listenAddr 用于监听的地址
@@ -26,5 +25,4 @@ public:
 
      /// @brief 设置新连接到来时的回调函数
      void setNewConnectionCallback(std::function<void(int sockfd, const InetAddress &addr)> cb);
-
 };
