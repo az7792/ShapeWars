@@ -1,12 +1,13 @@
 #pragma once
 #include <memory>
+#include <atomic>
 class Epoll;
 class Channel;
 
 class EventLoop
 {
      std::unique_ptr<Epoll> epoll_; // 管理的Epoll
-     bool running_;                 // eventLoop是否正在运行
+     std::atomic<bool> running_;    // eventLoop是否正在运行
 
      /**
       * @brief 用于通知唤醒epoll的Channel
