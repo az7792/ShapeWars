@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <queue>
+#include <unordered_set>
 #include <mutex>
 #include <condition_variable>
 #include <functional>
@@ -31,15 +32,17 @@ public:
           allocatedCount = initialSize;
      }
 
-     /// @warning 对象池要在最后析构
      ~ObjectPool()
      {
-          if (pool.size() != allocatedCount)
-               LOG_ERROR("对象池析构时有未回收的对象");
+          assert(pool.size() + used.size() == allocatedCount);
           while (!pool.empty())
           {
                delete pool.front();
                pool.pop();
+          }
+          for (auto &obj : used)
+          {
+               delete obj;
           }
      }
 
@@ -52,13 +55,16 @@ public:
           {
                auto obj = pool.front();
                pool.pop();
+               used.insert(obj);
                return obj;
           }
 
           if (allocatedCount >= maxSize)
                return nullptr; // 池已满
           allocatedCount++;
-          return factory();
+          auto obj = factory();
+          used.insert(obj);
+          return obj;
      }
 
      // 归还一个对象
@@ -68,13 +74,15 @@ public:
           if (obj)
           {
                pool.emplace(obj);
+               used.erase(obj);
           }
      }
 
 private:
      size_t maxSize;               // 最大池大小
      size_t allocatedCount = 0;    // 已经创建数量 = 池中对象数量 + 已经分配出去的数量
-     std::queue<T *> pool;         // 池中的对象
+     std::queue<T *> pool;         // 池中的空闲对象
+     std::unordered_set<T *> used; // 已经分配出去的对象
      ObjectFactory factory;        // 用于创建新对象的工厂函数
      mutable std::mutex poolMutex; // 保护池的访问
 };
