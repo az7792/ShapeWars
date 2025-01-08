@@ -17,7 +17,12 @@ class Channel
      void update();
 
 public:
-     int fd;                 // Channel对应的fd
+     int fd; // Channel对应的fd
+     /**
+      * @brief fd是否已经关闭
+      * 如果已经关闭则不需要再close，但需要从epoll树上移除，所有不能简单将fd设置为-1
+      */
+     bool fdClosed = true;
      uint32_t events = 0;    // 订阅的事件
      uint32_t revents;       // 实际发生的事件
      bool isInEpoll = false; // 是否已经注册到Epoll中

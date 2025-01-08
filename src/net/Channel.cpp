@@ -3,7 +3,11 @@
 #include <sys/epoll.h> //仅用于使用EPOLLIN，EPOLLOUT等宏
 #include <unistd.h>
 
-Channel::Channel(EventLoop *loop, int fd) : loop_(loop), fd(fd) {}
+Channel::Channel(EventLoop *loop, int fd) : loop_(loop), fd(fd), fdClosed(true)
+{
+     if (fd != -1 && loop_ != nullptr)
+          fdClosed = false;
+}
 
 Channel::~Channel()
 {
@@ -16,8 +20,11 @@ void Channel::close()
      disableAll();
      if (isInEpoll)
           this->remove();
-     if (fd != -1)
+     if (!fdClosed)
+     {
           ::close(fd);
+          fdClosed = true;
+     }
      loop_ = nullptr;
 }
 
@@ -43,19 +50,19 @@ void Channel::setEventLoop(EventLoop *loop)
 
 void Channel::remove()
 {
-     if (loop_ != nullptr && fd != -1)
+     if (isInEpoll && loop_ != nullptr)
           loop_->removeChannel(this);
 }
 
 void Channel::update()
 {
-     if (loop_ != nullptr && fd != -1)
+     if (loop_ != nullptr) // 不在epoll中也能更新(也就是注册)
           loop_->updateChannel(this);
 }
 
 void Channel::handleEvent()
 {
-     if (loop_ == nullptr || fd == -1)
+     if (loop_ == nullptr || fdClosed)
           return;
      // 实际发生了 且 注册了 且 设置了回调函数 才会最终调用回调函数
      if ((revents & EPOLLERR) && (events & EPOLLERR) && errorCallback_)
