@@ -25,9 +25,13 @@ public:
      Channel(EventLoop *loop, int fd);
      ~Channel();
 
+     /// 关闭Channel
+     void close();
+
      void setReadCallback(const std::function<void()> &cb);
      void setWriteCallback(const std::function<void()> &cb);
      void setErrorCallback(const std::function<void()> &cb);
+     void setEventLoop(EventLoop *loop);
 
      /// @brief 将当前channel从epoll中注销
      void remove();

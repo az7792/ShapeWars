@@ -7,10 +7,18 @@ Channel::Channel(EventLoop *loop, int fd) : loop_(loop), fd(fd) {}
 
 Channel::~Channel()
 {
+     close();
+}
+
+void Channel::close()
+{
      // 从epoll中注销
+     disableAll();
      if (isInEpoll)
           this->remove();
-     ::close(fd);
+     if (fd != -1)
+          ::close(fd);
+     loop_ = nullptr;
 }
 
 void Channel::setReadCallback(const std::function<void()> &cb)
@@ -28,18 +36,27 @@ void Channel::setErrorCallback(const std::function<void()> &cb)
      errorCallback_ = cb;
 }
 
+void Channel::setEventLoop(EventLoop *loop)
+{
+     loop_ = loop;
+}
+
 void Channel::remove()
 {
-     loop_->removeChannel(this);
+     if (loop_ != nullptr && fd != -1)
+          loop_->removeChannel(this);
 }
 
 void Channel::update()
 {
-     loop_->updateChannel(this);
+     if (loop_ != nullptr && fd != -1)
+          loop_->updateChannel(this);
 }
 
 void Channel::handleEvent()
 {
+     if (loop_ == nullptr || fd == -1)
+          return;
      // 实际发生了 且 注册了 且 设置了回调函数 才会最终调用回调函数
      if ((revents & EPOLLERR) && (events & EPOLLERR) && errorCallback_)
      {
