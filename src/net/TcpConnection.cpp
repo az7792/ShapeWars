@@ -63,6 +63,7 @@ void TcpConnection::start(EventLoop *loop, int fd, InetAddress localAddr, InetAd
 
 void TcpConnection::end()
 {
+     inputBuffer_.clear();
      close();
      abled_ = false;
      readCallback_ = nullptr;

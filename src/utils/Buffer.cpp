@@ -9,6 +9,14 @@ Buffer::Buffer(size_t initialSize)
 
 Buffer::~Buffer() {}
 
+void Buffer::clear()
+{
+    readIndex_ = writeIndex_ = 0;
+    readSize_ =  0;
+    writeSize_ = buffer_.size();
+}
+
+
 void Buffer::ensureWritable(size_t len)
 {
     if (len == 0)
@@ -108,20 +116,18 @@ std::string Buffer::readAllAsString()
 
 std::string Buffer::readAsString(size_t len)
 {
-    if (len > readSize_ || readSize_ == 0)
-        return "";
+    len = std::min(len, readSize_);
     std::string str(len, '\0');
     read(str.data(), len);
     return str;
 }
 
-bool Buffer::read(char *data, size_t len)
+int Buffer::read(char *data, size_t len)
 {
-    if (len > readSize_ || data == nullptr) // 无法读取
-        return false;
-    if (len == 0)
-        return true;
+    if (len == 0 || data == nullptr) // 不必要读取或不可读取
+        return 0;
 
+    len = std::min(len, readSize_);
     for (size_t i = 0; i < len; i++)
     {
         data[i] = buffer_[readIndex_];
@@ -129,7 +135,7 @@ bool Buffer::read(char *data, size_t len)
     }
     readSize_ -= len;
     writeSize_ += len;
-    return true;
+    return len;
 }
 
 int Buffer::readFd(int fd)

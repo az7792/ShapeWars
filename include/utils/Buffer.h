@@ -36,6 +36,9 @@ public:
      Buffer(size_t initialSize = 1024);
      ~Buffer();
 
+     /// @brief 清空缓冲区
+     void clear();
+
      /// @brief 扩容以确保能再容纳len字节的数据，如果可写空间本来就够，则不扩容
      void ensureWritable(size_t len);
 
@@ -52,13 +55,14 @@ public:
      std::string readAllAsString();
 
      /// 读取指定长度的数据
+     /// @return 返回实际读取到的字符串，可能不足len字节
      std::string readAsString(size_t len);
 
      /**
       * 读取指定长度的数据到data中
-      * @return 成功返回true，失败返回false
+      * @return 返回实际读取的字节数
       */
-     bool read(char *data, size_t len);
+     int read(char *data, size_t len);
 
      /**
       * 从文件描述符读取数据到缓冲区
