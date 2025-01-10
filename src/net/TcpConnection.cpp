@@ -4,7 +4,7 @@
 
 void TcpConnection::handleRead()
 {
-     int n = inputBuffer_.readFd(channel_->fd);
+     int n = readFd(); // 这儿主要是判断对端是否关闭
      if (n > 0)
      {
           if (readCallback_)
@@ -75,6 +75,11 @@ void TcpConnection::end()
 int TcpConnection::send(const std::string &buf)
 {
      return SocketOps::send(channel_->fd, buf);
+}
+
+int TcpConnection::readFd()
+{
+     return inputBuffer_.readFd(channel_->fd);
 }
 
 void TcpConnection::close()

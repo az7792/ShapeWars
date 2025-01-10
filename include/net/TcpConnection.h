@@ -43,6 +43,9 @@ public:
      // 发送数据
      int send(const std::string &buf);
 
+     /// @brief 尝试从fd读取数据到缓冲区
+     int readFd();
+
      // 断开连接
      void close();
 
