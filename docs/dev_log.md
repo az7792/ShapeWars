@@ -31,3 +31,7 @@
 - 完善`ObjectPool`，添加unordered_set以管理已分配的对象,防止意外丢失对象
 - 增加`TcpConnection`类 与 `TcpServer`类
 
+## 2025年1月10日
+- 优化`Buffer`类，不再判断是否能读取到指定长度的数据，而是读取min(length, 缓冲区可读长度)长度的数据
+- `TcpConnection`增加尝试从fd读取数据到buf的公共方法
+- 增加`WebSocketFrame`类，用于编解码websocket数据帧(未测试,会与WebSocketServer一并测试)
