@@ -52,4 +52,7 @@ public:
 
      /// @brief 关闭服务器
      void close();
+
+     /// 主动断开一个连接
+     void closeConnection(TcpConnection *tc);
 };

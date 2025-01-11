@@ -90,3 +90,10 @@ void TcpServer::close()
                v->join();
      isRunning_ = false;
 }
+
+void TcpServer::closeConnection(TcpConnection *tc)
+{
+     tc->end();
+     connectionPool_.release(tc);
+     // 由使用者主动关闭的连接不触发关闭回调
+}
