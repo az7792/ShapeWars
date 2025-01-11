@@ -35,3 +35,8 @@
 - 优化`Buffer`类，不再判断是否能读取到指定长度的数据，而是读取min(length, 缓冲区可读长度)长度的数据
 - `TcpConnection`增加尝试从fd读取数据到buf的公共方法
 - 增加`WebSocketFrame`类，用于编解码websocket数据帧(未测试,会与WebSocketServer一并测试)
+
+## 2025年1月11日
+- `TcpServer`增加closeConnection方法，用于主动关闭连接
+- 增加`WebSocketServer`类，用于处理websocket连接
+     - 使用[demo](https://github.com/az7792/ShapeWarsDemo)测试新网络
