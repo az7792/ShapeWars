@@ -3,10 +3,19 @@
 #include <functional>
 
 class EventLoop;
+class Acceptor;
+class Epoll;
+class TcpConnection;
 
 /// @brief 将sockfd 与 EventLoop 联系起来
 class Channel
 {
+     // friend
+     friend Acceptor;
+     friend EventLoop;
+     friend Epoll;
+     friend TcpConnection;
+
      std::function<void()> readCallback_, writeCallback_, errorCallback_; // 回调函数
      /**
       * @brief Channel对应的EventLoop
@@ -16,7 +25,6 @@ class Channel
      /// @brief 更新当前订阅的事件状态
      void update();
 
-public:
      int fd; // Channel对应的fd
      /**
       * @brief fd是否已经关闭
@@ -26,6 +34,7 @@ public:
      uint32_t events = 0;    // 订阅的事件
      uint32_t revents;       // 实际发生的事件
      bool isInEpoll = false; // 是否已经注册到Epoll中
+public:
 
      Channel(EventLoop *loop, int fd);
      ~Channel();

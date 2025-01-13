@@ -40,3 +40,7 @@
 - `TcpServer`增加closeConnection方法，用于主动关闭连接
 - 增加`WebSocketServer`类，用于处理websocket连接
      - 使用[demo](https://github.com/az7792/ShapeWarsDemo)测试新网络
+
+## 2025年1月13日
+- 使用友元优化Channel的成员管理
+- 测试的cmake脚本优化，先制作静态库，避免不必要的重复编译

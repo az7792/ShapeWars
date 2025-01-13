@@ -49,7 +49,7 @@ int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
      Logger::instance().setTimeFormat(TimeFormat::TimeOnly);
-     WebSocketServer server(InetAddress("127.0.0.1", 7792));
+     WebSocketServer server(InetAddress("0.0.0.0", 7792));
      server.setOnMessage(onMessage);
      server.setOnClose(onClose);
      server.setOnError(onError);
