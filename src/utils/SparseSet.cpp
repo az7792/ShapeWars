@@ -35,8 +35,3 @@ bool SparseSet::find(uint32_t v) const
      }
      return sparse_[v] != nullValue;
 }
-
-const std::vector<uint32_t> &SparseSet::getDense() const
-{
-     return dense_;
-}

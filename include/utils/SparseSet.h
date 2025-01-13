@@ -12,9 +12,9 @@
 class SparseSet
 {
 private:
-     const uint32_t nullValue = 0xffffffff; //[0] 不要交互顺序
-     std::vector<uint32_t> dense_, sparse_; //[1]
-
+     const uint32_t nullValue = 0xffffffff; //[0] 标记空位置
+     std::vector<uint32_t> dense_;          //[1] 稠密数组,存放实际数据
+     std::vector<uint32_t> sparse_;         //[1] 稀疏数组，存放索引
 public:
      SparseSet(size_t size = 1000);
      ~SparseSet() = default;
@@ -29,6 +29,8 @@ public:
      /// @brief 判断是否存在某个数
      bool find(uint32_t v) const;
 
-     /// @brief 获取用于遍历的dense数组
-     const std::vector<uint32_t> &getDense() const;
+     /// begin只读
+     std::vector<uint32_t>::const_iterator begin() const { return dense_.begin(); }
+     /// end只读
+     std::vector<uint32_t>::const_iterator end() const { return dense_.end(); }
 };

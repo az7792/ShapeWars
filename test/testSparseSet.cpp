@@ -40,9 +40,13 @@ int main()
           {
                v1.push_back(v);
           }
-          for (auto v : s.getDense())
+          // for (auto v : s)//这种也可以
+          // {
+          //      v2.push_back(v);
+          // }
+          for (auto it = s.begin(); it != s.end(); ++it)
           {
-               v2.push_back(v);
+               v2.push_back(*it);
           }
           sort(v1.begin(), v1.end());
           sort(v2.begin(), v2.end());
