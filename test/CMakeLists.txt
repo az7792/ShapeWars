@@ -20,6 +20,7 @@ set(EXECUTABLE_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build)
 set(TEST_FILES
     ./testWebsocketServer.cpp
     ./testTcpServer.cpp
+    ./testSparseSet.cpp
     # 添加更多测试文件
 )
 
