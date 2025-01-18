@@ -22,6 +22,7 @@ set(TEST_FILES
     #./testTcpServer.cpp
     ./testSparseSet.cpp
     ./testSparseMap.cpp
+    ./testEntity.cpp
     # 添加更多测试文件
 )
 
