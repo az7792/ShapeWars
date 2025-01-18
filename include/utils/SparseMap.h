@@ -31,7 +31,7 @@ public:
      {
           if (key >= sparse_.size())
           {
-               throw std::out_of_range("SparseSet::insert: value超出范围");
+               sparse_.resize(std::max((size_t)key + 1, sparse_.size() * 2), nullValue);
           }
           if (sparse_[key] == nullValue)
           {

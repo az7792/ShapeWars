@@ -12,9 +12,9 @@
 class SparseSet
 {
 private:
-     const uint32_t nullValue = 0xffffffff; //[0] 标记空位置
-     std::vector<uint32_t> dense_;          //[1] 稠密数组,存放实际数据
-     std::vector<uint32_t> sparse_;         //[1] 稀疏数组，存放索引
+     constexpr static const uint32_t nullValue = 0xffffffff; // 标记空位置
+     std::vector<uint32_t> dense_;                           // 稠密数组,存放实际数据
+     std::vector<uint32_t> sparse_;                          // 稀疏数组，存放索引
 public:
      SparseSet(size_t size = 1000);
      ~SparseSet() = default;

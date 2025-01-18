@@ -21,7 +21,7 @@ int main()
           int op = rand() % 3;
           if (op == 0)
           {
-               int v = rand() % len;
+               int v = rand() % (2 * len);
                s.insert(v, to_string(v + 100));
                uset.emplace(v, to_string(v + 100));
           }
