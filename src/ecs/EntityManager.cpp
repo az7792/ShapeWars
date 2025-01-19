@@ -7,6 +7,11 @@
 //      return groups_.back();
 // }
 
+uint32_t ecs::EntityManager::getEntityNum() const
+{
+     return entityNum_;
+}
+
 ecs::Entity ecs::EntityManager::createEntity()
 {
      ecs::Entity newEntity;
@@ -21,10 +26,11 @@ ecs::Entity ecs::EntityManager::createEntity()
           availableEntityIndex_ = ecs::entityToIndex(entities_[availableEntityIndex_]);
           entities_[ecs::entityToIndex(newEntity)] = newEntity;
      }
+     entityNum_++;
      return newEntity;
 }
 
 bool ecs::EntityManager::entityIsValid(Entity entity)
 {
-     return (entity < entities_.size() && entities_[ecs::entityToIndex(entity)] == entity);
+     return (ecs::entityToIndex(entity) < entities_.size() && entities_[ecs::entityToIndex(entity)] == entity);
 }

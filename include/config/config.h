@@ -1,3 +1,3 @@
 #pragma once
 
-#define ECS_COMPONENT_PAGE_SIZE 1024
+#define ECS_COMPONENT_PAGE_SIZE 128

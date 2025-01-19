@@ -8,10 +8,18 @@
 #include "config/config.h"
 #include "fwd.h"
 #include "utils.h"
+// TODO: 空类型优化
 namespace ecs
 {
+     class ComponentPoolBase
+     {
+     public:
+          /// @brief 尝试删除一个实体(使实体失去该类型组件)
+          virtual bool try_erase(ecs::Entity entity) = 0;
+     };
+
      template <typename Component>
-     class ComponentPool
+     class ComponentPool : public ComponentPoolBase
      {
      private:
           constexpr static const uint32_t nullValue_ = 0xffffffff;                                      // 标记空稀疏数组的空值
@@ -23,6 +31,15 @@ namespace ecs
           size_t size_; // 稠密数组可用部分的大小
 
           size_t pageIndex_; // 空闲位置在最好一页的索引(并不是指第几页)
+
+          /// @brief 交换两个稠密数组的位置
+          void swap(uint32_t i1, uint32_t i2)
+          {
+               assert(has(ecs::entityToIndex(dense_[i1])) && has(ecs::entityToIndex(dense_[i2])));
+               std::swap(dense_[i1], dense_[i2]);
+               std::swap(ptrs_[i1], ptrs_[i2]);
+               std::swap(sparse_[ecs::entityToIndex(dense_[i1])], sparse_[ecs::entityToIndex(dense_[i2])]);
+          }
 
      public:
           ComponentPool(size_t size = 100) : sparse_(size, nullValue_), size_(0), pageIndex_(ECS_COMPONENT_PAGE_SIZE) {};
@@ -82,33 +99,24 @@ namespace ecs
           {
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
-               swap(index, size_ - 1);
                size_--;
+               swap(sparse_[index], size_);
                sparse_[index] = nullValue_;
           }
 
           /// @brief 尝试删除一个实体(使实体失去该类型组件)
-          void try_erase(ecs::Entity entity)
+          bool try_erase(ecs::Entity entity) override
           {
                if (has(entity))
                {
                     erase(entity);
+                    return true;
                }
+               return false;
           }
 
           /// @brief 判断实体是否拥有该类型组件
           bool has(ecs::Entity entity) const { return (ecs::entityToIndex(entity) < sparse_.size() && sparse_[ecs::entityToIndex(entity)] != nullValue_); }
-
-          /// @brief 交换两个数的位置
-          void swap(ecs::Entity e1, ecs::Entity e2)
-          {
-               assert(has(e1) && has(e2));
-               uint32_t index1 = ecs::entityToIndex(e1);
-               uint32_t index2 = ecs::entityToIndex(e2);
-               std::swap(dense_[sparse_[index1]], dense_[sparse_[index2]]);
-               std::swap(ptrs_[sparse_[index1]], ptrs_[sparse_[index2]]);
-               std::swap(sparse_[index1], sparse_[index2]);
-          }
 
           /// @brief 获取实体的组件指针
           Component *get(ecs::Entity entity)

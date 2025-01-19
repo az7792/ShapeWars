@@ -17,6 +17,10 @@ struct Name
      string name;
 };
 
+struct Empty
+{
+};
+
 int main()
 {
      ecs::EntityManager em;
@@ -87,8 +91,45 @@ int main()
           cout << "Entity: " << entity << " Name: " << name->name << endl;
      }
 
-     // 获取一个不存在的组件应该 failed.
-     // name = em.getComponent<Name>(e2);
+     em.destroyEntity(e1);
+     assert(!em.entityIsValid(e1));
+     cout << "--------------\n";
+     view2 = em.getView<Name>();
+     for (auto entity : view2)
+     {
+          Name *name = em.getComponent<Name>(entity);
+          cout << "Entity: " << entity << " Name: " << name->name << endl;
+     }
+     em.destroyEntity(e2);
+
+     e1 = em.createEntity();
+     e2 = em.createEntity();
+
+     cout << ecs::entityToVersion(e1) << " " << ecs::entityToIndex(e1) << endl;
+     cout << ecs::entityToVersion(e2) << " " << ecs::entityToIndex(e2) << endl;
+
+     cout << "----------------\n";
+     em.addComponent<Empty>(e1);
+     em.addComponent<Empty>(e2);
+     em.addComponent<Name>(e2, "e2_new");
+
+     view2 = em.getView<Empty>();
+     for (auto entity : view2)
+     {
+          cout << ecs::entityToIndex(entity) << endl;
+     }
+     cout << "-----------------\n";
+     em.destroyEntity(e1);
+     view2 = em.getView<Empty>();
+     for (auto entity : view2)
+     {
+          cout << em.getComponent<Name>(entity)->name << endl;
+     }
+     cout << "-----------------\n";
+     em.destroyEntity(e2);
+     em.destroyEntity(e3);
+
+     assert(em.getEntityNum() == 0);
 
      return 0;
 }

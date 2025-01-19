@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm> // std::min_element
 #include "ComponentPool.h"
+#include "utils/SparseMap.h"
 #include "ComponentTypeID.h"
 #include "utils/SparseSet.h"
 #include "fwd.h"
@@ -21,16 +22,22 @@ namespace ecs
           // friend class Group;
 
      private:
-          std::vector<Entity> entities_;      // 所有实体,ID与下标相同且版本页相同才可能是有效的实体
-          uint32_t availableEntityIndex_ = 0; // 第一个空闲的实体索引
+          std::vector<Entity> entities_;                  // 所有实体,ID与下标相同且版本好相同才可能是有效的实体
+          uint32_t entityNum_ = 0;                        // 实体数量
+          uint32_t availableEntityIndex_ = 0;             // 第一个空闲的实体索引
+          SparseMap<ComponentPoolBase *> componentPools_; // 实体ID与实体索引的映射
           // std::vector<Group> groups_;         // 所有组
-          //  SparseSet componentIDs_;            // 已创建的组件类型id
+
      private:
           /// 获取组件池
           template <typename Component>
-          static ComponentPool<Component> &getComponentPool()
+          ComponentPool<Component> &getComponentPool()
           {
                static ComponentPool<Component> pool;
+               if (!componentPools_.find(ComponentTypeID::getID<Component>()))
+               {
+                    componentPools_.insert(ComponentTypeID::getID<Component>(), static_cast<ComponentPoolBase *>(&pool));
+               }
                return pool;
           }
 
@@ -41,11 +48,28 @@ namespace ecs
           /// @warning 组创建后无法在程序结束前销毁
           // Group &group(const std::vector<uint32_t> &direct, const std::vector<uint32_t> &indirect = {});
 
+          uint32_t getEntityNum() const;
+
           /// @brief 创建一个实体
           Entity createEntity();
 
           /// @brief 销毁一个实体
-          void destroyEntity(Entity entity);
+          void destroyEntity(Entity entity)
+          {
+               if(!entityIsValid(entity))
+                    return;
+               for (auto &[_, pool] : componentPools_)
+               {
+                    pool->try_erase(entity);
+               }
+               uint32_t index = ecs::entityToIndex(entity);
+               uint32_t version = ecs::entityToVersion(entity) + 1; // 版本号加1
+               if (version == deadEntity)
+                    version = 0;
+               entities_[index] = (version << 20) | availableEntityIndex_;
+               availableEntityIndex_ = index;
+               entityNum_--;
+          }
 
           /// @brief 判断实体是否有效
           bool entityIsValid(Entity entity);
