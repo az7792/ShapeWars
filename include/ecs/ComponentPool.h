@@ -50,7 +50,7 @@ namespace ecs
 
           /// @brief 插入一个实体(使实体拥有该类型组件)
           template <typename... Args>
-          void insert(ecs::Entity entity, Args &&...args)
+          Component* insert(ecs::Entity entity, Args &&...args)
           {
                uint32_t index = ecs::entityToIndex(entity);
                if (index >= sparse_.size())
@@ -82,16 +82,18 @@ namespace ecs
                          sparse_[index] = size_;
                          size_++;
                     }
-               } // TODO: 替换组件?
+               } // MAYBE: 替换组件?
+               return ptrs_[sparse_[index]];
           }
 
           /// @brief 替换一个实体的组件
           template <typename... Args>
-          void replace(ecs::Entity entity, Args &&...args)
+          Component* replace(ecs::Entity entity, Args &&...args)
           {
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
                *ptrs_[sparse_[index]] = Component{std::forward<Args>(args)...};
+               return ptrs_[sparse_[index]];
           }
 
           /// @brief 删除一个实体(使实体失去该类型组件)
