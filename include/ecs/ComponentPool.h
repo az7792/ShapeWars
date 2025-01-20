@@ -8,9 +8,12 @@
 #include "config/config.h"
 #include "fwd.h"
 #include "utils.h"
+#include "utils/SparseMap.h"
+#include "ComponentTypeID.h"
 // TODO: 空类型优化
 namespace ecs
 {
+
      class ComponentPoolBase
      {
      public:
@@ -22,6 +25,9 @@ namespace ecs
      class ComponentPool : public ComponentPoolBase
      {
      private:
+          template <typename, typename>
+          friend class Group;
+
           constexpr static const uint32_t nullValue_ = 0xffffffff;                                      // 标记空稀疏数组的空值
           std::vector<std::unique_ptr<std::array<Component, ECS_COMPONENT_PAGE_SIZE>>> ComponentPages_; // 组件页数组
           std::vector<Component *> ptrs_;                                                               // 指针数组，存放实体的组件指针
@@ -50,7 +56,7 @@ namespace ecs
 
           /// @brief 插入一个实体(使实体拥有该类型组件)
           template <typename... Args>
-          Component* insert(ecs::Entity entity, Args &&...args)
+          Component *insert(ecs::Entity entity, Args &&...args)
           {
                uint32_t index = ecs::entityToIndex(entity);
                if (index >= sparse_.size())
@@ -88,7 +94,7 @@ namespace ecs
 
           /// @brief 替换一个实体的组件
           template <typename... Args>
-          Component* replace(ecs::Entity entity, Args &&...args)
+          Component *replace(ecs::Entity entity, Args &&...args)
           {
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
@@ -128,5 +134,27 @@ namespace ecs
           }
 
           size_t size() const { return size_; }
+     };
+
+     namespace ComponentPools
+     {
+          inline static SparseMap<ComponentPoolBase *> componentPools; // 组件ID与组件池的映射,通过EntityManager管理
+
+          template <typename Component>
+          static bool firstInit(ComponentPool<Component> &pool)
+          {
+               componentPools.insert(ComponentTypeID::getID<Component>(), static_cast<ComponentPoolBase *>(&pool));
+               return true;
+          }
+
+          /// 获取组件池
+          template <typename Component>
+          static ComponentPool<Component> &get()
+          {
+               static ComponentPool<Component> pool;
+               static bool firstInit_ = firstInit<Component>(pool);
+               (void)firstInit_; // 防止未使用警告
+               return pool;
+          }
      };
 } // namespace ecs

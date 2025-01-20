@@ -4,6 +4,8 @@
 #include "utils/SparseMap.h"
 #include "ComponentTypeID.h"
 #include "utils/SparseSet.h"
+#include "utils/Signal.h"
+#include "Group.h"
 #include "fwd.h"
 namespace ecs
 {
@@ -19,34 +21,50 @@ namespace ecs
           /// @brief 实体视图
           using view = std::vector<Entity>;
 
-          // friend class Group;
+          /// 实体添加新组件时触发
+          inline static Signal<void, Entity> OnComponentAdded;
 
-     private:
-          std::vector<Entity> entities_;                  // 所有实体,ID与下标相同且版本好相同才可能是有效的实体
-          uint32_t entityNum_ = 0;                        // 实体数量
-          uint32_t availableEntityIndex_ = 0;             // 第一个空闲的实体索引
-          SparseMap<ComponentPoolBase *> componentPools_; // 实体ID与实体索引的映射
-          // std::vector<Group> groups_;         // 所有组
+          /// 实体删除组件时触发
+          inline static Signal<void, Entity> OnComponentRemoved;
 
-     private:
-          /// 获取组件池
+          /// 实体更新组件时触发
           template <typename Component>
-          ComponentPool<Component> &getComponentPool()
-          {
-               static ComponentPool<Component> pool;
-               if (!componentPools_.find(ComponentTypeID::getID<Component>()))
-               {
-                    componentPools_.insert(ComponentTypeID::getID<Component>(), static_cast<ComponentPoolBase *>(&pool));
-               }
-               return pool;
-          }
+          inline static Signal<void, Entity, Component *> OnComponentReplaced;
+
+          /// 实体销毁时触发
+          inline static Signal<void, Entity> OnEntityDestroyed;
+
+          /// 实体创建时触发
+          inline static Signal<void, Entity> OnEntityCreated;
+
+     private:
+          std::vector<Entity> entities_;      // 所有实体,ID与下标相同且版本好相同才可能是有效的实体
+          uint32_t entityNum_ = 0;            // 实体数量
+          uint32_t availableEntityIndex_ = 0; // 第一个空闲的实体索引
 
      public: // Etity & Component
           /// @brief 创建组
-          /// @param direct 直接拥有的组件类型ID列表
-          /// @param indirect 间接拥有的组件类型ID列表
+          /// 实体的组件必须不在排除类别并且拥有包含列表的全部类型组件
+          /// @param includeComponents 需要包含的组件
+          /// @param excludeComponents 需要排除的组件
           /// @warning 组创建后无法在程序结束前销毁
-          // Group &group(const std::vector<uint32_t> &direct, const std::vector<uint32_t> &indirect = {});
+          template <typename... includeComponents, typename... excludeComponents>
+          Group<type_list<includeComponents...>, type_list<excludeComponents...>> &group(type_list<excludeComponents...>)
+          {
+               using GroupType = Group<type_list<includeComponents...>, type_list<excludeComponents...>>;
+               static GroupType group;
+               OnEntityDestroyed.connect(std::bind(&GroupType::handleEntityDestroyed, &group, std::placeholders::_1));
+               OnComponentAdded.connect(std::bind(&GroupType::handleComponentAdded, &group, std::placeholders::_1));
+               OnComponentRemoved.connect(std::bind(&GroupType::handleComponentRemoved, &group, std::placeholders::_1));
+               return group;
+          }
+
+          /// @brief 创建组
+          template <class... includeComponents>
+          Group<type_list<includeComponents...>, type_list<>> &group()
+          {
+               return group<includeComponents...>(type_list<>{});
+          }
 
           uint32_t getEntityNum() const;
 
@@ -54,22 +72,7 @@ namespace ecs
           Entity createEntity();
 
           /// @brief 销毁一个实体
-          void destroyEntity(Entity entity)
-          {
-               if(!entityIsValid(entity))
-                    return;
-               for (auto &[_, pool] : componentPools_)
-               {
-                    pool->try_erase(entity);
-               }
-               uint32_t index = ecs::entityToIndex(entity);
-               uint32_t version = ecs::entityToVersion(entity) + 1; // 版本号加1
-               if (version == deadEntity)
-                    version = 0;
-               entities_[index] = (version << 20) | availableEntityIndex_;
-               availableEntityIndex_ = index;
-               entityNum_--;
-          }
+          void destroyEntity(Entity entity);
 
           /// @brief 判断实体是否有效
           bool entityIsValid(Entity entity);
@@ -79,25 +82,29 @@ namespace ecs
           /// @param entity 实体
           /// @param ...args 组件构造参数
           template <typename Component, typename... Args>
-          void addComponent(Entity entity, Args &&...args)
+          Component *addComponent(Entity entity, Args &&...args)
           {
                if (!entityIsValid(entity))
-                    return;
-               auto &pool = getComponentPool<Component>();
-               pool.insert(entity, std::forward<Args>(args)...);
+                    return nullptr;
+               auto &pool = ComponentPools::get<Component>();
+               Component *cptr = pool.insert(entity, std::forward<Args>(args)...);
+               OnComponentAdded(entity);
+               return cptr;
           }
 
-          /// @brief 给实体更换组件
+          /// @brief 给实体更新组件的数据
           /// @tparam Component 组件类型
           /// @param entity 实体
           /// @param ...args 组件参数
           template <typename Component, typename... Args>
-          void replaceComponent(Entity entity, Args &&...args)
+          Component *replaceComponent(Entity entity, Args &&...args)
           {
                if (!entityIsValid(entity))
-                    return;
-               auto &pool = getComponentPool<Component>();
-               pool.replace(entity, std::forward<Args>(args)...);
+                    return nullptr;
+               auto &pool = ComponentPools::get<Component>();
+               Component *cptr = pool.replace(entity, std::forward<Args>(args)...);
+               OnComponentReplaced<Component>(entity, cptr);
+               return cptr;
           }
 
           /// @brief 删除实体的某个组件
@@ -106,8 +113,9 @@ namespace ecs
           {
                if (!entityIsValid(entity))
                     return;
-               auto &pool = getComponentPool<Component>();
+               auto &pool = ComponentPools::get<Component>();
                pool.erase(entity);
+               OnComponentRemoved(entity);
           }
 
           /// @brief 获取实体的某个组件
@@ -116,7 +124,7 @@ namespace ecs
           {
                if (!entityIsValid(entity))
                     return nullptr;
-               auto &pool = getComponentPool<Component>();
+               auto &pool = ComponentPools::get<Component>();
                return pool.get(entity);
           }
 
@@ -126,7 +134,7 @@ namespace ecs
           {
                if (!entityIsValid(entity))
                     return false;
-               auto &pool = getComponentPool<Component>();
+               auto &pool = ComponentPools::get<Component>();
                return pool.has(entity);
           }
 
@@ -144,8 +152,8 @@ namespace ecs
           std::vector<ecs::Entity> getView()
           {
                std::vector<ecs::Entity> entities;
-               std::vector<size_t> poolsSize = {getComponentPool<Components>().size()...};
-               std::vector<std::vector<ecs::Entity> *> pools = {&getComponentPool<Components>().getDense()...};
+               std::vector<size_t> poolsSize = {ComponentPools::get<Components>().size()...};
+               std::vector<std::vector<ecs::Entity> *> pools = {&ComponentPools::get<Components>().getDense()...};
 
                size_t index = std::min_element(poolsSize.begin(), poolsSize.end()) - poolsSize.begin();
 
@@ -159,27 +167,3 @@ namespace ecs
      };
 
 } // namespace ecs
-// 对于实体的操作：
-// using Entity uin32_t;
-// 创建一个实体：EntityManager.CreateEntity()->Entity;
-// 判断实体是否有效：EntityManager.IsValid(Entity)->bool;
-// 删除一个实体,并移除所有组件：EntityManager.DestroyEntity(Entity)->void;
-
-// 实体添加组件：EntityManager.AddComponent<Component>(Entity,args...)->void;
-// 实体添加组件：EntityManager.AddComponent<Component>(Entity)->component_ptr;
-
-// 实体删除组件：EntityManager.RemoveComponent<Component>(Entity)->void;
-
-// 实体获取组件：EntityManager.GetComponent<Component>(Entity)->component_ptr;
-
-// 实体替换组件：EntityManager.ReplaceComponent<Component>(Entity,args...)->void;
-
-// 实体是否包含某个组件：EntityManager.HasComponent<Component>(Entity)->bool;
-
-// 实体是否包含某一组组件：EntityManager.AllOfComponents<Component1,Component2...>(Entity)->bool;
-
-// 实体是否包含任意一个组件：EntityManager.AnyOfComponents<Component1,Component2...>(Entity)->bool;
-
-// 获取实体的组件数量：EntityManager.GetComponentCount(Entity)->size_t;
-
-// 获取实体的组件集合：EntityManager.GetComponentList(Entity)->std::vector<component_ptr>;

@@ -24,6 +24,9 @@ struct Empty
 int main()
 {
      ecs::EntityManager em;
+
+     auto &G = em.group<Name>(ecs::type_list<Position, Velocity>{});
+
      ecs::Entity e1 = em.createEntity();
      ecs::Entity e2 = em.createEntity();
      ecs::Entity e3 = em.createEntity();
@@ -31,11 +34,26 @@ int main()
      em.addComponent<Position>(e1, 1.0f, 2.0f);
      em.addComponent<Velocity>(e1, 3.0f, 4.0f);
      em.addComponent<Name>(e1, "e1");
+     for (auto &entity : G)
+     {
+          cout << "NameEntity: " << entity << endl;
+     }
 
      em.addComponent<Position>(e2, 5.0f, 6.0f);
      em.addComponent<Velocity>(e2, 7.0f, 8.0f);
+     em.addComponent<Name>(e2, "e2");
 
+     em.addComponent<Velocity>(e3, 33.0f, 4.0f);
      em.addComponent<Name>(e3, "e3");
+     cout<<"--------------\n";
+     for (auto &entity : G)
+     {
+          cout << "NameEntity: " << entity << endl;
+     }
+
+     assert(ecs::ComponentPools::get<Position>().size() == 2);
+     assert(ecs::ComponentPools::get<Velocity>().size() == 3);
+     assert(ecs::ComponentPools::get<Name>().size() == 3);
 
      // 测试是否添加成功
      assert(em.hasComponent<Position>(e1));

@@ -57,3 +57,7 @@
 ## 2025年1月19日
 - ecs:增加删除实体
 - 修复一些bug
+
+## 2025年1月20日
+- `ComponentPool`: insert和replace返回Component*
+- 增加`Group`用于运行时维护符合某一组组件要求的实体组

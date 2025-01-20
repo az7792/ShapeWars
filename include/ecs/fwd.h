@@ -2,9 +2,10 @@
 
 namespace ecs
 {
-     class Group;
      class EntityManager;
-     class View;
+
+     template <typename, typename>
+     class Group;
 
      /// @brief 实体类型
      /// @note 高12位为版本，低20位为ID
