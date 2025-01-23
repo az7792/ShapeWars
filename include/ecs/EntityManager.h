@@ -37,12 +37,43 @@ namespace ecs
           /// 实体创建时触发
           inline static Signal<void, Entity> OnEntityCreated;
 
+          std::vector<std::function<void()>> systems_; // 系统列表
+
      private:
           std::vector<Entity> entities_;      // 所有实体,ID与下标相同且版本好相同才可能是有效的实体
           uint32_t entityNum_ = 0;            // 实体数量
           uint32_t availableEntityIndex_ = 0; // 第一个空闲的实体索引
+     public:                                  // system
+          EntityManager &addSystem(std::function<void()> system)
+          {
+               systems_.emplace_back(system);
+               return *this; // 链式调用
+          }
+
+          /// @brief 执行所有系统
+          void updateSystems()
+          {
+               for (auto &system : systems_)
+               {
+                    system();
+               }
+          }
 
      public: // Etity & Component
+          /// 获取所有实体
+          std::vector<Entity> getEntities()
+          {
+               std::vector<Entity> entities;
+               for (auto &entity : entities_)
+               {
+                    if (entityIsValid(entity))
+                    {
+                         entities.push_back(entity);
+                    }
+               }
+               return entities;
+          }
+
           /// @brief 创建组
           /// 实体的组件必须不在排除类别并且拥有包含列表的全部类型组件
           /// @param includeComponents 需要包含的组件
@@ -52,11 +83,19 @@ namespace ecs
           Group<type_list<includeComponents...>, type_list<excludeComponents...>> &group(type_list<excludeComponents...>)
           {
                using GroupType = Group<type_list<includeComponents...>, type_list<excludeComponents...>>;
-               static GroupType group;
-               OnEntityDestroyed.connect(std::bind(&GroupType::handleEntityDestroyed, &group, std::placeholders::_1));
-               OnComponentAdded.connect(std::bind(&GroupType::handleComponentAdded, &group, std::placeholders::_1));
-               OnComponentRemoved.connect(std::bind(&GroupType::handleComponentRemoved, &group, std::placeholders::_1));
-               return group;
+               static std::unique_ptr<GroupType> groupInstance = nullptr;
+
+               if (!groupInstance)
+               {
+                    groupInstance = std::make_unique<GroupType>(getEntities());
+
+                    // 连接信号
+                    OnEntityDestroyed.connect(std::bind(&GroupType::handleEntityDestroyed, groupInstance.get(), std::placeholders::_1));
+                    OnComponentAdded.connect(std::bind(&GroupType::handleComponentAdded, groupInstance.get(), std::placeholders::_1));
+                    OnComponentRemoved.connect(std::bind(&GroupType::handleComponentRemoved, groupInstance.get(), std::placeholders::_1));
+               }
+
+               return *groupInstance;
           }
 
           /// @brief 创建组

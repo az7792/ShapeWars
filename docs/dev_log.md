@@ -61,3 +61,7 @@
 ## 2025年1月20日
 - `ComponentPool`: insert和replace返回Component*
 - 增加`Group`用于运行时维护符合某一组组件要求的实体组
+
+## 2025年1月23日
+- `Group`增加初始化方法
+- 增加System相关方法

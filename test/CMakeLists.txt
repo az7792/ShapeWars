@@ -23,6 +23,7 @@ set(TEST_FILES
     ./testSparseSet.cpp
     ./testSparseMap.cpp
     ./testEntity.cpp
+    ./testEntitySystem.cpp
     # 添加更多测试文件
 )
 

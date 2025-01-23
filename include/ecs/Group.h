@@ -40,7 +40,14 @@ namespace ecs
           }
 
      public:
-          Group() = default;
+          Group(const std::vector<Entity> &entities)
+          {
+               for (auto &entity : entities)
+               {
+                    handleComponentAdded(entity);
+               }
+          };
+          Group() {};
           ~Group() = default;
 
           /// begin只读
