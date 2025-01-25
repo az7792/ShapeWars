@@ -2,11 +2,11 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const scale = window.localStorage.getItem("no_retina") ? 1 : window.devicePixelRatio;
-const miniMap = new MiniMap(100, 100);
+const miniMap = new MiniMap(MAPINFO.width * MAPINFO.scale / MAPINFO.gridSize, MAPINFO.height * MAPINFO.scale / MAPINFO.gridSize);
 
 //--------test code start----------
-let tmpx = -4.6;
-let tmpy = -4.6;
+let tmpx = -5;
+let tmpy = -5;
 
 for (let i = 0; i < 90; i++) {
      miniMap.fillRect(0, i, 100, 1, [2 * i, 255 - 2 * i, 100 + i, 255]);
@@ -45,6 +45,14 @@ window.addEventListener('keydown', function (event) {
                     update(tmpx, tmpy);
                }, 20)
                break;
+          case 'i':
+               console.log('I 键被按下');
+               MAPINFO.fov += 0.1;
+               break;
+          case 'k':
+               console.log('K 键被按下');
+               MAPINFO.fov -= 0.1;
+               break;
           default:
                break;
      }
@@ -75,11 +83,14 @@ function drawBackground(palyerX, palyerY) {
      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
      //角色 box2d物理坐标转 -> canvas大地图的像素坐标
-     ({ x: palyerX, y: palyerY } = Box2DtoCanvas(palyerX, palyerY));
+     ({ x: palyerX, y: palyerY } = box2DtoCanvas(palyerX, palyerY));
 
      //屏幕左上角在大地图的坐标
-     let ltx = Math.round(palyerX - canvas.width / 2);
-     let lty = Math.round(palyerY - canvas.height / 2);
+     let ltx = Math.round(palyerX - canvas.width * MAPINFO.fov / 2);
+     let lty = Math.round(palyerY - canvas.height * MAPINFO.fov / 2);
+
+     //由于fov导致每个gridSize的像素实际在画布上显示为gridSize/fov
+     let gridSize = MAPINFO.gridSize / MAPINFO.fov;//这儿直接整除如果有小数会导致后面的计算失真
 
      /** 
       * 屏幕左上角在大地图的坐标的偏移量
@@ -95,40 +106,45 @@ function drawBackground(palyerX, palyerY) {
       * A: B所在的(50*50)的方格的左上角坐标
       * (sx,sy)：A - B
       */
-     let sx = Math.floor(ltx / 50) * 50 - ltx;
-     let sy = Math.floor(lty / 50) * 50 - lty;
+     let sx = Math.round((Math.floor(ltx / MAPINFO.gridSize) * MAPINFO.gridSize - ltx) / MAPINFO.fov);
+     let sy = Math.round((Math.floor(lty / MAPINFO.gridSize) * MAPINFO.gridSize - lty) / MAPINFO.fov);
+
 
      //准换到小地图
-     x = Math.floor((ltx) / 50);
-     y = Math.floor((lty) / 50);
-     let width = Math.ceil(canvas.width / 50) + 1;//避免右下边界无法被覆盖到
-     let height = Math.ceil(canvas.height / 50) + 1;//避免右下边界无法被覆盖到
+     let { x, y } = canvasToMiniMap(ltx, lty);
+     let width = Math.ceil(canvas.width / gridSize) + 1;//多算一格，避免右下边界无法被覆盖到
+     let height = Math.ceil(canvas.height / gridSize) + 1;//多算一格，避免右下边界无法被覆盖到
 
      ctx.imageSmoothingEnabled = false;//禁用图像插值
      ctx.drawImage(
           miniMap.canvas,
           x, y, width, height,
-          sx, sy, width * 50, height * 50
+          sx, sy,
+          width * gridSize,
+          height * gridSize
      );
+
+     console.log(palyerX, palyerY, ltx, lty, sx, sy, x, y, width, height);
+
 
      ctx.lineWidth = 1;
      ctx.strokeStyle = COLORS.backgroundLine;
      ctx.beginPath();
-     for (let i = sx; i <= sx + width * 50; i += 50) {//竖线
+     for (let i = sx; i <= sx + width * gridSize; i += gridSize) {//竖线
           ctx.moveTo(i, sy);
-          ctx.lineTo(i, sy + height * 50);
+          ctx.lineTo(i, sy + height * gridSize);
      }
-     for (let i = sy; i <= sy + height * 50; i += 50) {//横线
+     for (let i = sy; i <= sy + height * gridSize; i += gridSize) {//横线
           ctx.moveTo(sx, i);
-          ctx.lineTo(sx + width * 50, i);
+          ctx.lineTo(sx + width * gridSize, i);
      }
      ctx.stroke();
 
      //测试用圆
      ctx.beginPath();
-     ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, Math.PI * 2);
-     ctx.fillStyle = 'blue'; 
-     ctx.fill(); 
+     ctx.arc(canvas.width / 2, canvas.height / 2, 20 / MAPINFO.fov, 0, Math.PI * 2);
+     ctx.fillStyle = 'blue';
+     ctx.fill();
 
      ctx.restore();
 }
@@ -136,10 +152,10 @@ function drawBackground(palyerX, palyerY) {
 //绘制小地图
 function drawMiniMap(palyerX, palyerY) {
 
-     let x = canvas.width - miniMap.width - 30;
-     let y = canvas.height - miniMap.height - 30;
-     let width = miniMap.width;
-     let height = miniMap.height;
+     let width = 100;
+     let height = 100 * miniMap.height / miniMap.width;
+     let x = canvas.width - width - 30;
+     let y = canvas.height - height - 30;
 
      //地图
      ctx.drawImage(
@@ -154,14 +170,12 @@ function drawMiniMap(palyerX, palyerY) {
      ctx.strokeRect(x, y, width, height);
 
      //角色 box2d物理坐标转 -> canvas小地图的像素坐标 -> canvas大地图的像素坐标
-     palyerX += 5;
-     palyerY = 5 - palyerY;
-     palyerX = Math.floor(palyerX * 500 / 50);
-     palyerY = Math.floor(palyerY * 500 / 50);
+     ({ x: palyerX, y: palyerY } = box2DtoCanvas(palyerX, palyerY));
+     ({ x: palyerX, y: palyerY } = canvasToMiniMap(palyerX, palyerY));
 
      //角色在小地图的红色圆形标识
      ctx.beginPath();
-     ctx.arc(x + palyerX, y + palyerY, 2, 0, Math.PI * 2);
+     ctx.arc(x + palyerX * 100 / miniMap.width, y + palyerY * 100 / miniMap.width, 2, 0, Math.PI * 2);
      ctx.fillStyle = 'red';
      ctx.fill();
 }
