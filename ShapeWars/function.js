@@ -37,3 +37,14 @@ function canvasToMiniMap(x, y) {
      y = Math.floor(y / MAPINFO.gridSize);
      return { x, y };
 }
+
+//box2d物理坐标 -> 屏幕坐标系
+function box2DtoScreen(x, y, canvasWidth, canvasHeight) {
+     ({ x: x, y: y } = box2DtoCanvas(x, y));
+
+     //屏幕左上角在大地图的坐标
+     let { x: ltx, y: lty } = box2DtoCanvas(camera.x, camera.y);
+     ltx = Math.round(ltx - canvasWidth * camera.fov / 2);
+     lty = Math.round(lty - canvasHeight * camera.fov / 2);
+     return { x: (x - ltx) / camera.fov, y: (y - lty) / camera.fov };
+}

@@ -5,8 +5,8 @@ const scale = window.localStorage.getItem("no_retina") ? 1 : window.devicePixelR
 const miniMap = new MiniMap(MAPINFO.width * MAPINFO.scale / MAPINFO.gridSize, MAPINFO.height * MAPINFO.scale / MAPINFO.gridSize);
 
 //--------test code start----------
-let tmpx = -5;
-let tmpy = -5;
+camera.x = 0;
+camera.y = 0;
 
 for (let i = 0; i < 90; i++) {
      miniMap.fillRect(0, i, 100, 1, [2 * i, 255 - 2 * i, 100 + i, 255]);
@@ -14,7 +14,7 @@ for (let i = 0; i < 90; i++) {
 miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
 
 resizeCanvas();
-update(tmpx, tmpy);
+update();
 
 // 监听键盘按下事件
 window.addEventListener('keydown', function (event) {
@@ -24,39 +24,55 @@ window.addEventListener('keydown', function (event) {
      switch (key) {
           case 'w':
                console.log('W 键被按下');
-               tmpy += 0.01;
+               camera.y += 0.01;
+               update();
                break;
           case 'a':
                console.log('A 键被按下');
-               tmpx -= 0.01;
+               camera.x -= 0.01;
+               update();
                break;
           case 's':
                console.log('S 键被按下');
-               tmpy -= 0.01;
+               camera.y -= 0.01;
+               update();
                break;
           case 'd':
                console.log('D 键被按下');
-               tmpx += 0.01;
+               camera.x += 0.01;
+               update();
                break;
           case 'l':
                console.log('L 键被按下');
                setInterval(() => {
-                    tmpx += 0.01;
-                    update(tmpx, tmpy);
+                    camera.x += 0.01;
+                    update();
                }, 20)
                break;
           case 'i':
                console.log('I 键被按下');
-               MAPINFO.fov += 0.1;
+               camera.fov += 0.1;
+               update();
                break;
           case 'k':
                console.log('K 键被按下');
-               MAPINFO.fov -= 0.1;
+               camera.fov -= 0.1;
+               camera.fov = Math.max(0.1, camera.fov);
+               update();
+               break;
+          case 'm':
+               console.log('M 键被按下');
+               let points = [
+                    { x: 0, y: 0 },
+                    { x: 0.1, y: 0.1 },
+                    { x: 0.1, y: 0.2 },
+                    { x: 0, y: 0.2 }];
+               drawPolygon(points, 'blue', 'red');
+               drawRegularPolygon(3, 0.35, 0.13, 0.2, Math.PI * (-0) / 180, 'blue', 'yellow');
                break;
           default:
                break;
      }
-     update(tmpx, tmpy);
 });
 
 //----------test code end----------
@@ -70,11 +86,11 @@ function resizeCanvas() {
 // 监听窗口大小变化
 window.onresize = () => {
      resizeCanvas();
-     update(tmpx, tmpy);
+     update(camera.x, camera.y);
 }
 
 //绘制背景
-function drawBackground(palyerX, palyerY) {
+function drawBackground() {
 
      ctx.save();
 
@@ -82,15 +98,15 @@ function drawBackground(palyerX, palyerY) {
      ctx.fillStyle = COLORS.backgroundInvalid;
      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-     //角色 box2d物理坐标转 -> canvas大地图的像素坐标
-     ({ x: palyerX, y: palyerY } = box2DtoCanvas(palyerX, palyerY));
+     //相机 box2d物理坐标转 -> canvas大地图的像素坐标
+     let { x: cx, y: cy } = box2DtoCanvas(camera.x, camera.y);
 
      //屏幕左上角在大地图的坐标
-     let ltx = Math.round(palyerX - canvas.width * MAPINFO.fov / 2);
-     let lty = Math.round(palyerY - canvas.height * MAPINFO.fov / 2);
+     let ltx = Math.round(cx - canvas.width * camera.fov / 2);
+     let lty = Math.round(cy - canvas.height * camera.fov / 2);
 
      //由于fov导致每个gridSize的像素实际在画布上显示为gridSize/fov
-     let gridSize = MAPINFO.gridSize / MAPINFO.fov;//这儿直接整除如果有小数会导致后面的计算失真
+     let gridSize = MAPINFO.gridSize / camera.fov;//这儿直接整除如果有小数会导致后面的计算失真
 
      /** 
       * 屏幕左上角在大地图的坐标的偏移量
@@ -106,8 +122,8 @@ function drawBackground(palyerX, palyerY) {
       * A: B所在的(50*50)的方格的左上角坐标
       * (sx,sy)：A - B
       */
-     let sx = Math.round((Math.floor(ltx / MAPINFO.gridSize) * MAPINFO.gridSize - ltx) / MAPINFO.fov);
-     let sy = Math.round((Math.floor(lty / MAPINFO.gridSize) * MAPINFO.gridSize - lty) / MAPINFO.fov);
+     let sx = Math.round((Math.floor(ltx / MAPINFO.gridSize) * MAPINFO.gridSize - ltx) / camera.fov);
+     let sy = Math.round((Math.floor(lty / MAPINFO.gridSize) * MAPINFO.gridSize - lty) / camera.fov);
 
 
      //准换到小地图
@@ -124,9 +140,6 @@ function drawBackground(palyerX, palyerY) {
           height * gridSize
      );
 
-     console.log(palyerX, palyerY, ltx, lty, sx, sy, x, y, width, height);
-
-
      ctx.lineWidth = 1;
      ctx.strokeStyle = COLORS.backgroundLine;
      ctx.beginPath();
@@ -142,7 +155,7 @@ function drawBackground(palyerX, palyerY) {
 
      //测试用圆
      ctx.beginPath();
-     ctx.arc(canvas.width / 2, canvas.height / 2, 20 / MAPINFO.fov, 0, Math.PI * 2);
+     ctx.arc(canvas.width / 2, canvas.height / 2, 20 / camera.fov, 0, Math.PI * 2);
      ctx.fillStyle = 'blue';
      ctx.fill();
 
@@ -150,7 +163,7 @@ function drawBackground(palyerX, palyerY) {
 }
 
 //绘制小地图
-function drawMiniMap(palyerX, palyerY) {
+function drawMiniMap() {
 
      let width = 100;
      let height = 100 * miniMap.height / miniMap.width;
@@ -170,18 +183,101 @@ function drawMiniMap(palyerX, palyerY) {
      ctx.strokeRect(x, y, width, height);
 
      //角色 box2d物理坐标转 -> canvas小地图的像素坐标 -> canvas大地图的像素坐标
-     ({ x: palyerX, y: palyerY } = box2DtoCanvas(palyerX, palyerY));
-     ({ x: palyerX, y: palyerY } = canvasToMiniMap(palyerX, palyerY));
+     let { x: cx, y: cy } = box2DtoCanvas(camera.x, camera.y);
+     ({ x: cx, y: cy } = canvasToMiniMap(cx, cy));
 
      //角色在小地图的红色圆形标识
      ctx.beginPath();
-     ctx.arc(x + palyerX * 100 / miniMap.width, y + palyerY * 100 / miniMap.width, 2, 0, Math.PI * 2);
+     ctx.arc(x + cx * 100 / miniMap.width, y + cy * 100 / miniMap.width, 2, 0, Math.PI * 2);
      ctx.fillStyle = 'red';
      ctx.fill();
 }
 
+
+/**
+ * 绘制多边形
+ * @param {box2d点集} points 
+ * @param {填充颜色} fillClose 
+ * @param {描边颜色} strokeClose 
+ */
+function drawPolygon(points, fillColor, strokeColor) {
+     for (let i = 0; i < points.length; i++) {
+          points[i] = box2DtoScreen(points[i].x, points[i].y, canvas.width, canvas.height);
+     }
+
+     ctx.save();
+     ctx.beginPath();
+
+     ctx.moveTo(points[0].x, points[0].y);
+     for (let i = 1; i < points.length; i++) {
+          ctx.lineTo(points[i].x, points[i].y);
+     }
+     ctx.closePath();//自动闭合路径
+
+     ctx.fillStyle = fillColor;
+     ctx.fill();
+
+     ctx.lineWidth = 3 / camera.fov;
+     ctx.strokeStyle = strokeColor;
+     ctx.stroke();
+
+     ctx.restore();
+}
+
+/**
+ * 绘制正多边形
+ * @param {边数} sides
+ * @param {box2d X} x 
+ * @param {box2d Y} y 
+ * @param {外接圆半径} r 
+ * @param {角度}  angle
+ * @param {填充颜色} fillColor 
+ * @param {描边颜色} strokeColor 
+ * @returns 
+ */
+function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
+     // 确保边数至少为3
+     if (sides < 3) return;
+
+     //变换到屏幕坐标系
+     ({ x, y } = box2DtoScreen(x, y, canvas.width, canvas.height));
+     r = r * MAPINFO.scale / camera.fov;
+
+     angle = -angle;
+
+     // 计算每个顶点的角度增量
+     const dAngle = (2 * Math.PI) / sides;
+
+     ctx.save();
+     ctx.beginPath();
+
+     // 第一个点
+     let startX = x + r * Math.cos(angle);
+     let startY = y + r * Math.sin(angle);
+     ctx.moveTo(startX, startY);
+
+     // 剩余顶点
+     for (let i = 1; i < sides; i++) {
+          // 当前顶点的角度
+          let currentAngle = angle + i * dAngle;
+          let currentX = x + r * Math.cos(currentAngle);
+          let currentY = y + r * Math.sin(currentAngle);
+          ctx.lineTo(currentX, currentY);
+     }
+
+     ctx.closePath();
+
+     ctx.fillStyle = fillColor;
+     ctx.fill();
+
+     ctx.strokeStyle = strokeColor;
+     ctx.lineWidth = 3 / camera.fov;
+     ctx.stroke();
+     ctx.restore();
+}
+
 //更新画布
-function update(tmpx, tmpy) {
-     drawBackground(tmpx, tmpy);
-     drawMiniMap(tmpx, tmpy);
+function update(x, y) {
+     drawBackground();
+     drawMiniMap();
 }
