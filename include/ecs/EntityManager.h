@@ -22,20 +22,24 @@ namespace ecs
           using view = std::vector<Entity>;
 
           /// 实体添加新组件时触发
-          inline static Signal<void, Entity> OnComponentAdded;
+          Signal<void, Entity> OnComponentAdded;
 
           /// 实体删除组件时触发
-          inline static Signal<void, Entity> OnComponentRemoved;
+          Signal<void, Entity> OnComponentRemoved;
 
           /// 实体更新组件时触发
           template <typename Component>
-          inline static Signal<void, Entity, Component *> OnComponentReplaced;
+          void OnComponentReplaced(Entity entity, Component *cptr)
+          {
+               static Signal<void, Entity, Component *> OnComponentReplaced;
+               OnComponentReplaced(entity, cptr);
+          }
 
           /// 实体销毁时触发
-          inline static Signal<void, Entity> OnEntityDestroyed;
+          Signal<void, Entity> OnEntityDestroyed;
 
           /// 实体创建时触发
-          inline static Signal<void, Entity> OnEntityCreated;
+          Signal<void, Entity> OnEntityCreated;
 
           std::vector<std::function<void()>> systems_; // 系统列表
 
@@ -58,6 +62,9 @@ namespace ecs
                     system();
                }
           }
+
+          EntityManager() { std::cout << "EntityManager created" << std::endl; }
+          ~EntityManager() { std::cout << "EntityManager destroyed" << std::endl; }
 
      public: // Etity & Component
           /// 获取所有实体

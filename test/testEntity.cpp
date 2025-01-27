@@ -31,9 +31,12 @@ int main()
      ecs::Entity e2 = em.createEntity();
      ecs::Entity e3 = em.createEntity();
      ecs::Entity e4 = 4;
-     em.addComponent<Position>(e1, 1.0f, 2.0f);
-     em.addComponent<Velocity>(e1, 3.0f, 4.0f);
-     em.addComponent<Name>(e1, "e1");
+     Position pos1{1.0f, 2.0f};
+     Velocity vel1{3.0f, 4.0f};
+     Name name1{"e1"};
+     em.addComponent<Position>(e1, pos1);
+     em.addComponent<Velocity>(e1, vel1);
+     em.addComponent<Name>(e1, name1);
      for (auto &entity : G)
      {
           cout << "NameEntity: " << entity << endl;
@@ -66,6 +69,10 @@ int main()
      assert(em.hasComponent<Velocity>(e2));
 
      assert(em.hasComponent<Name>(e3));
+
+     assert(em.getComponent<Position>(e1)->x == 1.0f && em.getComponent<Position>(e1)->y == 2.0f);
+     assert(em.getComponent<Velocity>(e1)->dx == 3.0f && em.getComponent<Velocity>(e1)->dy == 4.0f);
+     assert(em.getComponent<Name>(e1)->name == "e1");
 
      // 测试是否移除成功
      em.removeComponent<Position>(e1);

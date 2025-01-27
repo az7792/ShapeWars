@@ -138,10 +138,10 @@ namespace ecs
 
      namespace ComponentPools
      {
-          inline static SparseMap<ComponentPoolBase *> componentPools; // 组件ID与组件池的映射,通过EntityManager管理
+          extern SparseMap<ComponentPoolBase *> componentPools; // 组件ID与组件池的映射,通过EntityManager管理
 
           template <typename Component>
-          static bool firstInit(ComponentPool<Component> &pool)
+          inline bool firstInit(ComponentPool<Component> &pool)
           {
                componentPools.insert(ComponentTypeID::getID<Component>(), static_cast<ComponentPoolBase *>(&pool));
                return true;
@@ -149,7 +149,7 @@ namespace ecs
 
           /// 获取组件池
           template <typename Component>
-          static ComponentPool<Component> &get()
+          inline ComponentPool<Component> &get()
           {
                static ComponentPool<Component> pool;
                static bool firstInit_ = firstInit<Component>(pool);
