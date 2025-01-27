@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_BUILD_TYPE Debug)
 
 # 查找源文件
-file(GLOB SRC src/*.cpp src/**/*.cpp)
+file(GLOB_RECURSE SRC src/*.cpp)
 set(SRC ${SRC} main.cpp)
 
 # 设置可执行文件输出目录为上一级目录
