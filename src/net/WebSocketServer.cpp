@@ -1,4 +1,5 @@
 #include "net/WebSocketServer.h"
+#include "config/config.h"
 
 std::vector<uint8_t> WebSocketServer::sha1(const std::string &message)
 {

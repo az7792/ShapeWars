@@ -18,7 +18,7 @@ set(EXECUTABLE_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build)
 
 # 手动填写测试文件
 set(TEST_FILES
-    #./testWebsocketServer.cpp
+    ./testWebsocketServer.cpp
     #./testTcpServer.cpp
     ./testSparseSet.cpp
     ./testSparseMap.cpp
