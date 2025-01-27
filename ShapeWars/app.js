@@ -2,7 +2,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const scale = window.localStorage.getItem("no_retina") ? 1 : window.devicePixelRatio;
-const miniMap = new MiniMap(MAPINFO.width * MAPINFO.scale / MAPINFO.gridSize, MAPINFO.height * MAPINFO.scale / MAPINFO.gridSize);
+const miniMap = new MiniMap(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
 
 //--------test code start----------
 camera.x = 0;
@@ -106,7 +106,7 @@ function drawBackground() {
      let lty = Math.round(cy - canvas.height * camera.fov / 2);
 
      //由于fov导致每个gridSize的像素实际在画布上显示为gridSize/fov
-     let gridSize = MAPINFO.gridSize / camera.fov;//这儿直接整除如果有小数会导致后面的计算失真
+     let gridSize = MAPINFO.kGridSize / camera.fov;//这儿直接整除如果有小数会导致后面的计算失真
 
      /** 
       * 屏幕左上角在大地图的坐标的偏移量
@@ -122,8 +122,8 @@ function drawBackground() {
       * A: B所在的(50*50)的方格的左上角坐标
       * (sx,sy)：A - B
       */
-     let sx = Math.round((Math.floor(ltx / MAPINFO.gridSize) * MAPINFO.gridSize - ltx) / camera.fov);
-     let sy = Math.round((Math.floor(lty / MAPINFO.gridSize) * MAPINFO.gridSize - lty) / camera.fov);
+     let sx = Math.round((Math.floor(ltx / MAPINFO.kGridSize) * MAPINFO.kGridSize - ltx) / camera.fov);
+     let sy = Math.round((Math.floor(lty / MAPINFO.kGridSize) * MAPINFO.kGridSize - lty) / camera.fov);
 
 
      //准换到小地图
@@ -196,13 +196,13 @@ function drawMiniMap() {
 
 /**
  * 绘制多边形
- * @param {box2d点集} points 
- * @param {填充颜色} fillClose 
- * @param {描边颜色} strokeClose 
+ * @param {[]} points - 多边形顶点数组
+ * @param {string} fillClose - 填充颜色
+ * @param {string} strokeClose - 描边颜色
  */
 function drawPolygon(points, fillColor, strokeColor) {
      for (let i = 0; i < points.length; i++) {
-          points[i] = box2DtoScreen(points[i].x, points[i].y, canvas.width, canvas.height);
+          points[i] = box2DtoScreen(points[i].x, points[i].y, canvas);
      }
 
      ctx.save();
@@ -226,13 +226,13 @@ function drawPolygon(points, fillColor, strokeColor) {
 
 /**
  * 绘制正多边形
- * @param {边数} sides
- * @param {box2d X} x 
- * @param {box2d Y} y 
- * @param {外接圆半径} r 
- * @param {角度}  angle
- * @param {填充颜色} fillColor 
- * @param {描边颜色} strokeColor 
+ * @param {uint} sides - 边数
+ * @param {f32} x - box2d x坐标
+ * @param {f32} y - box2d y坐标
+ * @param {f32} r - 半径
+ * @param {f32}  angle - 旋转角度
+ * @param {string} fillColor - 填充颜色
+ * @param {string} strokeColor - 描边颜色
  * @returns 
  */
 function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
@@ -240,8 +240,8 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      if (sides < 3) return;
 
      //变换到屏幕坐标系
-     ({ x, y } = box2DtoScreen(x, y, canvas.width, canvas.height));
-     r = r * MAPINFO.scale / camera.fov;
+     ({ x, y } = box2DtoScreen(x, y, canvas));
+     r = r * MAPINFO.kScale / camera.fov;
 
      angle = -angle;
 
