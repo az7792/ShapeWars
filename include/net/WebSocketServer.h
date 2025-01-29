@@ -13,9 +13,9 @@ class WebSocketServer
      void handleClose(TcpConnection *conn);                // 处理连接关闭
      void handleError(TcpConnection *conn);                // 处理错误
 
-     std::function<void(TcpConnection *)> onOpen;              // 连接打开
-     std::function<void(TcpConnection *)> onClose;             // 关闭时
-     std::function<void(TcpConnection *)> onError;             // 发生错误时
+     std::function<void(TcpConnection *)> onOpen;                    // 连接打开
+     std::function<void(TcpConnection *)> onClose;                   // 关闭时
+     std::function<void(TcpConnection *)> onError;                   // 发生错误时
      std::function<void(TcpConnection *, std::string &&)> onMessage; // 收到消息时
 
      TcpServer tcpServer;
@@ -23,7 +23,7 @@ class WebSocketServer
 
      std::mutex tcpConnectedMutex;                     // 同步tcpConnected的锁
      std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket链接
-     void addConnect(TcpConnection *conn);             // 增加一个新连接
+     bool addConnect(TcpConnection *conn);             // 增加一个新连接
      void subConnect(TcpConnection *conn);             // 断开一个连接
 
 public:
