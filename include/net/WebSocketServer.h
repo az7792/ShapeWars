@@ -13,9 +13,9 @@ class WebSocketServer
      void handleClose(TcpConnection *conn);                // 处理连接关闭
      void handleError(TcpConnection *conn);                // 处理错误
 
-     std::function<void(const TcpConnection *)> onOpen;              // 连接打开
-     std::function<void(const TcpConnection *)> onClose;             // 关闭时
-     std::function<void(const TcpConnection *)> onError;             // 发生错误时
+     std::function<void(TcpConnection *)> onOpen;              // 连接打开
+     std::function<void(TcpConnection *)> onClose;             // 关闭时
+     std::function<void(TcpConnection *)> onError;             // 发生错误时
      std::function<void(TcpConnection *, std::string &&)> onMessage; // 收到消息时
 
      TcpServer tcpServer;
@@ -35,8 +35,8 @@ public:
      void close();
 
 public: // SETTERS
-     void setOnOpen(std::function<void(const TcpConnection *)> cb);
-     void setOnClose(std::function<void(const TcpConnection *)> cb);
-     void setOnError(std::function<void(const TcpConnection *)> cb);
+     void setOnOpen(std::function<void(TcpConnection *)> cb);
+     void setOnClose(std::function<void(TcpConnection *)> cb);
+     void setOnError(std::function<void(TcpConnection *)> cb);
      void setOnMessage(std::function<void(TcpConnection *, std::string &&)> cb);
 };

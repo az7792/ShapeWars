@@ -270,12 +270,12 @@ WebSocketServer::~WebSocketServer()
     close();
 }
 
-void WebSocketServer::setOnOpen(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnOpen(std::function<void(TcpConnection *)> cb)
 {
      onOpen = cb;
 }
 
-void WebSocketServer::setOnClose(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnClose(std::function<void(TcpConnection *)> cb)
 {
      onClose = cb;
 }
@@ -285,7 +285,7 @@ void WebSocketServer::setOnMessage(std::function<void(TcpConnection *, std::stri
      onMessage = cb;
 }
 
-void WebSocketServer::setOnError(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnError(std::function<void(TcpConnection *)> cb)
 {
      onError = cb;
 }
