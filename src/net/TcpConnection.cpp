@@ -47,7 +47,7 @@ TcpConnection::TcpConnection() : channel_(std::make_unique<Channel>(nullptr, -1)
 
 void TcpConnection::start(EventLoop *loop, int fd, InetAddress localAddr, InetAddress peerAddr)
 {
-     assert(channel_->isInEpoll == false && channel_->fd == -1);
+     assert(channel_->isInEpoll == false && channel_->fdClosed == true);
      channel_->fd = fd;
      channel_->fdClosed = false;
      channel_->setEventLoop(loop);
