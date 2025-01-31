@@ -11,6 +11,8 @@ namespace ecs
      /// @note 高12位为版本，低20位为ID
      using Entity = uint32_t;
 
+     constexpr Entity nullEntity = 0xFFFFFFFFu;
+
      template <typename... Type>
      struct type_list
      {

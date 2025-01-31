@@ -114,6 +114,8 @@ namespace ecs
 
           uint32_t getEntityNum() const;
 
+          ecs::Entity* getEntityPtr(ecs::Entity entity);
+
           /// @brief 创建一个实体
           Entity createEntity();
 

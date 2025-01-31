@@ -11,6 +11,11 @@ uint32_t ecs::EntityManager::getEntityNum() const
      return entityNum_;
 }
 
+ecs::Entity *ecs::EntityManager::getEntityPtr(ecs::Entity entity)
+{
+     return &entities_[ecs::entityToIndex(entity)];
+}
+
 ecs::Entity ecs::EntityManager::createEntity()
 {
      ecs::Entity newEntity;
