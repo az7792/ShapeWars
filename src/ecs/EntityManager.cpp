@@ -6,6 +6,19 @@
 //      return groups_.back();
 // }
 
+std::vector<ecs::Entity> ecs::EntityManager::getEntities()
+{
+     std::vector<Entity> entities;
+     for (auto &entity : entities_)
+     {
+          if (entityIsValid(*entity))
+          {
+               entities.push_back(*entity);
+          }
+     }
+     return entities;
+}
+
 uint32_t ecs::EntityManager::getEntityNum() const
 {
      return entityNum_;
@@ -13,7 +26,7 @@ uint32_t ecs::EntityManager::getEntityNum() const
 
 ecs::Entity *ecs::EntityManager::getEntityPtr(ecs::Entity entity)
 {
-     return &entities_[ecs::entityToIndex(entity)];
+     return entities_[ecs::entityToIndex(entity)].get();
 }
 
 ecs::Entity ecs::EntityManager::createEntity()
@@ -22,13 +35,13 @@ ecs::Entity ecs::EntityManager::createEntity()
      if (availableEntityIndex_ == entities_.size())
      {
           newEntity = availableEntityIndex_++; // 高12位的版本号已经是0x000
-          entities_.push_back(newEntity);
+          entities_.push_back(std::make_unique<ecs::Entity>(newEntity));
      }
      else
      {
-          newEntity = (entities_[availableEntityIndex_] & 0xFFF00000u) | availableEntityIndex_;
-          availableEntityIndex_ = ecs::entityToIndex(entities_[availableEntityIndex_]);
-          entities_[ecs::entityToIndex(newEntity)] = newEntity;
+          newEntity = (*entities_[availableEntityIndex_] & 0xFFF00000u) | availableEntityIndex_;
+          availableEntityIndex_ = ecs::entityToIndex(*entities_[availableEntityIndex_]);
+          *entities_[ecs::entityToIndex(newEntity)] = newEntity;
      }
      entityNum_++;
      OnEntityCreated(newEntity);
@@ -49,7 +62,7 @@ void ecs::EntityManager::destroyEntity(Entity entity)
      uint32_t version = ecs::entityToVersion(entity) + 1; // 版本号加1
      if (version == deadEntity)
           version = 0;
-     entities_[index] = (version << 20) | availableEntityIndex_;
+     *entities_[index] = (version << 20) | availableEntityIndex_;
      availableEntityIndex_ = index;
      entityNum_--;
      // 通过完全组删除实体
@@ -58,5 +71,5 @@ void ecs::EntityManager::destroyEntity(Entity entity)
 
 bool ecs::EntityManager::entityIsValid(Entity entity)
 {
-     return (ecs::entityToIndex(entity) < entities_.size() && entities_[ecs::entityToIndex(entity)] == entity);
+     return (ecs::entityToIndex(entity) < entities_.size() && *entities_[ecs::entityToIndex(entity)] == entity);
 }

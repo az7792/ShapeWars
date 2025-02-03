@@ -44,7 +44,9 @@ namespace ecs
           std::vector<std::function<void()>> systems_; // 系统列表
 
      private:
-          std::vector<Entity> entities_;      // 所有实体,ID与下标相同且版本好相同才可能是有效的实体
+          // TODO: 使用分页优化
+          std::vector<std::unique_ptr<Entity>> entities_; // 所有实体,ID与下标相同且版本好相同才可能是有效的实体,使用指针是为了指针稳定性
+
           uint32_t entityNum_ = 0;            // 实体数量
           uint32_t availableEntityIndex_ = 0; // 第一个空闲的实体索引
      public:                                  // system
@@ -68,18 +70,7 @@ namespace ecs
 
      public: // Etity & Component
           /// 获取所有实体
-          std::vector<Entity> getEntities()
-          {
-               std::vector<Entity> entities;
-               for (auto &entity : entities_)
-               {
-                    if (entityIsValid(entity))
-                    {
-                         entities.push_back(entity);
-                    }
-               }
-               return entities;
-          }
+          std::vector<Entity> getEntities();
 
           /// @brief 创建组
           /// 实体的组件必须不在排除类别并且拥有包含列表的全部类型组件
@@ -114,7 +105,7 @@ namespace ecs
 
           uint32_t getEntityNum() const;
 
-          ecs::Entity* getEntityPtr(ecs::Entity entity);
+          ecs::Entity *getEntityPtr(ecs::Entity entity);
 
           /// @brief 创建一个实体
           Entity createEntity();
