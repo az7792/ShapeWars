@@ -1,7 +1,7 @@
 #include "game/GameLoop.h"
 #include "utils/Logger.h"
 #include <thread>
-// valgrind --leak-check=full --show-leak-kinds=all ./server
+
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);

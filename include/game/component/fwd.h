@@ -1,0 +1,9 @@
+#pragma once
+#include "camera.h"
+#include "input.h"
+#include "position.h"
+#include "velocity.h"
+#include "HP.h"
+#include "packData.h"
+#include "regularPolygon.h"
+#include "box2d/id.h"

@@ -82,3 +82,9 @@
 ## 2025年1月31日
 - ecs添加获取实体ID指针的方法
 - TcpConnection修正启动时的断言
+
+## 2025年2月3日
+- 修复`EntityManager`中实体(ecs::Entity)列表resize时导致指针失效的问题
+- 增加`EntitySet`，专门适用于的实体的稀疏集
+- TcpConnection移除冗余的`fdClosed_`变量
+- 完成前后端联调测试

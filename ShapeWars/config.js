@@ -21,3 +21,8 @@ camera = {
      y: 0,//Box2D的坐标
      fov: 1,//缩放系数,越大可视范围越大，例如50px实际显示为 50/fov px
 };
+
+serverTime = {
+     prev: 0,//前一帧
+     curr: 0,//当前帧
+}

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "fwd.h"
 #include <iostream>
-#include "utils/SparseSet.h"
+#include "ecs/EntitySet.h"
 
 namespace ecs
 {
@@ -15,28 +15,28 @@ namespace ecs
      {
      private:
           friend class EntityManager;
-          SparseSet entities_;
+          EntitySet entities_;
 
           void handleEntityDestroyed(Entity entity)
           {
-               entities_.erase(ecs::entityToIndex(entity));
+               entities_.erase(entity);
           }
 
           void handleComponentAdded(Entity entity)
           {
                if ((ComponentPools::get<includeComponents>().has(entity) && ...) && (!ComponentPools::get<excludeComponents>().has(entity) && ...))
                {
-                    entities_.insert(ecs::entityToIndex(entity));
+                    entities_.insert(entity);
                }
                else
                {
-                    entities_.erase(ecs::entityToIndex(entity)); // 由于过滤，之前的实体可能不再满足条件
+                    entities_.erase(entity); // 由于过滤，之前的实体可能不再满足条件
                }
           }
 
           void handleComponentRemoved(Entity entity)
           {
-               entities_.erase(ecs::entityToIndex(entity));
+               entities_.erase(entity);
           }
 
      public:

@@ -29,4 +29,22 @@ class MiniMap {
           const data = imageData.data;  // 返回一个数组 [R, G, B, A]
           return data;
      }
+
+     reset(width, height) {
+          this.width = width;
+          this.height = height;
+          
+          this.canvas.width = width;
+          this.canvas.height = height;
+
+          this.ctx = this.canvas.getContext('2d');
+          this.fillRect(0, 0, width, height, COLORS.backgroundValid);
+
+          //test start
+          for (let i = 0; i < 90; i++) {
+               miniMap.fillRect(0, i, 100, 1, [2 * i, 255 - 2 * i, 100 + i, 255]);
+          }
+          miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
+          //test end
+     }
 }
