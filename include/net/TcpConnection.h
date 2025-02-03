@@ -12,7 +12,6 @@ class TcpConnection
 {
 private:
      std::unique_ptr<Channel> channel_;
-     bool fdClosed_ = false; // 该连接的fd是否已经关闭
 
      Buffer inputBuffer_;
      // Buffer outputBuffer_;//TODO

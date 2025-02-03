@@ -58,7 +58,6 @@ void TcpConnection::start(EventLoop *loop, int fd, InetAddress localAddr, InetAd
      this->localAddr = localAddr;
      this->peerAddr = peerAddr;
      abled_ = true;
-     fdClosed_ = false;
 }
 
 void TcpConnection::end()
