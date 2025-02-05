@@ -22,6 +22,14 @@ namespace ecs
                return componentId;
           }
 
+          /// 注册组件
+          /// 请在程序最开始时注册所有组件，注册顺序严格按照 协议表的顺序
+          /// 不需要同步到前端的组件可以不注册
+          template <typename Component>
+          static void registerComponent()
+          {
+               getID<Component>();
+          }
 
           /// 获取组件类型ID列表
           template <typename... Components>
