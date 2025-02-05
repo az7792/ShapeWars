@@ -35,6 +35,12 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
      for (auto entity : view)
      {
           Camera *camera = em.getComponent<Camera>(entity);
+          // 调整摄像机速度，平滑跟随玩家
+          b2BodyId bodyId = camera->bodyId;
+          b2Vec2 curr = b2Body_GetPosition(bodyId);
+          b2Vec2 target = b2Body_GetPosition(*em.getComponent<b2BodyId>(entity));
+          b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
+          b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
 
           auto processEntity = [&](ecs::Entity targetEntity)
           {

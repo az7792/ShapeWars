@@ -26,3 +26,11 @@ serverTime = {
      prev: 0,//前一帧
      curr: 0,//当前帧
 }
+
+performanceMetrics = {
+     clientfps: 0, //客户端渲染帧率
+     serverfps: 0, //服务器逻辑帧率
+     ping: 0, //延迟 ms
+     TPS: 0, //每秒事务数
+     MSPT: 0, //平均单个事务处理时间 ms
+}

@@ -20,24 +20,15 @@ void GameLoop::inputSys()
 
 void GameLoop::outputSys()
 {
-     // auto view = em_.getView<b2BodyId>();
-     // for (auto &entity : view)
-     // {
-     //      Camera *camera = em_.getComponent<Camera>(entity);
-
-     //      auto pos = b2Body_GetPosition(*em_.getComponent<b2BodyId>(entity));
-     //      auto vel = b2Body_GetLinearVelocity(*em_.getComponent<b2BodyId>(entity));
-     //      std::cout << "cpos:" << camera->x << "," << camera->y << std::endl;
-     //      std::cout << "pos:" << pos.x << "," << pos.y << std::endl;
-     //      std::cout << "vel:" << vel.x << "," << vel.y << std::endl;
-     // }
-     // return;
      auto &group = em_.group<Camera, TcpConnection *>();
      for (auto &entity : group)
      {
           Camera *camera = em_.getComponent<Camera>(entity);
           std::string message;
           strAppend<uint8_t>(message, 0x01);
+          b2Vec2 cameraPos = b2Body_GetPosition(camera->bodyId);
+          strAppend<float>(message, cameraPos.x);
+          strAppend<float>(message, cameraPos.y);
           uint16_t len = camera->createEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->createEntities)

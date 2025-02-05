@@ -6,3 +6,5 @@ const entityManager = new EntityManager();
 const socket = new WebSocket("ws://localhost:7792");
 socket.binaryType = 'arraybuffer';
 const playerInput = new PlayerInput();
+
+let pingTime = 0;
