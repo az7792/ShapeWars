@@ -88,3 +88,13 @@
 - 增加`EntitySet`，专门适用于的实体的稀疏集
 - TcpConnection移除冗余的`fdClosed_`变量
 - 完成前后端联调测试
+
+## 2025年2月5日
+- 后端增加对自定义Ping包的处理
+- 前端修复插值失效的bug
+- 组件ID采用手动注册的方式
+- 实体类型组件Type的id改为uint8_t
+- 增加bug列表
+- 添加平滑阻尼函数SmoothDampVelocity
+- 修改玩家移动的默认速度为0.5m/s
+- 增加摄像机跟随玩家
