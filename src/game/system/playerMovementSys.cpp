@@ -23,12 +23,12 @@ void playerMovementSys(ecs::EntityManager &em, b2WorldId &worldId)
                vel.x = vel.y = 0;
           else if (dx != 0 && dy != 0)
           {
-               vel.x = 0.1f * dx / sqrtf32(2), vel.y = 0.1f * dy / sqrtf32(2);
+               vel.x = 0.5f * dx / sqrtf32(2), vel.y = 0.5f * dy / sqrtf32(2);
           }
           else if (dx != 0)
-               vel.x = 0.1f * dx, vel.y = 0;
+               vel.x = 0.5f * dx, vel.y = 0;
           else if (dy != 0)
-               vel.y = 0.1f * dy, vel.x = 0;
+               vel.y = 0.5f * dy, vel.x = 0;
           b2Body_SetLinearVelocity(*bodyId, vel);
      }
 }
