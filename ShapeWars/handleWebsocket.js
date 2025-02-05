@@ -36,12 +36,18 @@ socket.onmessage = (event) => {
                while (listLen--) {
                     entityManager.updateEntityByDataView(dataView, offset);
                }
+               //更新时间
+               serverTime.prev = serverTime.curr;
+               serverTime.curr = Date.now();
                break;
-          case 0x02:
+          case 0x02://Ping
                break;
-          case 0x03:
+          case 0x03://Pong
+               performanceMetrics.ping = Date.now() - pingTime;
+               console.log("Pong", performanceMetrics.ping);
                break;
      }
+     sendMessage(playerInput.packData());
 };
 
 // 连接关闭时触发

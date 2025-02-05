@@ -89,13 +89,16 @@ window.onresize = () => {
 //更新画布
 function update() {
      drawBackground();//更新背景
-     entityManager.update();//更新实体
+     entityManager.update(Date.now());//更新实体
      drawMiniMap();//更新小地图
      requestAnimationFrame(update);
 }
 
 
-
-setInterval(() => {
-     sendMessage(playerInput.packData());
-}, 1000 / 30);
+// //Ping
+// setInterval(() => {
+//      let message = new Uint8Array(1);
+//      message[0] = 0x02;
+//      sendMessage(message);
+//      pingTime = Date.now();
+// }, 1000);

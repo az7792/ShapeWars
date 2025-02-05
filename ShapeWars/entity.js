@@ -12,7 +12,7 @@ class triangleEntity {
           if (serverTime.curr == serverTime.prev)
                this.deltaTime = 1;
           else
-               this.deltaTime = Math.max(0, Math.min(1, (currTime - serverTime.prev) / (serverTime.curr - serverTime.prev)));
+               this.deltaTime = Math.max(0, Math.min(1, (currTime - serverTime.curr) / (serverTime.curr - serverTime.prev)));
           drawRegularPolygon(this.sides, this.lerp(this.x), this.lerp(this.y), this.r, this.lerp(this.angle), "red", "blue");
      }
 
