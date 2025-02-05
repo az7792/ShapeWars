@@ -159,8 +159,10 @@ void GameLoop::handleOnMessage(TcpConnection *conn, std::string &&msg)
           }
           break;
      }
-     case 0x02:
+     case 0x02: // Ping
      {
+          std::string message = {0x03}; // Pong
+          ws_.send(message, conn);
           break;
      }
      default:
