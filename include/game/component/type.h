@@ -2,5 +2,5 @@
 #include <cstdint>
 struct Type
 {
-     uint16_t id;
+     uint8_t id;
 };

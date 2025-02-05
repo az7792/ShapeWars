@@ -7,3 +7,4 @@
 #include "packData.h"
 #include "regularPolygon.h"
 #include "box2d/id.h"
+#include "type.h"
