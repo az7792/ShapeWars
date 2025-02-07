@@ -9,9 +9,10 @@ int main()
      /// 务必于协议表顺序一致
      ecs::ComponentTypeID::registerComponent<Position>();       // 0
      ecs::ComponentTypeID::registerComponent<Velocity>();       // 1
-     ecs::ComponentTypeID::registerComponent<RegularPolygon>(); // 2
-     ecs::ComponentTypeID::registerComponent<HP>();             // 3
-     ecs::ComponentTypeID::registerComponent<Type>();           // 4
+     ecs::ComponentTypeID::registerComponent<Angle>();          // 2
+     ecs::ComponentTypeID::registerComponent<RegularPolygon>(); // 3
+     ecs::ComponentTypeID::registerComponent<HP>();             // 4
+     ecs::ComponentTypeID::registerComponent<Type>();           // 5
 
      Logger::instance().setLevel(LogLevel::DEBUG);
      GameLoop gameLoop;
