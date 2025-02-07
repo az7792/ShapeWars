@@ -9,7 +9,7 @@ ecs::Entity createEntityTest(ecs::EntityManager &em, b2WorldId &worldId, TcpConn
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, 100, 100, false);
+     em.addComponent<HP>(e, (int16_t)100, (int16_t)100, false);
      em.addComponent<Camera>(e, Camera(0.f, 0.f, 1.f));
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
