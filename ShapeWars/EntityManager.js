@@ -7,9 +7,11 @@ class EntityManager {
      addEntityByDataView(dataView, offset) {
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
-          let entityType = readTypeID(dataView,offset);//实体类型
-          if (entityType == 0) {
+          let entityType = readTypeID(dataView, offset);//实体类型
+          if (entityType == 3) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
+          } else if (entityType == 1) {
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, playerEntity.create(dataView, offset));
           }
      }
 

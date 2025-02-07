@@ -198,7 +198,7 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      if (sides < 3) return;
 
      //变换到屏幕坐标系
-     ({ x, y } = box2DtoScreen(x, y, canvas));
+     ({ x, y } = box2DtoScreen(x, y));
      r = r * MAPINFO.kScale / camera.fov;
 
      angle = -angle;
@@ -238,4 +238,58 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      ctx.lineWidth = 3 / camera.fov;
      ctx.stroke();
      ctx.restore();
+}
+
+// 绘制血条
+function drawHealthBar(x, y, health, maxHealth) {
+     // 变换到屏幕坐标系
+     ({ x, y } = box2DtoScreen(x, y));
+
+     let width = Math.min(100, maxHealth) / camera.fov; // 血条宽度
+     let height = 8 / camera.fov; // 血条高度
+     let barWidth = width * health / maxHealth; // 当前血量对应的宽度
+     let radius = 3 / camera.fov; // 圆角半径
+
+     ctx.save();
+
+     let startX = x - width / 2;
+     let startY = y - height / 2;
+
+     ctx.save();
+
+     // 画底色（暗绿色）
+     ctx.fillStyle = "#004400";
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, width, height, radius);
+     ctx.fill();
+
+     // 画血量（亮绿色）
+     ctx.fillStyle = "#00ff00";
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, barWidth, height, radius);
+     ctx.fill();
+
+     // 画边框（黑色）
+     ctx.strokeStyle = "#000000";
+     ctx.lineWidth = 2;
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, width, height, radius);
+     ctx.stroke();
+
+     ctx.restore();
+}
+
+// 绘制圆角矩形
+function drawRoundedRect(x, y, width, height, radius) {
+     ctx.beginPath();
+     ctx.moveTo(x + radius, y);
+     ctx.lineTo(x + width - radius, y);
+     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+     ctx.lineTo(x + width, y + height - radius);
+     ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+     ctx.lineTo(x + radius, y + height);
+     ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+     ctx.lineTo(x, y + radius);
+     ctx.quadraticCurveTo(x, y, x + radius, y);
+     ctx.closePath();
 }

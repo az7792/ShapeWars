@@ -34,6 +34,8 @@
 
 <body>
      <button id="startGameButton">开始游戏</button>
+     <button id="upFov">upFov</button>
+     <button id="downFov">downFov</button>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
 
      <script src="./ShapeWars/config.js"></script> <!-- 配置文件 -->
@@ -55,12 +57,23 @@
      <script>
           // 获取按钮元素
           const startButton = document.getElementById('startGameButton');
+          const upFovButton = document.getElementById('upFov');
+          const downFovButton = document.getElementById('downFov');
 
           // 监听按钮点击事件
           startButton.addEventListener('click', function () {
                sendMessage(new Uint8Array([0]));
                console.log('开始游戏');
           });
+
+          upFovButton.addEventListener('click', function () {
+               camera.fov += 0.1;
+          });
+          downFovButton.addEventListener('click', function () {
+               if (camera.fov > 0.2)
+                    camera.fov -= 0.1;
+          });
+
      </script>
 </body>
 

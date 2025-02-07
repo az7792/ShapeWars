@@ -52,7 +52,7 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                strAppend(packData->data, ecs::entityToIndex(targetEntity)); // 写入实体ID
 
                // TODO : 写入实体类型
-               strAppend<uint8_t>(packData->data, 0); // test
+               strAppend<uint8_t>(packData->data, 1); // test
 
                uint64_t componentState = 0;
                b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
