@@ -18,13 +18,13 @@ socket.onmessage = (event) => {
                miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize)
                break;
           case 0x01: // 更新实体
+               //当前玩家的ID
+               nowPlayerID = dataView.getUint32(offset.value, true);
+               offset.value += 4;
                // 摄像机位置
                camera.lerpX[0] = camera.lerpX[1];
                camera.lerpY[0] = camera.lerpY[1];
-               camera.lerpX[1] = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
-               camera.lerpY[1] = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
+               [camera.lerpX[1], camera.lerpY[1]] = readPosition(dataView, offset);
                //需要增加的实体列表
                let listLen = dataView.getUint16(offset.value, true);
                offset.value += 2;

@@ -36,3 +36,6 @@ performanceMetrics = {
      TPS: 0, //每秒事务数
      MSPT: 0, //平均单个事务处理时间 ms
 }
+
+//当前玩家ID
+nowPlayerID = 0;

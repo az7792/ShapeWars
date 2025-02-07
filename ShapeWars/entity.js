@@ -1,11 +1,13 @@
-//三角形方块
-class triangleEntity {
+//多边形方块
+class polygonEntity {
      constructor() {
           this.x = [0, 0];
           this.y = [0, 0];
           this.angle = [0, 0];
           this.r = 0.1;
-          this.sides = 3;
+          this.sides = 15;
+          this.maxHP = 0;
+          this.HP = 0;
      }
      showMe(deltaTime) {
           drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), "red", "blue");
@@ -19,28 +21,31 @@ class triangleEntity {
 
           let componentState = dataView.getBigUint64(offset.value, true);//组件状态
           offset.value += 8;
-          let bitIsOne = Number(componentState >> BigInt(0)) & 1;//位置
-          if (bitIsOne) {
-               this.x[1] = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
-               this.y[1] = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
+
+          if (componentState & COMP_POSITION) {//位置
+               [this.x[1], this.y[1]] = readPosition(dataView, offset, 2);
           }
-          bitIsOne = Number(componentState >> BigInt(2)) & 1;//半径
-          if (bitIsOne) {
-               this.r = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
+
+          if (componentState & COMP_ANGLE) {//角度
+               this.angle[1] = readAngle(dataView, offset);
           }
-          bitIsOne = Number(componentState >> BigInt(3)) & 1;//角度
-          if (bitIsOne) {
-               this.angle[1] = dataView.getFloat32(offset.value, true);
-               offset.value += 4;
+
+          if (componentState & COMP_POLYGON) {//多边形
+               [this.sides, this.r] = readPolygon(dataView, offset);
+          }
+
+          if (componentState & COMP_HP) {//血量
+               [this.maxHP, this.HP] = readHP(dataView, offset);
           }
      }
 
      static create(dataView, offset) {
-          let res = new triangleEntity();
+          let res = new polygonEntity();
           res.update(dataView, offset);
+          //更新初始状态
+          res.x[0] = res.x[1];
+          res.y[0] = res.y[1];
+          res.angle[0] = res.angle[1];
           return res;
      }
 }

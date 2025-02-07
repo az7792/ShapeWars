@@ -117,13 +117,6 @@ function drawBackground() {
           ctx.lineTo(sx + width * gridSize, i);
      }
      ctx.stroke();
-
-     //测试用圆
-     ctx.beginPath();
-     ctx.arc(canvas.width / 2, canvas.height / 2, 20 / camera.fov, 0, Math.PI * 2);
-     ctx.fillStyle = 'blue';
-     ctx.fill();
-
      ctx.restore();
 }
 
@@ -210,24 +203,30 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
 
      angle = -angle;
 
-     // 计算每个顶点的角度增量
-     const dAngle = (2 * Math.PI) / sides;
-
      ctx.save();
      ctx.beginPath();
 
-     // 第一个点
-     let startX = x + r * Math.cos(angle);
-     let startY = y + r * Math.sin(angle);
-     ctx.moveTo(startX, startY);
+     if (sides >= 16) {
+          // 边数较多时，直接画圆
+          ctx.arc(x, y, r, 0, 2 * Math.PI);
+     } else {
 
-     // 剩余顶点
-     for (let i = 1; i < sides; i++) {
-          // 当前顶点的角度
-          let currentAngle = angle + i * dAngle;
-          let currentX = x + r * Math.cos(currentAngle);
-          let currentY = y + r * Math.sin(currentAngle);
-          ctx.lineTo(currentX, currentY);
+          // 计算每个顶点的角度增量
+          const dAngle = (2 * Math.PI) / sides;
+
+          // 第一个点
+          let startX = x + r * Math.cos(angle);
+          let startY = y + r * Math.sin(angle);
+          ctx.moveTo(startX, startY);
+
+          // 剩余顶点
+          for (let i = 1; i < sides; i++) {
+               // 当前顶点的角度
+               let currentAngle = angle + i * dAngle;
+               let currentX = x + r * Math.cos(currentAngle);
+               let currentY = y + r * Math.sin(currentAngle);
+               ctx.lineTo(currentX, currentY);
+          }
      }
 
      ctx.closePath();

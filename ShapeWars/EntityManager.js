@@ -7,10 +7,9 @@ class EntityManager {
      addEntityByDataView(dataView, offset) {
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
-          let entityType = dataView.getUint8(offset.value);//实体类型
-          offset.value += 1;
+          let entityType = readTypeID(dataView,offset);//实体类型
           if (entityType == 0) {
-               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, triangleEntity.create(dataView, offset));
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
           }
      }
 
