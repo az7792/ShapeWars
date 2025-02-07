@@ -6,8 +6,8 @@
 #include "box2d/box2d.h"
 struct Camera
 {
-     constexpr static float width = 1920.0f / 500;
-     constexpr static float height = 1080.0f / 500;
+     constexpr static float width = (1920.0f + 100) / 500;
+     constexpr static float height = (1080.0f + 100) / 500;
      float x;
      float y;
      float fov;
