@@ -1,3 +1,8 @@
+//插值函数
+function lerp(val, deltaTime) {
+     return (val[0] + (val[1] - val[0]) * deltaTime);
+}
+
 /**
  * 所用坐标系:
  * box2d:#            Y

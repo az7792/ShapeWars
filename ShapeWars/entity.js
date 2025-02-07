@@ -6,18 +6,9 @@ class triangleEntity {
           this.angle = [0, 0];
           this.r = 0.1;
           this.sides = 3;
-          this.deltaTime = 0;
      }
-     showMe(currTime) {
-          if (serverTime.curr == serverTime.prev)
-               this.deltaTime = 1;
-          else
-               this.deltaTime = Math.max(0, Math.min(1, (currTime - serverTime.curr) / (serverTime.curr - serverTime.prev)));
-          drawRegularPolygon(this.sides, this.lerp(this.x), this.lerp(this.y), this.r, this.lerp(this.angle), "red", "blue");
-     }
-
-     lerp(val) {
-          return (val[0] + (val[1] - val[0]) * this.deltaTime);
+     showMe(deltaTime) {
+          drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), "red", "blue");
      }
 
      update(dataView, offset) {

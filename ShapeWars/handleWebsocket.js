@@ -19,9 +19,11 @@ socket.onmessage = (event) => {
                break;
           case 0x01: // 更新实体
                // 摄像机位置
-               camera.x = dataView.getFloat32(offset.value, true);
+               camera.lerpX[0] = camera.lerpX[1];
+               camera.lerpY[0] = camera.lerpY[1];
+               camera.lerpX[1] = dataView.getFloat32(offset.value, true);
                offset.value += 4;
-               camera.y = dataView.getFloat32(offset.value, true);
+               camera.lerpY[1] = dataView.getFloat32(offset.value, true);
                offset.value += 4;
                //需要增加的实体列表
                let listLen = dataView.getUint16(offset.value, true);
