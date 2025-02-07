@@ -25,10 +25,16 @@ void GameLoop::outputSys()
      {
           Camera *camera = em_.getComponent<Camera>(entity);
           std::string message;
-          strAppend<uint8_t>(message, 0x01);
+          strAppend<uint8_t>(message, 0x01); // 更新实体数据
+          // 操作的玩家ID
+          strAppend<uint32_t>(message, ecs::entityToIndex(entity));
+
+          // 摄像机坐标
           b2Vec2 cameraPos = b2Body_GetPosition(camera->bodyId);
           strAppend<float>(message, cameraPos.x);
           strAppend<float>(message, cameraPos.y);
+
+          // 创建实体列表
           uint16_t len = camera->createEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->createEntities)
@@ -37,6 +43,7 @@ void GameLoop::outputSys()
                em_.getComponent<PackData>(e)->isPacked = false;
           }
 
+          // 删除实体列表
           len = camera->delEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->delEntities)
@@ -44,6 +51,7 @@ void GameLoop::outputSys()
                strAppend(message, ecs::entityToIndex(e));
           }
 
+          // 进入视野实体列表
           len = camera->inEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->inEntities)
@@ -52,6 +60,7 @@ void GameLoop::outputSys()
                em_.getComponent<PackData>(e)->isPacked = false;
           }
 
+          // 清理摄像机
           camera->delEntities.clear();
           for (auto &v : camera->createEntities)
           {
@@ -214,7 +223,8 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&GameLoop::outputSys, this));
 }
 
-GameLoop::~GameLoop() {
+GameLoop::~GameLoop()
+{
      b2DestroyWorld(worldId_);
 }
 
