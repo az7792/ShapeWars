@@ -24,6 +24,12 @@ canvas.addEventListener("mouseup", (event) => {
      }
 });
 
+//鼠标移动
+canvas.addEventListener("mousemove", (event) => {
+     playerInput.mouseXInScreen = event.clientX;
+     playerInput.mouseYInScreen = event.clientY;
+});
+
 window.addEventListener('blur', function () {
      playerInput.onBlur();
 });

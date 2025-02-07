@@ -54,6 +54,18 @@ function box2DtoScreen(x, y) {
      return { x: (x - ltx) / camera.fov, y: (y - lty) / camera.fov };
 }
 
+//屏幕坐标系 -> box2d物理坐标
+function screenToBox2D(x, y) {
+     //屏幕左上角在大地图的坐标
+     let { x: ltx, y: lty } = box2DtoCanvas(camera.x, camera.y);
+     ltx = Math.round(ltx - canvas.width * camera.fov / 2);
+     lty = Math.round(lty - canvas.height * camera.fov / 2);
+
+     x = ltx + x * camera.fov;
+     y = lty + y * camera.fov;
+     return canvasToBox2D(x, y);
+}
+
 //绘制背景
 function drawBackground() {
 

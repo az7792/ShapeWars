@@ -8,8 +8,10 @@ class PlayerInput {
           'd': 5        // D
      };
      constructor() {
-          this.mouseX = 0.0;
-          this.mouseY = 0.0;
+          this.mouseXInScreen = 0;
+          this.mouseYInScreen = 0;
+          this.mouseXInBox2D = 0.0;
+          this.mouseYInBox2D = 0.0;
           this.keyStatus = new Array(64).fill(false);
      }
 
@@ -25,14 +27,17 @@ class PlayerInput {
      }
 
      packData() {
+          ({ x: this.mouseXInBox2D, y: this.mouseYInBox2D } = screenToBox2D(this.mouseXInScreen, this.mouseYInScreen));
+          console.log(this.mouseXInBox2D, this.mouseYInBox2D);
+          
           let message = new Uint8Array(1 + 4 + 4 + 8);
           let offset = 0;
           message[offset++] = 0x01;  //操作指令
           // 打包鼠标位置（x 和 y）
           let view = new DataView(message.buffer);
-          view.setFloat32(offset, this.mouseX, true);  // 小端字节序
+          view.setFloat32(offset, this.mouseXInBox2D, true);  // 小端字节序
           offset += 4;
-          view.setFloat32(offset, this.mouseY, true);
+          view.setFloat32(offset, this.mouseYInBox2D, true);
           offset += 4;
           //打包按键
           let keyStatusBigInt = BigInt(0);  // 初始化为 0
