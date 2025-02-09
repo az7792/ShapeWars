@@ -89,7 +89,7 @@ class playerEntity {
           }
 
           if (componentState & COMP_HP) {//血量
-               [this.maxHP, this.HP] = readHP(dataView, offset);
+               [this.HP, this.maxHP] = readHP(dataView, offset);
           }
      }
 

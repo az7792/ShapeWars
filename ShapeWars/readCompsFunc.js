@@ -44,13 +44,13 @@ function readPolygon(dataView, offset) {
 
 /**
  * 读取HP
- * @returns [最大血量,当前血量]
+ * @returns [当前血量,最大血量]
  */
 function readHP(dataView, offset) {
      let val = [];
-     val[0] = dataView.getInt16(offset.value, true);//最大血量
+     val[0] = dataView.getInt16(offset.value, true);//当前血量
      offset.value += 2;
-     val[1] = dataView.getInt16(offset.value, true);//当前血量
+     val[1] = dataView.getInt16(offset.value, true);//最大血量
      offset.value += 2;
      return val;
 }

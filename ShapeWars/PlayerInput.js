@@ -28,7 +28,7 @@ class PlayerInput {
 
      packData() {
           ({ x: this.mouseXInBox2D, y: this.mouseYInBox2D } = screenToBox2D(this.mouseXInScreen, this.mouseYInScreen));
-          console.log(this.mouseXInBox2D, this.mouseYInBox2D);
+          //console.log(this.mouseXInBox2D, this.mouseYInBox2D);
           
           let message = new Uint8Array(1 + 4 + 4 + 8);
           let offset = 0;
