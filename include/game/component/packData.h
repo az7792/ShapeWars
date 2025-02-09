@@ -2,6 +2,8 @@
 #include <string>
 struct PackData
 {
-     std::string data;
-     bool isPacked = false;
+     std::string createData;
+     std::string updateData;
+     bool isCreated = false;
+     bool isUpdated = false;
 };

@@ -42,43 +42,72 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
           b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
           b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
 
-          auto processEntity = [&](ecs::Entity targetEntity)
+          // 创建时无论是否需要更新都需要打包
+          auto processEntity = [&](ecs::Entity targetEntity, bool isCreate = false)
           {
                PackData *packData = em.getComponent<PackData>(targetEntity);
-               if (packData->isPacked)
+               if (packData->isCreated && isCreate)
+                    return;
+               if (packData->isUpdated && !isCreate)
                     return;
 
-               packData->data.clear();
-               strAppend(packData->data, ecs::entityToIndex(targetEntity)); // 写入实体ID
+               std::string *data = nullptr;
+               bool *isPacked = nullptr;
+               if (isCreate)
+               {
+                    data = &packData->createData;
+                    isPacked = &packData->isCreated;
+               }
+               else
+               {
+                    data = &packData->updateData;
+                    isPacked = &packData->isUpdated;
+               }
+               data->clear();
 
-               // TODO : 写入实体类型
-               strAppend<uint8_t>(packData->data, 1); // test
+               strAppend(*data, ecs::entityToIndex(targetEntity)); // 写入实体ID
+
+               // 写入实体类型
+               Type *type = em.getComponent<Type>(targetEntity);
+               strAppend<uint8_t>(*data, type->id);
 
                uint64_t componentState = 0;
                b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
-               strAppend(packData->data, componentState); // 占位
+               strAppend(*data, componentState); // 占位
                if (em.hasComponent<Position>(targetEntity))
                {
-                    componentState |= (1ull << 0);
+                    componentState |= COMP_POSITION;
                     b2Vec2 position = b2Body_GetPosition(*bodyId);
-                    strAppend(packData->data, position.x);
-                    strAppend(packData->data, position.y);
+                    strAppend(*data, position.x);
+                    strAppend(*data, position.y);
                }
 
-               std::memcpy(packData->data.data() + 5, &componentState, 8); // 写入组件状态
-               packData->isPacked = true;
+               if (em.hasComponent<HP>(targetEntity))
+               {
+                    HP *hp = em.getComponent<HP>(targetEntity);
+                    if (hp->isDirty || isCreate) // 创建时无论是否变换都需要打包
+                    {
+                         componentState |= COMP_HP;
+                         strAppend(*data, hp->hp);
+                         strAppend(*data, hp->maxHP);
+                         hp->isDirty = false;
+                    }
+               }
+
+               std::memcpy(data->data() + 5, &componentState, 8); // 写入组件状态
+               *isPacked = true;
           };
 
           // 处理 createEntities
           for (auto createEntity : camera->createEntities)
           {
-               processEntity(createEntity);
+               processEntity(createEntity, true);
           }
 
           // 处理 inEntities
           for (auto inEntity : camera->inEntities)
           {
-               processEntity(inEntity);
+               processEntity(inEntity, false);
           }
 
           // 删除单独处理

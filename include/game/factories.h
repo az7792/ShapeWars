@@ -9,14 +9,17 @@ ecs::Entity createEntityTest(ecs::EntityManager &em, b2WorldId &worldId, TcpConn
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, (int16_t)100, (int16_t)100, false);
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
+     em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
+     em.addComponent<AttackList>(e);
      em.addComponent<Camera>(e, Camera(0.f, 0.f, 1.f));
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 
-     em.addComponent<PackData>(e, "", false);
+     em.addComponent<PackData>(e, "", "", false, false);
      em.addComponent<Input>(e, 0.f, 0.f, 0ull);
      em.addComponent<TcpConnection *>(e, tcpConnection);
+     em.addComponent<Type>(e, static_cast<uint8_t>(1));
 
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
@@ -28,6 +31,7 @@ ecs::Entity createEntityTest(ecs::EntityManager &em, b2WorldId &worldId, TcpConn
      shapeDef.density = 1.f;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
+     shapeDef.enableContactEvents = true;
      // shapeDef.filter.categoryBits = (uint64_t)MyCategories::PLAYER;
      // shapeDef.filter.maskBits = 0;
 

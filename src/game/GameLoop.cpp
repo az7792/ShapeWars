@@ -39,8 +39,8 @@ void GameLoop::outputSys()
           strAppend<uint16_t>(message, len);
           for (auto e : camera->createEntities)
           {
-               message += em_.getComponent<PackData>(e)->data;
-               em_.getComponent<PackData>(e)->isPacked = false;
+               message += em_.getComponent<PackData>(e)->createData;
+               em_.getComponent<PackData>(e)->isCreated = false;
           }
 
           // 删除实体列表
@@ -56,8 +56,8 @@ void GameLoop::outputSys()
           strAppend<uint16_t>(message, len);
           for (auto e : camera->inEntities)
           {
-               message += em_.getComponent<PackData>(e)->data;
-               em_.getComponent<PackData>(e)->isPacked = false;
+               message += em_.getComponent<PackData>(e)->updateData;
+               em_.getComponent<PackData>(e)->isUpdated = false;
           }
 
           // 清理摄像机
@@ -219,6 +219,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
+         .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&GameLoop::outputSys, this));
 }
