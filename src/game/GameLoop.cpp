@@ -78,7 +78,7 @@ void GameLoop::createPlayerSys()
      std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
      while (!createPlayerQueue_.empty())
      {
-          ecs::Entity entity = createEntityTest(em_, worldId_, createPlayerQueue_.front());
+          ecs::Entity entity = createEntityPlayer(em_, worldId_, createPlayerQueue_.front(), {0});
           int inputIndex = freeInputsQueue_.front();
           freeInputsQueue_.pop_front();
           playerMap_[createPlayerQueue_.front()] = entity;
@@ -218,6 +218,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&GameLoop::destroyPlayerSys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
+         .addSystem(std::bind(&TestRegularPolygonSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_)))

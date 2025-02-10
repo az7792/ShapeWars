@@ -4,45 +4,11 @@
 #include "net/TcpConnection.h"
 
 #include "box2d/box2d.h"
-ecs::Entity createEntityTest(ecs::EntityManager &em, b2WorldId &worldId, TcpConnection *tcpConnection)
-{
-     ecs::Entity e = em.createEntity();
-     em.addComponent<Position>(e);
-     em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
-     em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
-     em.addComponent<AttackList>(e);
-     em.addComponent<Camera>(e, Camera(0.f, 0.f, 1.f));
-     Camera *camera = em.getComponent<Camera>(e);
-     camera->bodyId = camera->createSensor(worldId);
+// 创建玩家
+ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpConnection *tcpConnection, GroupIndex groupIndex);
 
-     em.addComponent<PackData>(e, "", "", false, false);
-     em.addComponent<Input>(e, 0.f, 0.f, 0ull);
-     em.addComponent<TcpConnection *>(e, tcpConnection);
-     em.addComponent<Type>(e, static_cast<uint8_t>(1));
+// 创建资源方块
+ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, RegularPolygon regularPolygon, float x, float y);
 
-     b2BodyDef bodyDef = b2DefaultBodyDef();
-     bodyDef.type = b2_dynamicBody;
-     bodyDef.position = {0.f, 0.f};
-     bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
-     b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
-
-     b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = 1.f;   // 默认为1
-     shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
-     shapeDef.userData = bodyDef.userData;
-     shapeDef.enableContactEvents = true;
-     // shapeDef.filter.categoryBits = (uint64_t)MyCategories::PLAYER;
-     // shapeDef.filter.maskBits = 0;
-
-     // 圆形
-     b2Circle circle;
-     circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
-     circle.radius = 0.05f;
-
-     b2CreateCircleShape(bodyId, &shapeDef, &circle);
-     b2Body_SetLinearVelocity(bodyId, {0.001f, 0.001f});
-
-     em.addComponent<b2BodyId>(e, bodyId);
-     return e;
-}
+// 创建子弹
+ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::Entity player);

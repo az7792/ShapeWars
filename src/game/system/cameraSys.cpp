@@ -74,7 +74,9 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                uint64_t componentState = 0;
                b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
                strAppend(*data, componentState); // 占位
-               if (em.hasComponent<Position>(targetEntity))
+
+               // 添加数据按协议表顺序由大到小
+               if (em.hasComponent<Position>(targetEntity)) // 0
                {
                     componentState |= COMP_POSITION;
                     b2Vec2 position = b2Body_GetPosition(*bodyId);
@@ -82,7 +84,19 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                     strAppend(*data, position.y);
                }
 
-               if (em.hasComponent<HP>(targetEntity))
+               if (em.hasComponent<RegularPolygon>(targetEntity)) // 3
+               {
+                    RegularPolygon *regularPolygon = em.getComponent<RegularPolygon>(targetEntity);
+                    if (regularPolygon->isDirty || isCreate)
+                    {
+                         componentState |= COMP_POLYGON;
+                         strAppend(*data, regularPolygon->sides);
+                         strAppend(*data, regularPolygon->radius);
+                         regularPolygon->isDirty = false;
+                    }
+               }
+
+               if (em.hasComponent<HP>(targetEntity)) // 4
                {
                     HP *hp = em.getComponent<HP>(targetEntity);
                     if (hp->isDirty || isCreate) // 创建时无论是否变换都需要打包

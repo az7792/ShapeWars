@@ -6,13 +6,14 @@
 // valgrind --leak-check=full --show-leak-kinds=all ./server
 int main()
 {
-     /// 务必于协议表顺序一致
+     /// 务必于协议表顺序一致，最好不要轻易调整顺序，哪怕这个字段永远用不到
      ecs::ComponentTypeID::registerComponent<Position>();       // 0
      ecs::ComponentTypeID::registerComponent<Velocity>();       // 1
      ecs::ComponentTypeID::registerComponent<Angle>();          // 2
      ecs::ComponentTypeID::registerComponent<RegularPolygon>(); // 3
      ecs::ComponentTypeID::registerComponent<HP>();             // 4
      ecs::ComponentTypeID::registerComponent<Type>();           // 5
+     ecs::ComponentTypeID::registerComponent<GroupIndex>();     // 6
 
      Logger::instance().setLevel(LogLevel::DEBUG);
      GameLoop gameLoop;

@@ -15,12 +15,9 @@
 // box2d 帧率
 #define TPS 30
 
-
-enum class MyCategories // uint32
-{
-     PLAYER = 0x00000001,
-     CAMERA = 0x00000002,
-     // BULLET = 0x00000004,
-     // RESOURCE_BLOCK = 0x00000008,
-     // BORDER_WALL = 0x00000010,
-};
+// 实体类型
+#define CATEGORY_PLAYER (1u << 0)
+#define CATEGORY_BLOCK (1u << 1)
+#define CATEGORY_BULLET (1u << 2)
+#define CATEGORY_CAMERA (1u << 3)
+#define CATEGORY_BORDER_WALL (1u << 4)

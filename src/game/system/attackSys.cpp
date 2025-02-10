@@ -77,8 +77,11 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
                if (em.hasComponent<HP>(attackId))
                {
                     auto hp = em.getComponent<HP>(attackId);
-                    hp->hp -= attack->damage / TPS;
-                    hp->isDirty = true;
+                    if (hp->hp > 0)
+                    {
+                         hp->hp -= attack->damage / TPS;
+                         hp->isDirty = true;
+                    }
                }
           }
      }
