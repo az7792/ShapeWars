@@ -121,3 +121,4 @@
 - 为bug列表添加编号
 - 完成资源方块测试
      - 未添加删除逻辑
+- 修复[BUG-004](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)

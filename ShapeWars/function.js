@@ -267,8 +267,6 @@ function drawHealthBar(x, y, health, maxHealth) {
      let startX = x - width / 2;
      let startY = y - height / 2;
 
-     ctx.save();
-
      // 画底色（暗绿色）
      ctx.fillStyle = "#004400";
      ctx.beginPath();
