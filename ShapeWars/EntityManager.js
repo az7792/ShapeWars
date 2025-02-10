@@ -1,5 +1,5 @@
 class EntityManager {
-     static entityTypeToLevel = [0, 1, 2, 0, 0, 0, 0]; // 实体类型到渲染层级的映射
+     static entityTypeToLevel = [1, 0, 2]; // 实体类型到渲染层级的映射
      constructor() {
           this.SparseSet = [new SparseSet(), new SparseSet(), new SparseSet()]; //[资源方块，玩家，子弹] 分层渲染，越小越先渲染
      }
@@ -8,10 +8,10 @@ class EntityManager {
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
           let entityType = readTypeID(dataView, offset);//实体类型
-          if (entityType == 3) {
-               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
-          } else if (entityType == 1) {
+          if (entityType == CATEGORY_PLAYER) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, playerEntity.create(dataView, offset));
+          } else if (entityType == CATEGORY_BLOCK) {
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
           }
      }
 
