@@ -36,6 +36,9 @@ public:
      Buffer(size_t initialSize = 1024);
      ~Buffer();
 
+     /// @brief 获取缓冲区可读大小
+     size_t readableBytes() const;
+
      /// @brief 清空缓冲区
      void clear();
 

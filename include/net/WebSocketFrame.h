@@ -17,16 +17,23 @@ public:
 
      bool ok = true; // 帧是否解析成功
 
-     /// 解析帧
-     WebSocketFrame(TcpConnection *conn, Buffer &buffer);
+     /**
+      * 解析帧
+      * @param conn 连接
+      * @param buffer 缓冲区
+      * @param isContinue 是否可以继续解析下一个包
+      */
+     WebSocketFrame(TcpConnection *conn, Buffer &buffer, bool &isContinue);
 
      /// 生成 WebSocket 帧字符串
      static std::string encode(bool fin, uint8_t opcode, bool masked, const std::string &payloadData);
 
 private:
      /// 解析 WebSocket 帧字符串
-     void decode(TcpConnection *conn, Buffer &buffer);
+     void decode(TcpConnection *conn, Buffer &buffer, bool &isContinue);
+
+     bool tryRead(TcpConnection *conn, Buffer &buf, char *data, int len, int tryNum, bool &isContinue);
 
      /// 尝试从TcpConnection已经对于的buffer中读len个字节到指定位置，最多尝试n次
-     bool tryRead(TcpConnection *conn, Buffer &buf, char *data, int len, int tryNum = 3);
+     bool tryRead(TcpConnection *conn, Buffer &buf, bool &isContinue, char *data, int len, int tryNum = 3);
 };

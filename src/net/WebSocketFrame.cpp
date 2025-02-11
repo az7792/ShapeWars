@@ -20,9 +20,9 @@
 |                     Payload Data continued ...                |
 +---------------------------------------------------------------+
 */
-WebSocketFrame::WebSocketFrame(TcpConnection *conn, Buffer &buffer)
+WebSocketFrame::WebSocketFrame(TcpConnection *conn, Buffer &buffer, bool &isContinue)
 {
-     decode(conn, buffer);
+     decode(conn, buffer, isContinue);
 }
 
 std::string WebSocketFrame::encode(bool fin, uint8_t opcode, bool masked, const std::string &payloadData)
@@ -83,10 +83,10 @@ std::string WebSocketFrame::encode(bool fin, uint8_t opcode, bool masked, const 
      return frame;
 }
 
-void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
+void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer, bool &isContinue)
 {
-     char twoBytes[2];                                    // 前两个字节
-     bool readOk = tryRead(conn, buffer, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
+     char twoBytes[2];                                                // 前两个字节
+     bool readOk = tryRead(conn, buffer, isContinue, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
      if (!readOk)
      {
           ok = false;
@@ -109,7 +109,7 @@ void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
      // 处理扩展长度
      if (initialPayloadLen == 126)
      {
-          readOk = tryRead(conn, buffer, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
+          readOk = tryRead(conn, buffer, isContinue, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
           if (!readOk)
           {
                ok = false;
@@ -122,7 +122,7 @@ void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
      else if (initialPayloadLen == 127)
      {
           char eightByte[8];
-          readOk = tryRead(conn, buffer, eightByte, 8, 3); // 尝试读取前8个字节,最多尝试3次
+          readOk = tryRead(conn, buffer, isContinue, eightByte, 8, 3); // 尝试读取前8个字节,最多尝试3次
           if (!readOk)
           {
                ok = false;
@@ -143,7 +143,7 @@ void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
      // 处理 Masking Key
      if (masked)
      {
-          readOk = tryRead(conn, buffer, maskingKey.data(), 4, 3); // 尝试读取前4个字节,最多尝试3次
+          readOk = tryRead(conn, buffer, isContinue, maskingKey.data(), 4, 3); // 尝试读取前4个字节,最多尝试3次
           if (!readOk)
           {
                ok = false;
@@ -154,7 +154,7 @@ void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
 
      // 提取 Payload 数据
      payloadData.resize(payloadLength);
-     readOk = tryRead(conn, buffer, payloadData.data(), payloadLength, 3); // 尝试读取Payload数据,最多尝试3次
+     readOk = tryRead(conn, buffer, isContinue, payloadData.data(), payloadLength, 3); // 尝试读取Payload数据,最多尝试3次
      if (!readOk)
      {
           ok = false;
@@ -171,7 +171,7 @@ void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
      }
 }
 
-bool WebSocketFrame::tryRead(TcpConnection *conn, Buffer &buf, char *data, int len, int tryNum)
+bool WebSocketFrame::tryRead(TcpConnection *conn, Buffer &buf, bool &isContinue, char *data, int len, int tryNum)
 {
      for (int i = 0; i < tryNum; ++i) // 最多尝试n次
      {
@@ -179,8 +179,10 @@ bool WebSocketFrame::tryRead(TcpConnection *conn, Buffer &buf, char *data, int l
           len -= buf.read(data, len);
           if (len == 0)
                return true;
-          std::this_thread::sleep_for(std::chrono::milliseconds(10 * (i + 1))); // 指数退避，避免频繁轮询对系统资源造成影响
+          std::this_thread::sleep_for(std::chrono::milliseconds(i + 1)); // 指数退避，避免频繁轮询对系统资源造成影响
+          isContinue = false;
      }
+     //TODO: 是否应该放弃？或者直接断开连接？
      throw std::runtime_error("webSocket帧数据读取错误"); // 主要之后无法再区分websocket帧读取了多少
      return false;
 }

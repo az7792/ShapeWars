@@ -182,30 +182,44 @@ void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
      }
      else
      {
-          WebSocketFrame frame(conn, buffer);
-          // 已经连接webSocket连接
-          if (!frame.ok)
+          bool isContinue = true;
+          while (isContinue && buffer.readableBytes() > 0)
           {
-               LOG_ERROR("webSocket帧解析错误" + conn->peerAddr.getIpPort() + "已断开连接");
-               tcpServer.closeConnection(conn);
-               subConnect(conn);
-               return;
+               // static std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
+               // auto nowTime = std::chrono::steady_clock::now();
+               // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime).count();
+               // lastTime = nowTime;
+               // std::ostringstream oss;
+               // oss << std::this_thread::get_id();
+               // LOG_DEBUG("readContinue:" + std::to_string(duration) + "ms On thread:" + oss.str());
+
+               WebSocketFrame frame(conn, buffer, isContinue);
+               // 已经连接webSocket连接
+               if (!frame.ok)
+               {
+                    LOG_ERROR("webSocket帧解析错误" + conn->peerAddr.getIpPort() + "已断开连接");
+                    tcpServer.closeConnection(conn);
+                    subConnect(conn);
+                    return;
+               }
+               if (frame.opcode == 0x8) // 关闭帧
+               {
+                    LOG_INFO("[ websocket ]" + conn->peerAddr.getIpPort() + "已关闭连接");
+                    tcpServer.closeConnection(conn);
+                    subConnect(conn);
+                    return;
+               }
+               if (frame.opcode == 0x9) // Ping帧
+               {
+                    std::string Pong = WebSocketFrame::encode(1, 0xA, 0, ""); // 返回Pong帧
+                    conn->send(Pong);
+                    return;
+               }
+               if (onMessage)
+               {
+                    onMessage(conn, std::move(frame.payloadData));
+               }
           }
-          if (frame.opcode == 0x8) // 关闭帧
-          {
-               LOG_INFO("[ websocket ]" + conn->peerAddr.getIpPort() + "已关闭连接");
-               tcpServer.closeConnection(conn);
-               subConnect(conn);
-               return;
-          }
-          if (frame.opcode == 0x9) // Ping帧
-          {
-               std::string Pong = WebSocketFrame::encode(1, 0xA, 0, ""); // 返回Pong帧
-               conn->send(Pong);
-               return;
-          }
-          if (onMessage)
-               onMessage(conn, std::move(frame.payloadData));
      }
 }
 

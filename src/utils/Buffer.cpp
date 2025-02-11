@@ -9,6 +9,10 @@ Buffer::Buffer(size_t initialSize)
 
 Buffer::~Buffer() {}
 
+size_t Buffer::readableBytes() const {
+    return readSize_;
+}
+
 void Buffer::clear()
 {
     readIndex_ = writeIndex_ = 0;

@@ -46,6 +46,7 @@ socket.onmessage = (event) => {
                //更新时间
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
+               sendMessage(playerInput.packData());
                break;
           case 0x02://Ping
                break;
@@ -54,7 +55,6 @@ socket.onmessage = (event) => {
                console.log("Pong", performanceMetrics.ping);
                break;
      }
-     sendMessage(playerInput.packData());
 };
 
 // 连接关闭时触发

@@ -34,10 +34,10 @@ function update() {
 }
 
 
-// //Ping
-// setInterval(() => {
-//      let message = new Uint8Array(1);
-//      message[0] = 0x02;
-//      sendMessage(message);
-//      pingTime = Date.now();
-// }, 1000);
+ //Ping
+ setInterval(() => {
+      let message = new Uint8Array(1);
+      message[0] = 0x02;
+      sendMessage(message);
+      pingTime = Date.now();
+ }, 1000);
