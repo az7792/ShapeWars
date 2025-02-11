@@ -28,6 +28,7 @@ void Acceptor::handleRead()
 {
      InetAddress addr;
      int cfd = SocketOps::accept(acceptChannel_->fd, &addr); // 该accept函数会阻塞等待新连接
+     SocketOps::setTcpNoDelay(cfd, true);                    // 禁用Nagle算法
      if (cfd < 0)
           LOG_ERROR("sockfd" + std::to_string(cfd) + " accept 失败: " + strerror(errno));
      else if (newConnectionCallback_)
