@@ -8,7 +8,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      em.addComponent<Velocity>(e);
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
-     em.addComponent<AttackList>(e);
+     em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "", false, false);
      em.addComponent<Input>(e, 0.f, 0.f, 0ull);
      em.addComponent<TcpConnection *>(e, tcpConnection);
@@ -52,7 +52,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, Regula
      em.addComponent<Velocity>(e);
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
-     em.addComponent<AttackList>(e);
+     em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "", false, false);
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_BLOCK)));
      em.addComponent<RegularPolygon>(e, regularPolygon);
@@ -90,7 +90,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::
      em.addComponent<Velocity>(e);
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
-     em.addComponent<AttackList>(e);
+     em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "", false, false);
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_BULLET)));
      em.addComponent<ecs::Entity>(e, player);

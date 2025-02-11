@@ -10,7 +10,7 @@
 #include "box2d/id.h"
 #include "type.h"
 #include "attack.h"
-#include "attackList.h"
+#include "contactList.h"
 #include "groupIndex.h"
 
 #include <cstdint>

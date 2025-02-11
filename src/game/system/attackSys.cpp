@@ -12,13 +12,13 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           // ShapesStartTouching(beginEvent->shapeIdA, beginEvent->shapeIdB);
           ecs::Entity entityA = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdA));
           ecs::Entity entityB = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdB));
-          if (em.hasComponent<AttackList>(entityA))
+          if (em.hasComponent<ContactList>(entityA))
           {
-               em.getComponent<AttackList>(entityA)->attacks.push_back(beginEvent->shapeIdB);
+               em.getComponent<ContactList>(entityA)->list.push_back(beginEvent->shapeIdB);
           }
-          if (em.hasComponent<AttackList>(entityB))
+          if (em.hasComponent<ContactList>(entityB))
           {
-               em.getComponent<AttackList>(entityB)->attacks.push_back(beginEvent->shapeIdA);
+               em.getComponent<ContactList>(entityB)->list.push_back(beginEvent->shapeIdA);
           }
      }
 
@@ -31,9 +31,9 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           if (b2Shape_IsValid(endEvent->shapeIdA))
           {
                ecs::Entity entityA = *static_cast<ecs::Entity *>(b2Shape_GetUserData(endEvent->shapeIdA));
-               if (em.hasComponent<AttackList>(entityA))
+               if (em.hasComponent<ContactList>(entityA))
                {
-                    auto &attacks = em.getComponent<AttackList>(entityA)->attacks;
+                    auto &attacks = em.getComponent<ContactList>(entityA)->list;
                     for (auto it = attacks.begin(); it != attacks.end(); ++it) // O(n) 这个n一般很小 0-5
                     {
                          if (b2StoreShapeId(*it) == b2StoreShapeId(endEvent->shapeIdB)) // 转为uint64_t进行比较
@@ -48,9 +48,9 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           if (b2Shape_IsValid(endEvent->shapeIdB))
           {
                ecs::Entity entityB = *static_cast<ecs::Entity *>(b2Shape_GetUserData(endEvent->shapeIdB));
-               if (em.hasComponent<AttackList>(entityB))
+               if (em.hasComponent<ContactList>(entityB))
                {
-                    auto &attacks = em.getComponent<AttackList>(entityB)->attacks;
+                    auto &attacks = em.getComponent<ContactList>(entityB)->list;
                     for (auto it = attacks.begin(); it != attacks.end(); ++it) // O(n) 这个n一般很小 0-5
                     {
                          if (b2StoreShapeId(*it) == b2StoreShapeId(endEvent->shapeIdA)) // 转为uint64_t进行比较
@@ -65,15 +65,15 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
      }
 
      // 进行攻击
-     auto group = em.group<Attack, AttackList>();
+     auto group = em.group<Attack, ContactList>();
      for (auto entity : group)
      {
-          auto attackList = em.getComponent<AttackList>(entity);
+          auto contactList = em.getComponent<ContactList>(entity);
           auto attack = em.getComponent<Attack>(entity);
 
-          for (auto attackShapeId : attackList->attacks)
+          for (auto shapeId : contactList->list)
           {
-               auto attackId = *static_cast<ecs::Entity *>(b2Shape_GetUserData(attackShapeId));
+               auto attackId = *static_cast<ecs::Entity *>(b2Shape_GetUserData(shapeId));
                if (em.hasComponent<HP>(attackId))
                {
                     auto hp = em.getComponent<HP>(attackId);
