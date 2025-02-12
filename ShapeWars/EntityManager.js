@@ -12,6 +12,8 @@ class EntityManager {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, playerEntity.create(dataView, offset));
           } else if (entityType == CATEGORY_BLOCK) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
+          }else if(entityType == CATEGORY_BULLET){
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
           }
      }
 

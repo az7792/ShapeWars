@@ -4,3 +4,4 @@
 #include "cameraSys.h"
 #include "attackSys.h"
 #include "TestRegularPolygon.h"
+#include "TestFire.h"

@@ -12,6 +12,10 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           // ShapesStartTouching(beginEvent->shapeIdA, beginEvent->shapeIdB);
           ecs::Entity entityA = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdA));
           ecs::Entity entityB = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdB));
+          if (em.hasComponent<BorderWall>(entityA) || em.hasComponent<BorderWall>(entityB))
+          {
+               continue;
+          }
           if (em.hasComponent<ContactList>(entityA))
           {
                em.getComponent<ContactList>(entityA)->list.push_back(beginEvent->shapeIdB);

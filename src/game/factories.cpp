@@ -31,7 +31,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_PLAYER;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
      shapeDef.filter.groupIndex = groupIndex.index;
 
      // 圆形
@@ -70,7 +70,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, Regula
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_BLOCK;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
 
      // 圆形
      b2Circle circle;
@@ -94,12 +94,12 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::
      em.addComponent<PackData>(e, "", "", false, false);
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_BULLET)));
      em.addComponent<ecs::Entity>(e, player);
-     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.01f); //>=16为圆形
+     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.02f); //>=16为圆形
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
-     bodyDef.position = {0.f, 0.f};
+     bodyDef.position = b2Body_GetPosition(*em.getComponent<b2BodyId>(player));
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
@@ -115,10 +115,50 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::
      // 圆形
      b2Circle circle;
      circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
-     circle.radius = 0.01f;
+     circle.radius = 0.02f;
 
      b2CreateCircleShape(bodyId, &shapeDef, &circle);
+     auto *input = em.getComponent<Input>(player);
+     b2Vec2 vel = (b2Vec2){input->x, input->y} - bodyDef.position;
+     vel = b2Normalize(vel) * 1.f;
+     b2Body_SetLinearVelocity(bodyId, vel);
 
      em.addComponent<b2BodyId>(e, bodyId);
      return e;
+}
+
+ecs::Entity createEntityBrderWall(ecs::EntityManager &em, b2WorldId &worldId, float width, float height)
+{
+     auto entity = em.createEntity();
+     em.addComponent<BorderWall>(entity);
+
+     // 创建墙
+     b2Segment s;
+     b2BodyDef bodyDef = b2DefaultBodyDef();
+     bodyDef.position = (b2Vec2){0.f, 0.f};
+     b2BodyId Wall = b2CreateBody(worldId, &bodyDef);
+
+     b2ShapeDef shapeDef = b2DefaultShapeDef(); // 默认为静态
+     shapeDef.userData = static_cast<void *>(em.getEntityPtr(entity));
+     shapeDef.filter.categoryBits = CATEGORY_BORDER_WALL;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER;
+     shapeDef.enableContactEvents = false;
+     // up
+     s.point1 = (b2Vec2){-width, height};
+     s.point2 = (b2Vec2){width, height};
+     b2CreateSegmentShape(Wall, &shapeDef, &s);
+     // left
+     s.point1 = (b2Vec2){width, height};
+     s.point2 = (b2Vec2){width, -height};
+     b2CreateSegmentShape(Wall, &shapeDef, &s);
+     // down
+     s.point1 = (b2Vec2){width, -height};
+     s.point2 = (b2Vec2){-width, -height};
+     b2CreateSegmentShape(Wall, &shapeDef, &s);
+     // right
+     s.point1 = (b2Vec2){-width, -height};
+     s.point2 = (b2Vec2){-width, height};
+     b2CreateSegmentShape(Wall, &shapeDef, &s);
+
+     return entity;
 }

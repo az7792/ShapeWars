@@ -57,7 +57,7 @@ class playerEntity {
           this.x = [0, 0];
           this.y = [0, 0];
           this.angle = [0, 0];
-          this.r = 0.1;
+          this.r = 0.05;
           this.sides = 16;//>=16显示圆形
           this.maxHP = 100;
           this.HP = 20;

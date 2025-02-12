@@ -11,6 +11,7 @@
 #include "type.h"
 #include "attack.h"
 #include "contactList.h"
+#include "borderWall.h"
 #include "groupIndex.h"
 
 #include <cstdint>

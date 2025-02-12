@@ -1,4 +1,7 @@
 const canvas = document.getElementById("canvas");
+canvas.addEventListener("contextmenu", function (event) {//禁用浏览器右键菜单
+     event.preventDefault();
+});
 const ctx = canvas.getContext("2d");
 const scale = window.localStorage.getItem("no_retina") ? 1 : window.devicePixelRatio;
 const miniMap = new MiniMap(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);

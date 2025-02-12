@@ -128,3 +128,7 @@
 - 处理同一时间同一连接到达多个包的情况
 - 修复[BUG-001](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md),产生[BUG-005](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
 - `AttackList`更名为`ContactList`
+
+## 2025年2月12日
+- 测试子弹
+- 添加边界墙
