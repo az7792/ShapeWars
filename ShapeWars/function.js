@@ -213,6 +213,9 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      ({ x, y } = box2DtoScreen(x, y));
      r = r * MAPINFO.kScale / camera.fov;
 
+     //外接圆半径
+     r = r / Math.cos(Math.PI / sides);
+
      angle = -angle;
 
      ctx.save();
