@@ -14,6 +14,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      em.addComponent<TcpConnection *>(e, tcpConnection);
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_PLAYER)));
      em.addComponent<GroupIndex>(e, groupIndex);
+     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.05f); //>=16为圆形
      em.addComponent<Camera>(e, Camera(0.f, 0.f, 1.f));
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);

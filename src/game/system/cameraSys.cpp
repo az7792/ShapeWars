@@ -4,6 +4,96 @@
 #include "game/component/fwd.h"
 #include <map>
 
+namespace
+{
+     // 0
+     void appendPosition0(std::string *data, b2Vec2 position, uint64_t &componentState)
+     {
+          componentState |= COMP_POSITION;
+          strAppend(*data, position.x);
+          strAppend(*data, position.y);
+     }
+
+     // 3
+     void appendRegularPolygon3(std::string *data, uint64_t &componentState, RegularPolygon *regularPolygon, bool isCreate = false)
+     {
+          if (regularPolygon->isDirty || isCreate)
+          {
+               componentState |= COMP_POLYGON;
+               strAppend(*data, regularPolygon->sides);
+               strAppend(*data, regularPolygon->radius);
+               regularPolygon->isDirty = false;
+          }
+     }
+
+     // 4
+     void appendHP4(std::string *data, uint64_t &componentState, HP *hp, bool isCreate = false)
+     {
+          if (hp->isDirty || isCreate) // 创建时无论是否变换都需要打包
+          {
+               componentState |= COMP_HP;
+               strAppend(*data, hp->hp);
+               strAppend(*data, hp->maxHP);
+               hp->isDirty = false;
+          }
+     }
+
+     // 创建时无论是否需要更新都需要打包
+     void processEntity(ecs::EntityManager &em, ecs::Entity targetEntity, bool isCreate = false)
+     {
+          PackData *packData = em.getComponent<PackData>(targetEntity);
+          if (packData->isCreated && isCreate)
+               return;
+          if (packData->isUpdated && !isCreate)
+               return;
+
+          std::string *data = nullptr;
+          bool *isPacked = nullptr;
+          if (isCreate)
+          {
+               data = &packData->createData;
+               isPacked = &packData->isCreated;
+          }
+          else
+          {
+               data = &packData->updateData;
+               isPacked = &packData->isUpdated;
+          }
+          data->clear();
+
+          strAppend(*data, ecs::entityToIndex(targetEntity)); // 写入实体ID
+
+          // 写入实体类型
+          Type *type = em.getComponent<Type>(targetEntity);
+          strAppend<uint8_t>(*data, type->id);
+
+          uint64_t componentState = 0;
+          b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
+          strAppend(*data, componentState); // 占位
+
+          if (type->id == __builtin_ctz(CATEGORY_PLAYER)) // 处理玩家实体
+          {
+               appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
+               appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+          }
+          else if (type->id == __builtin_ctz(CATEGORY_BLOCK)) // 处理方块实体
+          {
+               appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
+               appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+          }
+          else if (type->id == __builtin_ctz(CATEGORY_BULLET)) // 处理子弹实体
+          {
+               appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
+          }
+
+          std::memcpy(data->data() + 5, &componentState, 8); // 写入组件状态
+          *isPacked = true;
+     };
+}
+
 void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
 {
      // 处理传感器事件
@@ -42,86 +132,16 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
           b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
           b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
 
-          // 创建时无论是否需要更新都需要打包
-          auto processEntity = [&](ecs::Entity targetEntity, bool isCreate = false)
-          {
-               PackData *packData = em.getComponent<PackData>(targetEntity);
-               if (packData->isCreated && isCreate)
-                    return;
-               if (packData->isUpdated && !isCreate)
-                    return;
-
-               std::string *data = nullptr;
-               bool *isPacked = nullptr;
-               if (isCreate)
-               {
-                    data = &packData->createData;
-                    isPacked = &packData->isCreated;
-               }
-               else
-               {
-                    data = &packData->updateData;
-                    isPacked = &packData->isUpdated;
-               }
-               data->clear();
-
-               strAppend(*data, ecs::entityToIndex(targetEntity)); // 写入实体ID
-
-               // 写入实体类型
-               Type *type = em.getComponent<Type>(targetEntity);
-               strAppend<uint8_t>(*data, type->id);
-
-               uint64_t componentState = 0;
-               b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
-               strAppend(*data, componentState); // 占位
-
-               // 添加数据按协议表顺序由大到小
-               if (em.hasComponent<Position>(targetEntity)) // 0
-               {
-                    componentState |= COMP_POSITION;
-                    b2Vec2 position = b2Body_GetPosition(*bodyId);
-                    strAppend(*data, position.x);
-                    strAppend(*data, position.y);
-               }
-
-               if (em.hasComponent<RegularPolygon>(targetEntity)) // 3
-               {
-                    RegularPolygon *regularPolygon = em.getComponent<RegularPolygon>(targetEntity);
-                    if (regularPolygon->isDirty || isCreate)
-                    {
-                         componentState |= COMP_POLYGON;
-                         strAppend(*data, regularPolygon->sides);
-                         strAppend(*data, regularPolygon->radius);
-                         regularPolygon->isDirty = false;
-                    }
-               }
-
-               if (em.hasComponent<HP>(targetEntity)) // 4
-               {
-                    HP *hp = em.getComponent<HP>(targetEntity);
-                    if (hp->isDirty || isCreate) // 创建时无论是否变换都需要打包
-                    {
-                         componentState |= COMP_HP;
-                         strAppend(*data, hp->hp);
-                         strAppend(*data, hp->maxHP);
-                         hp->isDirty = false;
-                    }
-               }
-
-               std::memcpy(data->data() + 5, &componentState, 8); // 写入组件状态
-               *isPacked = true;
-          };
-
           // 处理 createEntities
           for (auto createEntity : camera->createEntities)
           {
-               processEntity(createEntity, true);
+               processEntity(em, createEntity, true);
           }
 
           // 处理 inEntities
           for (auto inEntity : camera->inEntities)
           {
-               processEntity(inEntity, false);
+               processEntity(em, inEntity, false);
           }
 
           // 删除单独处理

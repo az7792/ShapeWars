@@ -136,3 +136,5 @@
 ## 2025年2月13日
 - 前端绘制多边形改为内接圆
 - 取消`CATEGORY_BLOCK`实体的`enableContactEvents == false`
+- `SocketOps::send`添加`MSG_NOSIGNAL`标志以避免SIGPIPE信号
+- 优化摄像机系统，子弹不再同步血量
