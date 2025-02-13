@@ -44,8 +44,7 @@ ssize_t SocketOps::send(int fd, const std::string &mes)
 
 ssize_t SocketOps::send(int fd, const void *mes, size_t len)
 {
-     // TODO MSG_NOSIGNAL
-     return ::send(fd, mes, len, 0);
+     return ::send(fd, mes, len, MSG_NOSIGNAL);
 }
 
 ssize_t SocketOps::recv(int fd, void *buffer, size_t len)
