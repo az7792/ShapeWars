@@ -29,5 +29,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 # 设置库路径（静态库路径）
 link_directories(./lib)
 
-# 链接 Box2D 库
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib/libbox2d.a)
+# 链接 Box2D 和 lz4 库
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/libbox2d.a
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/liblz4.a
+)

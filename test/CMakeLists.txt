@@ -18,13 +18,14 @@ set(EXECUTABLE_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build)
 
 # 手动填写测试文件
 set(TEST_FILES
-    ./testWebsocketServer.cpp
+    # ./testWebsocketServer.cpp
     #./testTcpServer.cpp
-    ./testSparseSet.cpp
-    ./testSparseMap.cpp
-    ./testEntity.cpp
-    ./testEntitySystem.cpp
-    ./testGameLoop.cpp
+    # ./testSparseSet.cpp
+    # ./testSparseMap.cpp
+    # ./testEntity.cpp
+    # ./testEntitySystem.cpp
+    # ./testGameLoop.cpp
+    ./testLz4.cpp
     # 添加更多测试文件
 )
 
@@ -48,6 +49,9 @@ foreach(TEST_FILE ${TEST_FILES})
     # 设置测试目标的编译选项
     target_compile_options(${TEST_NAME} PRIVATE -Wall -g)
 
-    # 链接静态库
-    target_link_libraries(${TEST_NAME} PRIVATE src_objects ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libbox2d.a)
+    # 链接 Box2D 和 LZ4 库
+    target_link_libraries(${TEST_NAME} PRIVATE src_objects
+        ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libbox2d.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../lib/liblz4.a
+    )
 endforeach()
