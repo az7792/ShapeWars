@@ -9,11 +9,11 @@ class EntityManager {
           offset.value += 4;
           let entityType = readTypeID(dataView, offset);//实体类型
           if (entityType == CATEGORY_PLAYER) {
-               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, playerEntity.create(dataView, offset));
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, PlayerEntity.create(dataView, offset));
           } else if (entityType == CATEGORY_BLOCK) {
-               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, polygonEntity.create(dataView, offset));
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, PolygonEntity.create(dataView, offset));
           }else if(entityType == CATEGORY_BULLET){
-               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, bulletEntity.create(dataView, offset));
+               this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, BulletEntity.create(dataView, offset));
           }
      }
 

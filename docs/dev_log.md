@@ -138,3 +138,6 @@
 - 取消`CATEGORY_BLOCK`实体的`enableContactEvents == false`
 - `SocketOps::send`添加`MSG_NOSIGNAL`标志以避免SIGPIPE信号
 - 优化摄像机系统，子弹不再同步血量
+- 优化组件与工厂构建参数
+- 同步碰撞组
+- 前端重构实体类并增加敌我识别

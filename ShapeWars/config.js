@@ -4,6 +4,10 @@ const COLORS = {
      backgroundValid: "#e3e3e3",//有效背景颜色
      backgroundInvalid: "#808080",//无效背景颜色
      backgroundLine: "#cfcfcf",//背景块线条颜色
+     playerFillColor: ["#cf5c51", "#4c69a0", "#edb6bc", "#e8d179"],
+     playerStrokeColor: ["#9b3231", "#32467c", "#c88194", "#c28f4f"],
+     bulletFillColor: ["#cf5c51", "#4c69a0", "#edb6bc", "#e8d179"],
+     bulletStrokeColor: ["#9b3231", "#32467c", "#c88194", "#c28f4f"],
 };
 
 // box2d 物理世界参数
@@ -37,5 +41,8 @@ performanceMetrics = {
      MSPT: 0, //平均单个事务处理时间 ms
 }
 
-//当前玩家ID
-nowPlayerID = 0;
+//当前玩家所属碰撞组
+nowGroupIndex = 0;
+
+//Ping
+pingTime = 0;

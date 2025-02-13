@@ -64,3 +64,14 @@ function readTypeID(dataView, offset) {
      offset.value += 1;
      return typeID;
 }
+
+
+/**
+ * 读取碰撞组
+ * @returns 碰撞组
+ */
+function readGroupIndex(dataView, offset) {
+     let index = dataView.getInt32(offset.value, true);
+     offset.value += 4;
+     return index;
+}

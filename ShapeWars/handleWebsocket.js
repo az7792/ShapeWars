@@ -18,9 +18,8 @@ socket.onmessage = (event) => {
                miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize)
                break;
           case 0x01: // 更新实体
-               //当前玩家的ID
-               nowPlayerID = dataView.getUint32(offset.value, true);
-               offset.value += 4;
+               //当前玩家所在碰撞组
+               nowGroupIndex = readGroupIndex(dataView, offset);
                // 摄像机位置
                camera.lerpX[0] = camera.lerpX[1];
                camera.lerpY[0] = camera.lerpY[1];
