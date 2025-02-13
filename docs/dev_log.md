@@ -132,3 +132,7 @@
 ## 2025年2月12日
 - 测试子弹
 - 添加边界墙
+
+## 2025年2月13日
+- 前端绘制多边形改为内接圆
+- 取消`CATEGORY_BLOCK`实体的`enableContactEvents == false`

@@ -68,7 +68,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, Regula
      shapeDef.density = 1.f;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
-     shapeDef.enableContactEvents = true;
+     //shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_BLOCK;
      shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
 
