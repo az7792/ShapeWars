@@ -38,6 +38,17 @@ namespace
           }
      }
 
+     // 6
+     void appendGroupIndex6(std::string *data, uint64_t &componentState, GroupIndex *groupIndex, bool isCreate = false)
+     {
+          if (groupIndex->isDirty || isCreate)
+          {
+               componentState |= COMP_GROUPINDEX;
+               strAppend(*data, groupIndex->index);
+               groupIndex->isDirty = false;
+          }
+     }
+
      // 创建时无论是否需要更新都需要打包
      void processEntity(ecs::EntityManager &em, ecs::Entity targetEntity, bool isCreate = false)
      {
@@ -76,6 +87,7 @@ namespace
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+               appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
           }
           else if (type->id == __builtin_ctz(CATEGORY_BLOCK)) // 处理方块实体
           {
@@ -87,6 +99,7 @@ namespace
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
+               appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
           }
 
           std::memcpy(data->data() + 5, &componentState, 8); // 写入组件状态

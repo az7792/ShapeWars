@@ -26,8 +26,8 @@ void GameLoop::outputSys()
           Camera *camera = em_.getComponent<Camera>(entity);
           std::string message;
           strAppend<uint8_t>(message, 0x01); // 更新实体数据
-          // 操作的玩家ID
-          strAppend<uint32_t>(message, ecs::entityToIndex(entity));
+          // 操作的玩家所属碰撞组
+          strAppend<int32_t>(message, em_.getComponent<GroupIndex>(entity)->index);
 
           // 摄像机坐标
           b2Vec2 cameraPos = b2Body_GetPosition(camera->bodyId);
