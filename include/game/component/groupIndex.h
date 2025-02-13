@@ -4,4 +4,5 @@
 struct GroupIndex
 {
      int32_t index;
+     bool isDirty = true;
 };

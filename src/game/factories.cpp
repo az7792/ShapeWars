@@ -6,10 +6,10 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
-     em.addComponent<PackData>(e, "", "", false, false);
+     em.addComponent<PackData>(e, "", "");
      em.addComponent<Input>(e, 0.f, 0.f, 0ull);
      em.addComponent<TcpConnection *>(e, tcpConnection);
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_PLAYER)));
@@ -51,10 +51,10 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, Regula
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
-     em.addComponent<PackData>(e, "", "", false, false);
+     em.addComponent<PackData>(e, "", "");
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_BLOCK)));
      em.addComponent<RegularPolygon>(e, regularPolygon);
 
@@ -89,11 +89,12 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), true);
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
-     em.addComponent<PackData>(e, "", "", false, false);
+     em.addComponent<PackData>(e, "", "");
      em.addComponent<Type>(e, static_cast<uint8_t>(__builtin_ctz(CATEGORY_BULLET)));
+     em.addComponent<GroupIndex>(e, em.getComponent<GroupIndex>(player)->index);
      em.addComponent<ecs::Entity>(e, player);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.02f); //>=16为圆形
 
