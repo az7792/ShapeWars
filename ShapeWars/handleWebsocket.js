@@ -3,10 +3,7 @@ socket.onopen = () => {
      console.log("WebSocket 连接已建立");
 };
 
-socket.onmessage = (event) => {
-     //原始数据
-     let offset = { value: 0 };
-     const dataView = new DataView(event.data);
+function parseMessage(dataView, offset) {
      let MessageType = dataView.getUint8(offset.value, true);
      offset.value++;
      switch (MessageType) {
@@ -53,7 +50,24 @@ socket.onmessage = (event) => {
                performanceMetrics.ping = Date.now() - pingTime;
                console.log("Pong", performanceMetrics.ping);
                break;
+          case 0x04://LZ4压缩包
+               let compressedSize = dataView.getInt32(offset.value, true);
+               offset.value += 4;
+               let decompressedSize = dataView.getInt32(offset.value, true);
+               offset.value += 4;
+               const compressedData = new Uint8Array(dataView.buffer, offset.value, decompressedSize);
+               offset.value += decompressedSize;
+               let res = decompressLZ4(compressedData, compressedSize);
+               parseMessage(new DataView(res.buffer), { value: 0 });
+               break;
      }
+}
+
+socket.onmessage = (event) => {
+     //原始数据
+     let offset = { value: 0 };
+     const dataView = new DataView(event.data);
+     parseMessage(dataView, offset);
 };
 
 // 连接关闭时触发

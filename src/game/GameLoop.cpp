@@ -4,6 +4,7 @@
 // #include "game/system/movementSys.h"
 #include "game/factories.h"
 #include "game/utils.h"
+#include "lz4/lz4.h"
 #include <cstring>
 
 void GameLoop::inputSys()
@@ -20,11 +21,14 @@ void GameLoop::inputSys()
 
 void GameLoop::outputSys()
 {
+     static std::string message = ""; // 原始数据
+     static std::string dstStr = "";  // 压缩后的数据
+
      auto &group = em_.group<Camera, TcpConnection *>();
      for (auto &entity : group)
      {
           Camera *camera = em_.getComponent<Camera>(entity);
-          std::string message;
+          message.clear();
           strAppend<uint8_t>(message, 0x01); // 更新实体数据
           // 操作的玩家所属碰撞组
           strAppend<int32_t>(message, em_.getComponent<GroupIndex>(entity)->index);
@@ -68,7 +72,32 @@ void GameLoop::outputSys()
           }
           camera->createEntities.clear();
 
-          ws_.send(message, *em_.getComponent<TcpConnection *>(entity));
+          // 发送数据
+          if (message.size() >= 2500)
+          {
+               // LZ4压缩
+               int srcSize = message.size();
+               int maxDstSize = LZ4_compressBound(srcSize);             // 最坏情况下的压缩大小
+               if (static_cast<size_t>(maxDstSize + 9) > dstStr.size()) // 9 = uint8 + int32 + int32 (head + srcSize + dstSize)
+               {
+                    dstStr.resize(maxDstSize + 9);
+               }
+               int dstSize = LZ4_compress_default(message.data(), dstStr.data() + 9, srcSize, maxDstSize);
+               if (dstSize <= 0) // 压缩失败
+               {
+                    ws_.send(message, *em_.getComponent<TcpConnection *>(entity));
+                    continue;
+               }
+               dstStr.resize(9 + dstSize);
+               dstStr[0] = 0x04; // 0x04 LZ4压缩
+               std::memcpy(dstStr.data() + 1, &srcSize, sizeof(int32_t));
+               std::memcpy(dstStr.data() + 5, &dstSize, sizeof(int32_t));
+               ws_.send(dstStr, *em_.getComponent<TcpConnection *>(entity));
+          }
+          else
+          {
+               ws_.send(message, *em_.getComponent<TcpConnection *>(entity));
+          }
      }
 }
 

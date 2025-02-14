@@ -4,6 +4,45 @@ function lerp(val, deltaTime) {
 }
 
 /**
+ * 解压LZ4压缩包
+ * @param {Uint8Array} compressedData - 压缩数据 
+ * @param {Number} decompressedSize - 原始数据大小
+ * @returns 
+ */
+function decompressLZ4(compressedData, decompressedSize) {
+     // 分配内存
+     const compressedPtr = Module._malloc(compressedData.length);
+     const decompressedPtr = Module._malloc(decompressedSize);
+
+     // 将压缩数据写入内存
+     Module.HEAPU8.set(compressedData, compressedPtr);
+
+     // 调用 LZ4 解压缩函数
+     const resultSize = Module._LZ4_decompress_safe(
+          compressedPtr,
+          decompressedPtr,
+          compressedData.length,
+          decompressedSize
+     );
+
+     if (resultSize < 0) {
+          throw new Error("LZ4 decompression failed");
+     }
+
+     // 读取解压后的数据
+     const decompressedData = new Uint8Array(resultSize);
+     decompressedData.set(//从 WebAssembly 内存拷贝到 JavaScript 的内存中
+          new Uint8Array(Module.HEAPU8.buffer, decompressedPtr, resultSize)
+     );
+
+     // 释放内存
+     Module._free(compressedPtr);
+     Module._free(decompressedPtr);
+
+     return decompressedData;
+}
+
+/**
  * 所用坐标系:
  * box2d:#            Y
  * canvas:*           Y   
