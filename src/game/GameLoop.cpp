@@ -24,8 +24,8 @@ void GameLoop::outputSys()
      static std::string message = ""; // 原始数据
      static std::string dstStr = "";  // 压缩后的数据
 
-     auto &group = em_.group<Camera, TcpConnection *>();
-     for (auto &entity : group)
+     auto group = em_.group<Camera, TcpConnection *>();
+     for (auto &entity : *group)
      {
           Camera *camera = em_.getComponent<Camera>(entity);
           message.clear();
@@ -120,39 +120,19 @@ void GameLoop::createPlayerSys()
 
 void GameLoop::destroyPlayerSys()
 {
-     std::vector<ecs::Entity> delEntitiesFromCamera;
+     std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
+     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     while (!destroyPlayerQueue_.empty())
      {
-          std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
-          std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
-          while (!destroyPlayerQueue_.empty())
-          {
-               ecs::Entity e = playerMap_[destroyPlayerQueue_.front()];
-               playerMap_.erase(destroyPlayerQueue_.front());
-               destroyPlayerQueue_.pop_front();
-               b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
-               b2DestroyBody(*bodyId);                             // 清除玩家的刚体
-               b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
-               em_.destroyEntity(e);
-               freeInputsQueue_.push_back(inputMap_[e]);
-               inputMap_.erase(e);
-               delEntitiesFromCamera.push_back(e);
-          }
-     }
-
-     // 处理 由于销毁刚体导致实体脱离摄像机
-     for (auto e : delEntitiesFromCamera)
-     {
-          auto &group = em_.group<Camera, TcpConnection *>();
-          for (auto entity : group)
-          {
-               Camera *camera = em_.getComponent<Camera>(entity);
-               auto it = camera->inEntities.find(e);
-               if (it != camera->inEntities.end())
-               {
-                    camera->inEntities.erase(it);
-                    camera->delEntities.push_back(e);
-               }
-          }
+          ecs::Entity e = playerMap_[destroyPlayerQueue_.front()];
+          playerMap_.erase(destroyPlayerQueue_.front());
+          destroyPlayerQueue_.pop_front();
+          b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
+          b2DestroyBody(*bodyId);                             // 清除玩家的刚体
+          b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
+          em_.destroyEntity(e);
+          freeInputsQueue_.push_back(inputMap_[e]);
+          inputMap_.erase(e);
      }
 }
 

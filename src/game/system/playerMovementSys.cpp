@@ -5,7 +5,7 @@
 void playerMovementSys(ecs::EntityManager &em, b2WorldId &worldId)
 {
      auto group = em.group<Position, Velocity, b2BodyId, Input>();
-     for (auto entity : group)
+     for (auto entity : *group)
      {
           b2BodyId *bodyId = em.getComponent<b2BodyId>(entity);
           Input *input = em.getComponent<Input>(entity);

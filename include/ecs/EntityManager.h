@@ -78,7 +78,7 @@ namespace ecs
           /// @param excludeComponents 需要排除的组件
           /// @warning 组创建后无法在程序结束前销毁
           template <typename... includeComponents, typename... excludeComponents>
-          Group<type_list<includeComponents...>, type_list<excludeComponents...>> &group(type_list<excludeComponents...>)
+          Group<type_list<includeComponents...>, type_list<excludeComponents...>> *group(type_list<excludeComponents...>)
           {
                using GroupType = Group<type_list<includeComponents...>, type_list<excludeComponents...>>;
                static std::unique_ptr<GroupType> groupInstance = nullptr;
@@ -93,12 +93,12 @@ namespace ecs
                     OnComponentRemoved.connect(std::bind(&GroupType::handleComponentRemoved, groupInstance.get(), std::placeholders::_1));
                }
 
-               return *groupInstance;
+               return groupInstance.get();
           }
 
           /// @brief 创建组
           template <class... includeComponents>
-          Group<type_list<includeComponents...>, type_list<>> &group()
+          Group<type_list<includeComponents...>, type_list<>> *group()
           {
                return group<includeComponents...>(type_list<>{});
           }

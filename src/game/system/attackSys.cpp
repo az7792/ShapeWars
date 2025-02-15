@@ -70,7 +70,7 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
 
      // 进行攻击
      auto group = em.group<Attack, ContactList>();
-     for (auto entity : group)
+     for (auto entity : *group)
      {
           auto contactList = em.getComponent<ContactList>(entity);
           auto attack = em.getComponent<Attack>(entity);
