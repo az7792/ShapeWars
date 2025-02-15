@@ -138,7 +138,7 @@ namespace ecs
 
      namespace ComponentPools
      {
-          extern SparseMap<ComponentPoolBase *> componentPools; // 组件ID与组件池的映射,通过EntityManager管理
+          inline SparseMap<ComponentPoolBase *> componentPools; // 组件ID与组件池的映射,通过EntityManager管理
 
           template <typename Component>
           inline bool firstInit(ComponentPool<Component> &pool)
