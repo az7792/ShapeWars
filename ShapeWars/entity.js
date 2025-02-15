@@ -13,7 +13,8 @@ class BaseEntity {
 
      showMe(deltaTime) {
           drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
-          drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - 0.1, this.HP, this.maxHP);
+          if (this.HP < this.maxHP)
+               drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - 0.1, this.HP, this.maxHP);
      }
 
      update(dataView, offset) {
