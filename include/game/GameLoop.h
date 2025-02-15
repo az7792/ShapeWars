@@ -13,8 +13,10 @@ private:
      void outputSys();
      // 处理延迟创建玩家实体
      void createPlayerSys();
-     // 处理延迟销毁玩家实体
-     void destroyPlayerSys();
+     // 处理延迟销毁实体
+     void destroyEntitySys();
+     // 延迟删除形状映射
+     void delayDeleteShapesSys();
 
 private:
      struct atomicInput

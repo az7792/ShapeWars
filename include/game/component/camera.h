@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <set>
+#include "ecs/EntitySet.h"
 #include "config/config.h"
 #include "ecs/fwd.h"
 #include "box2d/box2d.h"
@@ -13,15 +13,17 @@ struct Camera
      float fov;
 
      std::vector<ecs::Entity> delEntities;    // 当前帧需要删除的实体
-     std::set<ecs::Entity> inEntities;        // 剩余的已经在摄像机范围内的实体，需要更新 TODO: 使用稀疏集优化
+     ecs::EntitySet inEntities;               // 剩余的已经在摄像机范围内的实体，需要更新
      std::vector<ecs::Entity> createEntities; // 当前帧刚需要进入摄像机范围的实体，需要创建
 
      b2BodyId bodyId;
 
      Camera() = default;
 
+     ~Camera() = default;
+
      Camera(float x_, float y_, float fov_)
-         : x(x_), y(y_), fov(fov_) {}
+         : x(x_), y(y_), fov(fov_), inEntities(100) {}
 
      b2BodyId createSensor(b2WorldId worldId)
      {

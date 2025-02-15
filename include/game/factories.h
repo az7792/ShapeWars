@@ -2,8 +2,16 @@
 #include "ecs/EntityManager.h"
 #include "component/fwd.h"
 #include "net/TcpConnection.h"
+#include <unordered_map>
 
 #include "box2d/box2d.h"
+
+// ShapeID -> Entity的映射
+inline std::unordered_map<uint64_t, ecs::Entity> shapeEntityMap;
+
+// willDeleteShapes中保存将要删除的形状ID
+inline std::vector<b2ShapeId> willDeleteShapes;
+
 // 创建玩家
 ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpConnection *tcpConnection, GroupIndex groupIndex);
 

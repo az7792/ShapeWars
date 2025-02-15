@@ -11,6 +11,14 @@
 #include "utils/SparseMap.h"
 #include "ComponentTypeID.h"
 // TODO: 空类型优化
+/*
+   TODO：优化std::array,array会把一整页的组件全部初始化，如果该组件有动态数据且默认分配很大空间会导致内存浪费
+     例如成员变量有vector<int>,并且默认构造会把vector分配一大块内存，导致浪费
+     struct A{
+         std::vector<int> vec;
+         A():vec(1000){}
+     };
+*/
 namespace ecs
 {
 
@@ -77,6 +85,7 @@ namespace ecs
                               ComponentPages_.emplace_back(std::make_unique<std::array<Component, ECS_COMPONENT_PAGE_SIZE>>());
                               pageIndex_ = 0;
                          }
+                         (&(*ComponentPages_.back())[pageIndex_])->~Component(); // 显式析构旧对象
                          new (&(*ComponentPages_.back())[pageIndex_]) Component{std::forward<Args>(args)...};
                          ptrs_.back() = &(*ComponentPages_.back())[pageIndex_];
                          pageIndex_++;
@@ -84,7 +93,8 @@ namespace ecs
                     else // 可重用
                     {
                          dense_[size_] = entity;
-                         *ptrs_[size_] = Component{std::forward<Args>(args)...};
+                         ptrs_[size_]->~Component(); // 显式析构旧对象
+                         new (ptrs_[size_]) Component{std::forward<Args>(args)...};
                          sparse_[index] = size_;
                          size_++;
                     }
@@ -98,7 +108,8 @@ namespace ecs
           {
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
-               *ptrs_[sparse_[index]] = Component{std::forward<Args>(args)...};
+               ptrs_[sparse_[index]]->~Component(); // 显式析构旧对象
+               new (ptrs_[sparse_[index]]) Component{std::forward<Args>(args)...};
                return ptrs_[sparse_[index]];
           }
 

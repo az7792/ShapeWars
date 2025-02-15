@@ -2,7 +2,9 @@
 #include "game/utils.h"
 #include "box2d/box2d.h"
 #include "game/component/fwd.h"
+#include "game/factories.h"
 #include <map>
+#include <unordered_set>
 
 namespace
 {
@@ -76,26 +78,26 @@ namespace
 
           // 写入实体类型
           Type *type = em.getComponent<Type>(targetEntity);
-          strAppend<uint8_t>(*data, type->id);
+          strAppend<uint8_t>(*data, __builtin_ctz(type->id));
 
           uint64_t componentState = 0;
           b2BodyId *bodyId = em.getComponent<b2BodyId>(targetEntity);
           strAppend(*data, componentState); // 占位
 
-          if (type->id == __builtin_ctz(CATEGORY_PLAYER)) // 处理玩家实体
+          if (type->id == CATEGORY_PLAYER) // 处理玩家实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
           }
-          else if (type->id == __builtin_ctz(CATEGORY_BLOCK)) // 处理方块实体
+          else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
           }
-          else if (type->id == __builtin_ctz(CATEGORY_BULLET)) // 处理子弹实体
+          else if (type->id == CATEGORY_BULLET) // 处理子弹实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
@@ -130,6 +132,15 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                // 处理结束事件
                camera->delEntities.push_back(*entity);
                camera->inEntities.erase(*entity);
+          }
+          else if (b2Shape_IsValid(endTouch->sensorShapeId)) // 由于删除
+          {
+               Camera *camera = static_cast<Camera *>(b2Shape_GetUserData(endTouch->sensorShapeId));
+               uint64_t shapeId = b2StoreShapeId(endTouch->visitorShapeId);
+               ecs::Entity entity = shapeEntityMap[shapeId];
+               // 处理结束事件
+               camera->delEntities.push_back(entity);
+               camera->inEntities.erase(entity);
           }
      }
 

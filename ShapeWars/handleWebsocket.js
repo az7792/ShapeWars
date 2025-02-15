@@ -21,17 +21,17 @@ function parseMessage(dataView, offset) {
                camera.lerpX[0] = camera.lerpX[1];
                camera.lerpY[0] = camera.lerpY[1];
                [camera.lerpX[1], camera.lerpY[1]] = readPosition(dataView, offset);
-               //需要增加的实体列表
+               //需要删除的实体列表
                let listLen = dataView.getUint16(offset.value, true);
                offset.value += 2;
                while (listLen--) {
-                    entityManager.addEntityByDataView(dataView, offset);
+                    entityManager.removeEntityByDataView(dataView, offset);
                }
-               //需要删除的实体列表
+               //需要增加的实体列表
                listLen = dataView.getUint16(offset.value, true);
                offset.value += 2;
                while (listLen--) {
-                    entityManager.removeEntityByDataView(dataView, offset);
+                    entityManager.addEntityByDataView(dataView, offset);
                }
                //需要更新的实体列表
                listLen = dataView.getUint16(offset.value, true);

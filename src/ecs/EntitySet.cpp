@@ -4,6 +4,8 @@
 
 ecs::EntitySet::EntitySet(size_t size) : sparse_(size, nullValue) {}
 
+ecs::EntitySet::EntitySet() {}
+
 void ecs::EntitySet::insert(ecs::Entity v)
 {
      uint32_t index = ecs::entityToIndex(v);

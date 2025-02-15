@@ -3,6 +3,7 @@
 #include "ecs/fwd.h"
 #include <cstdint>
 #include <cstddef>
+#include <iostream>
 namespace ecs
 {
      class EntitySet
@@ -12,7 +13,8 @@ namespace ecs
           std::vector<Entity> dense_;                             // 稠密数组,存放实际数据
           std::vector<Entity> sparse_;                            // 稀疏数组，存放索引
      public:
-          EntitySet(size_t size = 1000);
+          EntitySet(size_t size);
+          EntitySet();
           ~EntitySet() = default;
 
           /// @brief 插入一个数
@@ -24,6 +26,9 @@ namespace ecs
 
           /// @brief 判断是否存在某个数
           bool find(Entity v) const;
+
+          /// @brief 获取size
+          size_t size() const { return dense_.size(); }
 
           /// begin只读
           std::vector<Entity>::const_iterator begin() const { return dense_.begin(); }

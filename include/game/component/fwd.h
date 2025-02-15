@@ -13,6 +13,9 @@
 #include "contactList.h"
 #include "borderWall.h"
 #include "groupIndex.h"
+#include "deleteFlag.h"
+#include "damageOverTime.h"
+#include "bulletAttackNum.h"
 
 #include <cstdint>
 

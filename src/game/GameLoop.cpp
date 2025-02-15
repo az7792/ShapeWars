@@ -38,8 +38,16 @@ void GameLoop::outputSys()
           strAppend<float>(message, cameraPos.x);
           strAppend<float>(message, cameraPos.y);
 
+          // 删除实体列表
+          uint16_t len = camera->delEntities.size();
+          strAppend<uint16_t>(message, len);
+          for (auto e : camera->delEntities)
+          {
+               strAppend(message, ecs::entityToIndex(e));
+          }
+
           // 创建实体列表
-          uint16_t len = camera->createEntities.size();
+          len = camera->createEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->createEntities)
           {
@@ -47,15 +55,7 @@ void GameLoop::outputSys()
                em_.getComponent<PackData>(e)->isCreated = false;
           }
 
-          // 删除实体列表
-          len = camera->delEntities.size();
-          strAppend<uint16_t>(message, len);
-          for (auto e : camera->delEntities)
-          {
-               strAppend(message, ecs::entityToIndex(e));
-          }
-
-          // 进入视野实体列表
+          // 已经在视野内实体列表
           len = camera->inEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->inEntities)
@@ -118,22 +118,59 @@ void GameLoop::createPlayerSys()
      }
 }
 
-void GameLoop::destroyPlayerSys()
+void GameLoop::destroyEntitySys()
 {
-     std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
-     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
-     while (!destroyPlayerQueue_.empty())
-     {
-          ecs::Entity e = playerMap_[destroyPlayerQueue_.front()];
-          playerMap_.erase(destroyPlayerQueue_.front());
-          destroyPlayerQueue_.pop_front();
-          b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
-          b2DestroyBody(*bodyId);                             // 清除玩家的刚体
-          b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
-          em_.destroyEntity(e);
-          freeInputsQueue_.push_back(inputMap_[e]);
-          inputMap_.erase(e);
+     { // 处理因为网络断开导致的玩家删除
+          std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
+          std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+          while (!destroyPlayerQueue_.empty())
+          {
+               ecs::Entity e = playerMap_[destroyPlayerQueue_.front()];
+               playerMap_.erase(destroyPlayerQueue_.front());
+               destroyPlayerQueue_.pop_front();
+               b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
+               b2DestroyBody(*bodyId);                             // 清除玩家的刚体
+               b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
+               em_.destroyEntity(e);
+               freeInputsQueue_.push_back(inputMap_[e]);
+               inputMap_.erase(e);
+          }
      }
+     // 处理其他实体
+     std::vector<b2ShapeId> shapeIdCache;
+     auto view = em_.getView<DeleteFlag>();
+     for (auto &entity : view)
+     {
+          auto type = em_.getComponent<Type>(entity);
+          if (type->id == CATEGORY_PLAYER) // 处理玩家实体
+          {
+          }
+          else if (type->id == CATEGORY_BLOCK || type->id == CATEGORY_BULLET) // 处理方块实体 与 子弹实体
+          {
+               b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
+               int shapeNum = b2Body_GetShapeCount(*bodyId);
+               if (static_cast<size_t>(shapeNum) > shapeIdCache.size())
+               {
+                    shapeIdCache.resize(shapeNum);
+               }
+               b2Body_GetShapes(*bodyId, shapeIdCache.data(), shapeNum);
+               for (int i = 0; i < shapeNum; ++i)
+               {
+                    willDeleteShapes.emplace_back(shapeIdCache[i]);
+               }
+               b2DestroyBody(*bodyId); // 清除实体刚体
+               em_.destroyEntity(entity);
+          }
+     }
+}
+
+void GameLoop::delayDeleteShapesSys()
+{
+     for (auto shapeId : willDeleteShapes)
+     {
+          shapeEntityMap.erase(b2StoreShapeId(shapeId));
+     }
+     willDeleteShapes.clear();
 }
 
 void GameLoop::handleOnMessage(TcpConnection *conn, std::string &&msg)
@@ -228,7 +265,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
 
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))
-         .addSystem(std::bind(&GameLoop::destroyPlayerSys, this))
+         .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&TestRegularPolygonSys, std::ref(em_), std::ref(worldId_)))
@@ -236,6 +273,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_)))
+         .addSystem(std::bind(&GameLoop::delayDeleteShapesSys, this))
          .addSystem(std::bind(&GameLoop::outputSys, this));
 }
 
@@ -246,6 +284,7 @@ GameLoop::~GameLoop()
 
 void GameLoop::run()
 {
+     int ct = 0;
      std::thread WebSocketServerThread(&WebSocketServer::run, std::ref(ws_)); // websocket服务器线程
      isRunning_.store(true);
      while (isRunning_.load())
@@ -264,6 +303,11 @@ void GameLoop::run()
           // char ch;
           // std::cin >> ch;
           // std::cout << ch << std::endl;
+          ct++;
+          if (ct % TPS == 0)
+          {
+               std::cout << shapeEntityMap.size() << std::endl;
+          }
      }
      ws_.close();
      if (WebSocketServerThread.joinable())

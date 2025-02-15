@@ -75,6 +75,9 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           auto contactList = em.getComponent<ContactList>(entity);
           auto attack = em.getComponent<Attack>(entity);
 
+          bool isBullet = (em.getComponent<Type>(entity)->id == CATEGORY_BULLET);
+          BulletAttackNum *bulletAttackNum = (isBullet ? em.getComponent<BulletAttackNum>(entity) : nullptr);
+
           for (auto shapeId : contactList->list)
           {
                auto attackId = *static_cast<ecs::Entity *>(b2Shape_GetUserData(shapeId));
@@ -85,8 +88,38 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
                     {
                          hp->hp -= attack->damage / TPS;
                          hp->isDirty = true;
+                         if (isBullet) // 处理子弹攻击攻击判定次数
+                         {
+                              bulletAttackNum->num--;
+                              if (bulletAttackNum->num <= 0)
+                              {
+                                   if (!em.hasComponent<DeleteFlag>(entity))
+                                        em.addComponent<DeleteFlag>(entity);
+                                   break;
+                              }
+                         }
+                    }
+                    else if (!em.hasComponent<DeleteFlag>(attackId))
+                    {
+                         em.addComponent<DeleteFlag>(attackId);
                     }
                }
+          }
+     }
+
+     auto group2 = em.group<HP, DamageOverTime>();
+     for (auto entity : *group2)
+     {
+          auto hp = em.getComponent<HP>(entity);
+          auto damageOverTime = em.getComponent<DamageOverTime>(entity);
+          if (hp->hp > 0)
+          {
+               hp->hp -= damageOverTime->damage / TPS;
+               hp->isDirty = true;
+          }
+          else if (!em.hasComponent<DeleteFlag>(entity))
+          {
+               em.addComponent<DeleteFlag>(entity);
           }
      }
 }
