@@ -194,6 +194,7 @@ void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
                // LOG_DEBUG("readContinue:" + std::to_string(duration) + "ms On thread:" + oss.str());
 
                WebSocketFrame frame(conn, buffer, isContinue);
+               // TODO: 重做半包处理
                // 已经连接webSocket连接
                if (!frame.ok)
                {
