@@ -95,11 +95,15 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
                               {
                                    if (!em.hasComponent<DeleteFlag>(entity))
                                         em.addComponent<DeleteFlag>(entity);
+                                   if (hp->hp <= 0 && (!em.hasComponent<DeleteFlag>(attackId)))
+                                   {
+                                        em.addComponent<DeleteFlag>(attackId);
+                                   }
                                    break;
                               }
                          }
                     }
-                    else if (!em.hasComponent<DeleteFlag>(attackId))
+                    if (hp->hp <= 0 && (!em.hasComponent<DeleteFlag>(attackId)))
                     {
                          em.addComponent<DeleteFlag>(attackId);
                     }
