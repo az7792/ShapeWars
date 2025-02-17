@@ -132,14 +132,52 @@ int Buffer::read(char *data, size_t len)
         return 0;
 
     len = std::min(len, readSize_);
-    for (size_t i = 0; i < len; i++)
+
+    if (readIndex_ + len <= buffer_.size())
     {
-        data[i] = buffer_[readIndex_];
-        readIndex_ = (readIndex_ + 1) % buffer_.size();
+        std::memcpy(data, buffer_.data() + readIndex_, len);
+        readIndex_ = (readIndex_ + len) % buffer_.size();
+    }
+    else
+    {
+        size_t len1 = buffer_.size() - readIndex_;
+        std::memcpy(data, buffer_.data() + readIndex_, len1);
+        std::memcpy(data + len1, buffer_.data(), len - len1);
+        readIndex_ = len - len1;
     }
     readSize_ -= len;
     writeSize_ += len;
     return len;
+}
+
+int Buffer::read(Buffer &buf, size_t len)
+{
+    if (len == 0)
+        return 0;
+    len = std::min(len, readSize_);
+
+    if (readIndex_ + len <= buffer_.size())
+    {
+        buf.append(buffer_.data() + readIndex_, len);
+        readIndex_ = (readIndex_ + len) % buffer_.size();
+    }
+    else
+    {
+        size_t len1 = buffer_.size() - readIndex_;
+        buf.append(buffer_.data() + readIndex_, len1);
+        buf.append(buffer_.data(), len - len1);
+        readIndex_ = len - len1;
+    }
+    readSize_ -= len;
+    writeSize_ += len;
+    return len;
+}
+
+char *Buffer::operator[](size_t pos)
+{
+    if (pos > readSize_)
+        return nullptr;
+    return buffer_.data() + (readIndex_ + pos) % buffer_.size();
 }
 
 int Buffer::readFd(int fd)

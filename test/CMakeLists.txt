@@ -25,7 +25,8 @@ set(TEST_FILES
     # ./testEntity.cpp
     # ./testEntitySystem.cpp
     # ./testGameLoop.cpp
-    ./testLz4.cpp
+    #./testLz4.cpp
+    # ./testBuffer.cpp
     # 添加更多测试文件
 )
 

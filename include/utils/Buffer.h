@@ -68,6 +68,16 @@ public:
      int read(char *data, size_t len);
 
      /**
+      * 读取指定长度的数据到Buffer中
+      * @return 返回实际读取的字节数
+      */
+     int read(Buffer &buf, size_t len);
+
+     /// @brief 获取缓冲区第pos个可读字节的指针
+     /// @note 从0开始计数
+     char *operator[](size_t pos);
+
+     /**
       * 从文件描述符读取数据到缓冲区
       */
      int readFd(int fd);
