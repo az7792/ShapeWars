@@ -1,6 +1,9 @@
 #pragma once
 #include "WebSocketFrame.h"
 #include "TcpServer.h"
+#include "utils/ObjectPool.h"
+#include <unordered_map>
+#include <shared_mutex>
 
 class WebSocketServer
 {
@@ -13,18 +16,19 @@ class WebSocketServer
      void handleClose(TcpConnection *conn);                // 处理连接关闭
      void handleError(TcpConnection *conn);                // 处理错误
 
-     std::function<void(TcpConnection *)> onOpen;                    // 连接打开
-     std::function<void(TcpConnection *)> onClose;                   // 关闭时
-     std::function<void(TcpConnection *)> onError;                   // 发生错误时
-     std::function<void(TcpConnection *, std::string &&)> onMessage; // 收到消息时
+     std::function<void(TcpConnection *)> onOpen;              // 连接打开
+     std::function<void(TcpConnection *)> onClose;             // 关闭时
+     std::function<void(TcpConnection *)> onError;             // 发生错误时
+     std::function<void(TcpConnection *, Buffer &)> onMessage; // 收到消息时
 
      TcpServer tcpServer;
      bool isRunning;
 
-     std::mutex tcpConnectedMutex;                     // 同步tcpConnected的锁
-     std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket链接
-     bool addConnect(TcpConnection *conn);             // 增加一个新连接
-     void subConnect(TcpConnection *conn);             // 断开一个连接
+     std::shared_mutex tcpConnectedMutex;                                // 同步tcpConnected的锁
+     std::unordered_map<TcpConnection *, WebSocketFrame *> tcpConnected; // 管理已经连接的websocket链接
+     ObjectPool<WebSocketFrame> webSocketFramePool;                      // 管理websocket帧
+     bool addConnect(TcpConnection *conn);                               // 增加一个新连接
+     bool subConnect(TcpConnection *conn);                               // 断开一个连接
 
 public:
      WebSocketServer(const InetAddress &addr);
@@ -38,5 +42,5 @@ public: // SETTERS
      void setOnOpen(std::function<void(TcpConnection *)> cb);
      void setOnClose(std::function<void(TcpConnection *)> cb);
      void setOnError(std::function<void(TcpConnection *)> cb);
-     void setOnMessage(std::function<void(TcpConnection *, std::string &&)> cb);
+     void setOnMessage(std::function<void(TcpConnection *, Buffer &)> cb);
 };

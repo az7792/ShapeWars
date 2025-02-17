@@ -173,10 +173,9 @@ void GameLoop::delayDeleteShapesSys()
      willDeleteShapes.clear();
 }
 
-void GameLoop::handleOnMessage(TcpConnection *conn, std::string &&msg)
+void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
 {
-     int index = 0;
-     char header = msg[index++];
+     char header = buffer.readValue<char>();
      switch (header)
      {
      case 0x00: // 创建角色
@@ -195,11 +194,9 @@ void GameLoop::handleOnMessage(TcpConnection *conn, std::string &&msg)
                int inputIndex = inputMap_[playerMap_[conn]];
                lock.unlock();
                Input input = {};
-               std::memcpy(&input.x, msg.data() + index, sizeof(float));
-               index += sizeof(float);
-               std::memcpy(&input.y, msg.data() + index, sizeof(float));
-               index += sizeof(float);
-               std::memcpy(&input.state, msg.data() + index, sizeof(uint64_t));
+               input.x = buffer.readValue<float>();
+               input.y = buffer.readValue<float>();
+               input.state = buffer.readValue<uint64_t>();
                input_[inputIndex].x.store(input.x);
                input_[inputIndex].y.store(input.y);
                input_[inputIndex].state.store(input.state);
@@ -219,14 +216,18 @@ void GameLoop::handleOnMessage(TcpConnection *conn, std::string &&msg)
 
 void GameLoop::handleOnClose(TcpConnection *conn)
 {
-     std::lock_guard<std::mutex> lock(destroyPlayerQueueMutex_);
-     destroyPlayerQueue_.push_back(conn);
+     std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
+     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     if (playerMap_.find(conn) != playerMap_.end()) // 玩家不一定创建了实体
+          destroyPlayerQueue_.push_back(conn);
 }
 
 void GameLoop::handleOnError(TcpConnection *conn)
 {
-     std::lock_guard<std::mutex> lock(destroyPlayerQueueMutex_);
-     destroyPlayerQueue_.push_back(conn);
+     std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
+     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     if (playerMap_.find(conn) != playerMap_.end()) // 玩家不一定创建了实体
+          destroyPlayerQueue_.push_back(conn);
 }
 
 void GameLoop::handleOnOpen(TcpConnection *conn)
@@ -304,7 +305,7 @@ void GameLoop::run()
           // std::cin >> ch;
           // std::cout << ch << std::endl;
           ct++;
-          if (ct % TPS == 0)
+          if (ct % (10*TPS) == 0)
           {
                std::cout << shapeEntityMap.size() << std::endl;
           }

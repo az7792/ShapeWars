@@ -44,10 +44,10 @@ private:
      std::mutex createPlayerQueueMutex_;              // 创建玩家队列锁
      std::mutex destroyPlayerQueueMutex_;             // 销毁玩家队列锁
 
-     void handleOnMessage(TcpConnection *conn, std::string &&msg); // 处理WebSocket新消息事件
-     void handleOnClose(TcpConnection *conn);                      // 处理WebSocket关闭事件
-     void handleOnError(TcpConnection *conn);                      // 处理WebSocket错误事件
-     void handleOnOpen(TcpConnection *conn);                       // 处理WebSocket打开事件
+     void handleOnMessage(TcpConnection *conn, Buffer &buffer); // 处理WebSocket新消息事件
+     void handleOnClose(TcpConnection *conn);                   // 处理WebSocket关闭事件
+     void handleOnError(TcpConnection *conn);                   // 处理WebSocket错误事件
+     void handleOnOpen(TcpConnection *conn);                    // 处理WebSocket打开事件
 
 public:
      GameLoop();

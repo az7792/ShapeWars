@@ -134,8 +134,10 @@ std::string WebSocketServer::base64Encode(const std::vector<uint8_t> &input)
 void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
 {
 
+     std::shared_lock<std::shared_mutex> lock(tcpConnectedMutex);
      if (tcpConnected.find(conn) == tcpConnected.end()) // 可能是握手包
      {
+          lock.unlock();
           // 已经建立TCP连接，需要进行websocket握手
           std::string origin = buffer.readAllAsString();
           // 解析握手包
@@ -182,43 +184,46 @@ void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
      }
      else
      {
-          bool isContinue = true;
-          while (isContinue && buffer.readableBytes() > 0)
+          assert(tcpConnected.find(conn) != tcpConnected.end());
+          WebSocketFrame *frame = tcpConnected[conn];
+          lock.unlock();
+          while (true)
           {
-               // static std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
-               // auto nowTime = std::chrono::steady_clock::now();
-               // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - lastTime).count();
-               // lastTime = nowTime;
-               // std::ostringstream oss;
-               // oss << std::this_thread::get_id();
-               // LOG_DEBUG("readContinue:" + std::to_string(duration) + "ms On thread:" + oss.str());
-
-               WebSocketFrame frame(conn, buffer, isContinue);
-               // TODO: 重做半包处理
-               // 已经连接webSocket连接
-               if (!frame.ok)
+               frame->decode(conn, buffer);
+               if (frame->handleStatue == 7)
                {
+                    tcpServer.closeConnection(conn);
+                    frame->start();
+                    handleError(conn);
                     LOG_ERROR("webSocket帧解析错误" + conn->peerAddr.getIpPort() + "已断开连接");
-                    tcpServer.closeConnection(conn);
-                    subConnect(conn);
                     return;
                }
-               if (frame.opcode == 0x8) // 关闭帧
+
+               if (frame->fin == 1 && frame->handleStatue == 6)
                {
-                    LOG_INFO("[ websocket ]" + conn->peerAddr.getIpPort() + "已关闭连接");
-                    tcpServer.closeConnection(conn);
-                    subConnect(conn);
-                    return;
+                    if (frame->opcode == 0x8) // 关闭帧
+                    {
+                         LOG_INFO("[ websocket ]" + conn->peerAddr.getIpPort() + "已关闭连接");
+                         tcpServer.closeConnection(conn);
+                         handleClose(conn);
+                         return;
+                    }
+                    if (frame->opcode == 0x9) // Ping帧
+                    {
+                         std::string Pong = WebSocketFrame::encode(1, 0xA, 0, ""); // 返回Pong帧
+                         conn->send(Pong);
+                         frame->start();
+                         continue;
+                    }
+                    if (onMessage)
+                    {
+                         onMessage(conn, frame->payloadDataBuf);
+                    }
+                    frame->start();
                }
-               if (frame.opcode == 0x9) // Ping帧
+               else
                {
-                    std::string Pong = WebSocketFrame::encode(1, 0xA, 0, ""); // 返回Pong帧
-                    conn->send(Pong);
-                    return;
-               }
-               if (onMessage)
-               {
-                    onMessage(conn, std::move(frame.payloadData));
+                    break;
                }
           }
      }
@@ -226,23 +231,24 @@ void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
 
 void WebSocketServer::handleClose(TcpConnection *conn)
 {
-     subConnect(conn);
-     if (onClose)
+     if (onClose && subConnect(conn))
           onClose(conn);
 }
 
 void WebSocketServer::handleError(TcpConnection *conn)
 {
-     subConnect(conn);
-     if (onError)
+     if (onError && subConnect(conn))
+     {
           onError(conn);
+          LOG_WARN("[ websocket ]" + conn->peerAddr.getIpPort() + "意外断开连接");
+     }
 }
 
 bool WebSocketServer::addConnect(TcpConnection *conn)
 {
      if (conn == nullptr)
           return 0;
-     std::lock_guard<std::mutex> lock(tcpConnectedMutex);
+     std::unique_lock<std::shared_mutex> lock(tcpConnectedMutex);
      if (tcpConnected.size() >= MAX_CONNECTED)
      {
           // 不接受连接，主动断开
@@ -251,19 +257,25 @@ bool WebSocketServer::addConnect(TcpConnection *conn)
      }
      else if (tcpConnected.find(conn) == tcpConnected.end())
      {
-          tcpConnected.emplace(conn);
+          WebSocketFrame *frame = webSocketFramePool.get();
+          frame->start();
+          tcpConnected.emplace(conn, frame);
           return 1;
      }
      return 0;
 }
 
-void WebSocketServer::subConnect(TcpConnection *conn)
+bool WebSocketServer::subConnect(TcpConnection *conn)
 {
-     std::lock_guard<std::mutex> lock(tcpConnectedMutex);
-     if (conn != nullptr && tcpConnected.find(conn) != tcpConnected.end())
+     std::unique_lock<std::shared_mutex> lock(tcpConnectedMutex);
+     auto it = tcpConnected.find(conn);
+     if (conn != nullptr && it != tcpConnected.end())
      {
-          tcpConnected.erase(conn);
+          webSocketFramePool.release((*it).second);
+          tcpConnected.erase(it);
+          return true;
      }
+     return false;
 }
 
 int WebSocketServer::send(const std::string &message, TcpConnection *conn)
@@ -277,7 +289,9 @@ int WebSocketServer::send(const std::string &message, TcpConnection *conn)
      return sendNum;
 }
 
-WebSocketServer::WebSocketServer(const InetAddress &addr) : tcpServer(addr, 2), isRunning(false)
+WebSocketServer::WebSocketServer(const InetAddress &addr) : tcpServer(addr, 2), isRunning(false),
+                                                            webSocketFramePool([]() -> WebSocketFrame *
+                                                                               { return new WebSocketFrame(); }, 30, 10)
 {
      // server.setNewConnectionCallback();
      tcpServer.setOnMessageCallback(std::bind(&WebSocketServer::handleRead, this, std::placeholders::_1, std::placeholders::_2));
@@ -300,7 +314,7 @@ void WebSocketServer::setOnClose(std::function<void(TcpConnection *)> cb)
      onClose = cb;
 }
 
-void WebSocketServer::setOnMessage(std::function<void(TcpConnection *, std::string &&)> cb)
+void WebSocketServer::setOnMessage(std::function<void(TcpConnection *, Buffer &)> cb)
 {
      onMessage = cb;
 }

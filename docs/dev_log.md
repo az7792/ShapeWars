@@ -168,3 +168,6 @@
 
 ## 2025年2月17日
 - 优化Buffer的读取方法并增加从Buffer读到Buffer的方法
+- 修复[BUG-007]
+- 重构WebSocketServer 和 WebSocketFrame
+     - **未测试半帧和多帧**

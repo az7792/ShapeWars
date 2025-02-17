@@ -1,5 +1,6 @@
 #include "net/WebSocketFrame.h"
 #include <thread>
+#include <cstring>
 /*
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -20,9 +21,19 @@
 |                     Payload Data continued ...                |
 +---------------------------------------------------------------+
 */
-WebSocketFrame::WebSocketFrame(TcpConnection *conn, Buffer &buffer, bool &isContinue)
+WebSocketFrame::WebSocketFrame() : payloadDataBuf(128) {}
+
+void WebSocketFrame::start()
 {
-     decode(conn, buffer, isContinue);
+     fin = 1;
+     masked = false;
+     payloadLength = 0;
+
+     handleStatue = 6;
+     needReadLen = 1;
+
+     payloadDataBuf.clear();
+     processedLen = 0;
 }
 
 std::string WebSocketFrame::encode(bool fin, uint8_t opcode, bool masked, const std::string &payloadData)
@@ -83,106 +94,161 @@ std::string WebSocketFrame::encode(bool fin, uint8_t opcode, bool masked, const 
      return frame;
 }
 
-void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer, bool &isContinue)
+// FIN & opcode(1字节)
+void WebSocketFrame::handleStatue0(TcpConnection *conn, Buffer &buffer)
 {
-     char twoBytes[2];                                                // 前两个字节
-     bool readOk = tryRead(conn, buffer, isContinue, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
-     if (!readOk)
+     handleStatue = 0; // FIN & opcode(1字节)
+     needReadLen -= buffer.read(headerBuf, needReadLen);
+     if (needReadLen == 0)
      {
-          ok = false;
-          LOG_WARN("读取失败数据不足(2Bytes)");
-          return;
-     }
-     // 读取第 1 字节
-     fin = (twoBytes[0] & 0x80) != 0; // FIN 位
-     opcode = twoBytes[0] & 0x0F;     // Opcode
-     if (fin == 1 && opcode == 0x0)
-     {
-          ok = false;
-          LOG_WARN("FIN 与 opcode不匹配");
-          return;
-     }
-     // 读取第 2 字节
-     masked = (twoBytes[1] & 0x80) != 0;             // Mask 位
-     uint8_t initialPayloadLen = twoBytes[1] & 0x7F; // Payload 长度（前7位）
+          fin = (headerBuf[0] & 0x80) != 0; // FIN 位
+          opcode = headerBuf[0] & 0x0F;     // Opcode
 
-     // 处理扩展长度
-     if (initialPayloadLen == 126)
-     {
-          readOk = tryRead(conn, buffer, isContinue, twoBytes, 2, 3); // 尝试读取前两个字节,最多尝试3次
-          if (!readOk)
+          if ((fin == 1 && opcode == 0x0) || (fin == 0 && opcode != 0x0))
           {
-               ok = false;
-               LOG_WARN("处理扩展长度1数据不足(2Bytes)");
+               handleStatue = 7; // error
+               LOG_WARN("FIN 与 opcode不匹配");
                return;
           }
-          payloadLength = (static_cast<uint8_t>(twoBytes[0]) << 8) |
-                          static_cast<uint8_t>(twoBytes[1]);
-     }
-     else if (initialPayloadLen == 127)
-     {
-          char eightByte[8];
-          readOk = tryRead(conn, buffer, isContinue, eightByte, 8, 3); // 尝试读取前8个字节,最多尝试3次
-          if (!readOk)
-          {
-               ok = false;
-               LOG_WARN("处理扩展长度2数据不足(8Bytes)");
-               return;
-          }
-          payloadLength = 0;
-          for (int i = 0; i < 8; ++i)
-          {
-               payloadLength = (payloadLength << 8) | static_cast<uint8_t>(eightByte[i]);
-          }
-     }
-     else
-     {
-          payloadLength = initialPayloadLen;
-     }
 
-     // 处理 Masking Key
-     if (masked)
-     {
-          readOk = tryRead(conn, buffer, isContinue, maskingKey.data(), 4, 3); // 尝试读取前4个字节,最多尝试3次
-          if (!readOk)
-          {
-               ok = false;
-               LOG_WARN("Masking Key数据不足(4Bytes)");
-               return;
-          }
+          needReadLen = 1;
+          handleStatue1(conn, buffer);
      }
+}
 
-     // 提取 Payload 数据
-     payloadData.resize(payloadLength);
-     readOk = tryRead(conn, buffer, isContinue, payloadData.data(), payloadLength, 3); // 尝试读取Payload数据,最多尝试3次
-     if (!readOk)
+// MASK & payload len(1字节)
+void WebSocketFrame::handleStatue1(TcpConnection *conn, Buffer &buffer)
+{
+     handleStatue = 1; // MASK & payload len(1字节)
+     needReadLen -= buffer.read(headerBuf, needReadLen);
+     if (needReadLen == 0)
      {
-          ok = false;
-          LOG_WARN("payloadData数据不足(" + std::to_string(payloadLength) + "Bytes)");
-          return;
-     }
-     // 解码 Payload 数据（如果有 Masking Key）
-     if (masked)
-     {
-          for (size_t i = 0; i < payloadData.size(); ++i)
+          masked = (headerBuf[0] & 0x80) != 0; // Mask 位
+          payloadLength = headerBuf[0] & 0x7F; // Payload 长度（前7位）
+          if (payloadLength < 126)
           {
-               payloadData[i] ^= maskingKey[i % 4];
+               if (masked)
+               {
+                    needReadLen = 4;
+                    handleStatue4(conn, buffer);
+               }
+               else
+               {
+                    needReadLen = payloadLength;
+                    handleStatue5(conn, buffer);
+               }
+          }
+          else if (payloadLength == 126)
+          {
+               needReadLen = 2;
+               handleStatue2(conn, buffer);
+          }
+          else if (payloadLength == 127)
+          {
+               needReadLen = 8;
+               handleStatue3(conn, buffer);
           }
      }
 }
 
-bool WebSocketFrame::tryRead(TcpConnection *conn, Buffer &buf, bool &isContinue, char *data, int len, int tryNum)
+// Extended payload length(2字节)
+void WebSocketFrame::handleStatue2(TcpConnection *conn, Buffer &buffer)
 {
-     for (int i = 0; i < tryNum; ++i) // 最多尝试n次
+     handleStatue = 2; // Extended payload length(2字节)
+     needReadLen -= buffer.read(headerBuf, needReadLen);
+     if (needReadLen == 0)
      {
-          conn->readFd();
-          len -= buf.read(data, len);
-          if (len == 0)
-               return true;
-          std::this_thread::sleep_for(std::chrono::milliseconds(i + 1)); // 指数退避，避免频繁轮询对系统资源造成影响
-          isContinue = false;
+          // 大端->小端
+          payloadLength = (static_cast<uint16_t>(headerBuf[0]) << 8) |
+                          static_cast<uint16_t>(headerBuf[1]);
+          if (masked)
+          {
+               needReadLen = 4;
+               handleStatue4(conn, buffer);
+          }
+          else
+          {
+               needReadLen = payloadLength;
+               handleStatue5(conn, buffer);
+          }
      }
-     //TODO: 是否应该放弃？或者直接断开连接？
-     throw std::runtime_error("webSocket帧数据读取错误"); // 主要之后无法再区分websocket帧读取了多少
-     return false;
+}
+
+// Extended payload length(8字节)
+void WebSocketFrame::handleStatue3(TcpConnection *conn, Buffer &buffer)
+{
+     handleStatue = 3; // Extended payload length(8字节)
+     needReadLen -= buffer.read(headerBuf, needReadLen);
+     if (needReadLen == 0)
+     {
+          payloadLength = 0;
+          for (int i = 0; i < 8; ++i) // 大端->小端
+          {
+               payloadLength = (payloadLength << 8) | static_cast<uint64_t>(headerBuf[i]);
+          }
+          if (masked)
+          {
+               needReadLen = 4;
+               handleStatue4(conn, buffer);
+          }
+          else
+          {
+               needReadLen = payloadLength;
+               handleStatue5(conn, buffer);
+          }
+     }
+}
+
+// Masking key(4字节)
+void WebSocketFrame::handleStatue4(TcpConnection *conn, Buffer &buffer)
+{
+     handleStatue = 4; // Masking key(4字节)
+     needReadLen -= buffer.read(headerBuf, needReadLen);
+     if (needReadLen == 0)
+     {
+          std::memcpy(maskingKey.data(), headerBuf, 4);
+          needReadLen = payloadLength;
+          handleStatue5(conn, buffer);
+     }
+}
+
+// Payload data(n字节)
+void WebSocketFrame::handleStatue5(TcpConnection *conn, Buffer &buffer)
+{
+     handleStatue = 5; // Payload data(n字节)
+     needReadLen -= buffer.read(payloadDataBuf, needReadLen);
+     if (needReadLen == 0)
+     {
+          if (masked)
+          {
+               for (size_t i = 0; i < payloadLength; ++i)
+               {
+                    *payloadDataBuf[processedLen + i] ^= maskingKey[i % 4];
+               }
+          }
+          processedLen += payloadLength;
+          handleStatue = 6; // 处理完毕，准备处理下一帧
+     }
+}
+
+void WebSocketFrame::decode(TcpConnection *conn, Buffer &buffer)
+{
+     assert(handleStatue != 7);
+     if (fin == 1 && handleStatue == 6) // 之前的帧解析完成
+     {
+          start();
+          handleStatue0(conn, buffer);
+     }
+     else if (handleStatue == 0)
+          handleStatue0(conn, buffer);
+     else if (handleStatue == 1)
+          handleStatue1(conn, buffer);
+     else if (handleStatue == 2)
+          handleStatue2(conn, buffer);
+     else if (handleStatue == 3)
+          handleStatue3(conn, buffer);
+     else if (handleStatue == 4)
+          handleStatue4(conn, buffer);
+     else if (handleStatue == 5)
+          handleStatue5(conn, buffer);
 }
