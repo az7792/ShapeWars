@@ -20,7 +20,6 @@ class EntityManager {
 
      //移出实体
      removeEntityByDataView(dataView, offset) {
-          console.log("removeEntityByDataView")
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
           for (let i = 0; i < this.SparseSet.length; i++) {
@@ -30,7 +29,6 @@ class EntityManager {
 
      //删除实体
      deleteEntityByDataView(dataView, offset) {
-          console.log("deleteEntityByDataView")
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
           for (let i = 0; i < this.SparseSet.length; i++) {
