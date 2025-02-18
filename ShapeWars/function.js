@@ -82,8 +82,8 @@ function decompressLZ4(compressedData, decompressedSize) {
 
 //角色box2d物理坐标 -> canvas大地图的像素坐标系
 function box2DtoCanvas(x, y) {
-     x = Math.round((x + MAPINFO.width / 2) * MAPINFO.kScale);
-     y = Math.round((MAPINFO.height / 2 - y) * MAPINFO.kScale);
+     x = (x + MAPINFO.width / 2) * MAPINFO.kScale;
+     y = (MAPINFO.height / 2 - y) * MAPINFO.kScale;
      return { x, y };
 }
 
@@ -107,8 +107,8 @@ function box2DtoScreen(x, y) {
 
      //屏幕左上角在大地图的坐标
      let { x: ltx, y: lty } = box2DtoCanvas(camera.x, camera.y);
-     ltx = Math.round(ltx - canvas.width * camera.fov / 2);
-     lty = Math.round(lty - canvas.height * camera.fov / 2);
+     ltx = ltx - canvas.width * camera.fov / 2;
+     lty = lty - canvas.height * camera.fov / 2;
      return { x: (x - ltx) / camera.fov, y: (y - lty) / camera.fov };
 }
 
@@ -116,8 +116,8 @@ function box2DtoScreen(x, y) {
 function screenToBox2D(x, y) {
      //屏幕左上角在大地图的坐标
      let { x: ltx, y: lty } = box2DtoCanvas(camera.x, camera.y);
-     ltx = Math.round(ltx - canvas.width * camera.fov / 2);
-     lty = Math.round(lty - canvas.height * camera.fov / 2);
+     ltx = ltx - canvas.width * camera.fov / 2;
+     lty = lty - canvas.height * camera.fov / 2;
 
      x = ltx + x * camera.fov;
      y = lty + y * camera.fov;

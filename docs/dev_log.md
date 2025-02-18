@@ -175,3 +175,4 @@
 ## 2025年2月18日
 - 添加死亡动画，实体逐渐变大变透明，并保持一定倍率的原始速度继续移动
      - TODO: 添加受击反馈
+- 修复[BUG-003](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
