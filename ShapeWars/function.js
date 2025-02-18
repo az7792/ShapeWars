@@ -4,6 +4,25 @@ function lerp(val, deltaTime) {
 }
 
 /**
+ * 线性预测函数
+ * @param {*} val - 原始值val[0]和val[1]
+ * @param {*} t1 - val[0]时的时间
+ * @param {*} t2 - val[1]时的时间
+ * @param {*} t3 - 当前时间
+ * @returns 
+ */
+function predict(val, t1, t2, t3) {
+     const delta = t2 - t1;
+
+     if (delta <= 0) return val[1];
+
+     const timeDiff = t3 - t1;
+
+
+     return (val[1] - val[0]) * timeDiff / delta + val[0];
+}
+
+/**
  * 解压LZ4压缩包
  * @param {Uint8Array} compressedData - 压缩数据 
  * @param {Number} decompressedSize - 原始数据大小

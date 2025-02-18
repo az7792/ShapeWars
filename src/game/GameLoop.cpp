@@ -38,8 +38,16 @@ void GameLoop::outputSys()
           strAppend<float>(message, cameraPos.x);
           strAppend<float>(message, cameraPos.y);
 
+          // 移出实体列表
+          uint16_t len = camera->removeEntities.size();
+          strAppend<uint16_t>(message, len);
+          for (auto e : camera->removeEntities)
+          {
+               strAppend(message, ecs::entityToIndex(e));
+          }
+
           // 删除实体列表
-          uint16_t len = camera->delEntities.size();
+          len = camera->delEntities.size();
           strAppend<uint16_t>(message, len);
           for (auto e : camera->delEntities)
           {
@@ -65,6 +73,7 @@ void GameLoop::outputSys()
           }
 
           // 清理摄像机
+          camera->removeEntities.clear();
           camera->delEntities.clear();
           for (auto &v : camera->createEntities)
           {
@@ -144,6 +153,7 @@ void GameLoop::destroyEntitySys()
           auto type = em_.getComponent<Type>(entity);
           if (type->id == CATEGORY_PLAYER) // 处理玩家实体
           {
+               // TODO:
           }
           else if (type->id == CATEGORY_BLOCK || type->id == CATEGORY_BULLET) // 处理方块实体 与 子弹实体
           {

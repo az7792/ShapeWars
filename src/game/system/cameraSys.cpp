@@ -130,7 +130,7 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                Camera *camera = static_cast<Camera *>(b2Shape_GetUserData(endTouch->sensorShapeId));
                ecs::Entity *entity = static_cast<ecs::Entity *>(b2Shape_GetUserData(endTouch->visitorShapeId));
                // 处理结束事件
-               camera->delEntities.push_back(*entity);
+               camera->removeEntities.push_back(*entity);
                camera->inEntities.erase(*entity);
           }
           else if (b2Shape_IsValid(endTouch->sensorShapeId)) // 由于删除
@@ -154,6 +154,7 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
           b2Vec2 curr = b2Body_GetPosition(bodyId);
           b2Vec2 target = b2Body_GetPosition(*em.getComponent<b2BodyId>(entity));
           b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
+          // BUG: 006
           b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
 
           // 处理 createEntities

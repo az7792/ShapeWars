@@ -12,7 +12,8 @@ struct Camera
      float y;
      float fov;
 
-     std::vector<ecs::Entity> delEntities;    // 当前帧需要删除的实体
+     std::vector<ecs::Entity> delEntities;    // 当前帧需要删除的实体(在视野中被销毁的实体)
+     std::vector<ecs::Entity> removeEntities; // 当前帧需要移出的实体(移动到视野外的实体)
      ecs::EntitySet inEntities;               // 剩余的已经在摄像机范围内的实体，需要更新
      std::vector<ecs::Entity> createEntities; // 当前帧刚需要进入摄像机范围的实体，需要创建
 

@@ -2,6 +2,7 @@ class EntityManager {
      static entityTypeToLevel = [1, 0, 2]; // 实体类型到渲染层级的映射
      constructor() {
           this.SparseSet = [new SparseSet(), new SparseSet(), new SparseSet()]; //[资源方块，玩家，子弹] 分层渲染，越小越先渲染
+          this.deadEntities = []; //待删除的实体列表,用于播放动画
      }
      //添加实体
      addEntityByDataView(dataView, offset) {
@@ -12,17 +13,34 @@ class EntityManager {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, PlayerEntity.create(dataView, offset));
           } else if (entityType == CATEGORY_BLOCK) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, PolygonEntity.create(dataView, offset));
-          }else if(entityType == CATEGORY_BULLET){
+          } else if (entityType == CATEGORY_BULLET) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, BulletEntity.create(dataView, offset));
           }
      }
 
-     //移除实体
+     //移出实体
      removeEntityByDataView(dataView, offset) {
+          console.log("removeEntityByDataView")
           let entityId = dataView.getUint32(offset.value, true);//实体id
           offset.value += 4;
           for (let i = 0; i < this.SparseSet.length; i++) {
                this.SparseSet[i].try_remove(entityId);
+          }
+     }
+
+     //删除实体
+     deleteEntityByDataView(dataView, offset) {
+          console.log("deleteEntityByDataView")
+          let entityId = dataView.getUint32(offset.value, true);//实体id
+          offset.value += 4;
+          for (let i = 0; i < this.SparseSet.length; i++) {
+               if (this.SparseSet[i].has(entityId)) {
+                    let entity = this.SparseSet[i].get(entityId);
+                    this.deadEntities.push(entity);
+                    this.SparseSet[i].remove(entityId);
+                    entity.initDeadStatus();
+                    break;
+               }
           }
      }
 
@@ -44,10 +62,21 @@ class EntityManager {
      }
      updateEntity(level, id, entity) { this.SparseSet[level].get(id) = entity; }//实际更像是替换
 
-     update(currentTime) {
+     update(deltaTime) {
           for (let i = 0; i < this.SparseSet.length; i++) {
                for (let j = 0; j < this.SparseSet[i].dense.length; j++) {
-                    this.SparseSet[i].dense[j].entity.showMe(currentTime);
+                    this.SparseSet[i].dense[j].entity.showMe(deltaTime);
+               }
+          }
+          let currentTime = Date.now();
+          for (let i = this.deadEntities.length - 1; i >= 0; i--) {
+               let entity = this.deadEntities[i];
+               if (entity.deadTime + entity.deadAnimationDuration < currentTime) {
+                    [this.deadEntities[i], this.deadEntities[this.deadEntities.length - 1]] = [this.deadEntities[this.deadEntities.length - 1], this.deadEntities[i]];
+                    this.deadEntities.pop();
+               }
+               else {
+                    entity.showDeadAnimation(currentTime);
                }
           }
      }

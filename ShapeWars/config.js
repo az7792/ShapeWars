@@ -28,6 +28,8 @@ camera = {
      lerpY: [0, 0],//每帧插值更新x坐标
 };
 
+//TODO：同步其他服务器数据
+//       - TPS,MSPT
 serverTime = {
      prev: 0,//前一帧
      curr: 0,//当前帧

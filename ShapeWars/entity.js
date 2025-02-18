@@ -7,14 +7,46 @@ class BaseEntity {
           this.sides = 3;
           this.maxHP = 100;
           this.HP = 100;
-          this.fillColor = "red";
-          this.strokeColor = "blue";
+          this.fillColor = "#ff0000";
+          this.strokeColor = "#0000ff";
+
+          this.deadPrevTime = 0;//死亡前的时间
+          this.deadTime = 0;//死亡时的时间
+          this.deadAnimationDuration = 200;//ms
+          this.speedRate = 0.3;//控制速度为死亡时速度的倍数
+     }
+     hexToRGBA(hex, alpha) {
+          hex = hex.replace('#', '');
+
+          let r = parseInt(hex.substring(0, 2), 16);
+          let g = parseInt(hex.substring(2, 4), 16);
+          let b = parseInt(hex.substring(4, 6), 16);
+
+          // 返回 RGBA 格式的颜色
+          return `rgba(${r}, ${g}, ${b}, ${alpha})`;
      }
 
      showMe(deltaTime) {
           drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
           if (this.HP < this.maxHP)
                drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - 0.1, this.HP, this.maxHP);
+     }
+
+     initDeadStatus() {
+          this.deadPrevTime = serverTime.prev - (1/this.speedRate - 1) * (serverTime.curr - serverTime.prev);//变相增加从val[0]到val[1]的时间
+          this.deadTime = serverTime.curr;
+     }
+
+     showDeadAnimation(currentTime) {
+          let delta = (currentTime - this.deadTime) / this.deadAnimationDuration;
+
+          let alpha = Math.max(0, 1 - delta);//透明度
+          let deadR = this.r * (1 + 0.3 * delta);//半径
+
+          let rgbaFillColor = this.hexToRGBA(this.fillColor, alpha);
+          let rgbaStrokeColor = this.hexToRGBA(this.strokeColor, alpha);
+          currentTime -= (serverTime.curr - serverTime.prev);//修正时间,当实体死亡时,客户端会在一个服务器tick后才知道实体死亡
+          drawRegularPolygon(this.sides, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
      }
 
      update(dataView, offset) {
