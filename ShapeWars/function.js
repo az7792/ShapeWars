@@ -222,6 +222,39 @@ function drawMiniMap() {
 }
 
 
+//绘制性能指标
+function drawPerformance() {
+     // performanceMetrics = {
+     //      isShow: true, //是否显示性能指标
+     //      clientfps: 0, //客户端渲染帧率
+     //      serverfps: 0, //服务器逻辑帧率
+     //      ping: 0, //延迟 ms
+     //      TPS: 0, //每秒事务数
+     //      MSPT: 0, //平均单个事务处理时间 ms
+     // }
+
+     if (!performanceMetrics.isShow)
+          return;
+     ctx.save();
+     let Fsize = 16;
+     ctx.font = Fsize + 'px Arial';  // 字体大小和类型
+     ctx.fillStyle = 'blue';
+     let x = canvas.width - 100;
+     let y = 20;
+     //绘制客户端渲染帧率
+     ctx.fillText("CFPS: " + performanceMetrics.cFPS, x, y);
+     y += Fsize + 2;
+     //绘制延迟
+     ctx.fillText("Ping: " + performanceMetrics.ping + "ms", x, y);
+     y += Fsize + 2;
+     //绘制TPS
+     ctx.fillText("TPS: " + performanceMetrics.TPS, x, y);
+     y += Fsize + 2;
+     //TODO：绘制MSPT
+     ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms", x, y);
+     ctx.restore();
+}
+
 /**
  * 绘制多边形
  * @param {[point]} points - 多边形顶点数组

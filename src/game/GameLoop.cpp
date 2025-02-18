@@ -301,8 +301,7 @@ void GameLoop::run()
      while (isRunning_.load())
      {
           // 休眠到目标时间点，需要提前计算
-          // auto nextFrameTime = lastTime_ + std::chrono::milliseconds(2000);       // WARN: 这儿间隔是整数，可能有些问题
-          auto nextFrameTime = lastTime_ + std::chrono::milliseconds(1000 / TPS); // WARN: 这儿间隔是整数，可能有些问题
+          auto nextFrameTime = lastTime_ + std::chrono::milliseconds(1000 / TPS); // HACK: 这儿间隔是整数，无法整除时会导致 设定的TPS 与 实际逻辑帧率不符
 
           em_.updateSystems();
           tick_++;

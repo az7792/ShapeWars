@@ -48,13 +48,13 @@ function parseMessage(dataView, offset) {
                //更新时间
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
+               performanceMetrics.TPS = Math.round(1000 / (serverTime.curr - serverTime.prev));
                sendMessage(playerInput.packData());
                break;
           case 0x02://Ping
                break;
           case 0x03://Pong
                performanceMetrics.ping = Date.now() - pingTime;
-               console.log("Pong", performanceMetrics.ping);
                break;
           case 0x04://LZ4压缩包
                let compressedSize = dataView.getInt32(offset.value, true);

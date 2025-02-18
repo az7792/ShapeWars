@@ -36,10 +36,10 @@ serverTime = {
 }
 
 performanceMetrics = {
-     clientfps: 0, //客户端渲染帧率
-     serverfps: 0, //服务器逻辑帧率
+     isShow: true, //是否显示性能指标
+     cFPS: 0, //客户端渲染帧率
      ping: 0, //延迟 ms
-     TPS: 0, //每秒事务数
+     TPS: 0, //每秒事务数(服务器逻辑帧率)
      MSPT: 0, //平均单个事务处理时间 ms
 }
 
