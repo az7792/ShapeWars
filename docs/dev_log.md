@@ -177,3 +177,4 @@
      - TODO: 添加受击反馈
 - 修复[BUG-003](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
 - 绘制性能指标
+- 为第三方库添加LICENSE文件
