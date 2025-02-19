@@ -12,7 +12,7 @@
 #include "ComponentTypeID.h"
 // TODO: 空类型优化
 /*
-   TODO：优化std::array,array会把一整页的组件全部初始化，如果该组件有动态数据且默认分配很大空间会导致内存浪费
+   MAYBE：优化std::array,array会把一整页的组件全部初始化，如果该组件有动态数据且默认分配很大空间会导致内存浪费
      例如成员变量有vector<int>,并且默认构造会把vector分配一大块内存，导致浪费
      struct A{
          std::vector<int> vec;
