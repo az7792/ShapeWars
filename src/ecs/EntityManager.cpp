@@ -55,7 +55,7 @@ void ecs::EntityManager::destroyEntity(Entity entity)
      // 将Entity从EntityManager管理的池子中删除
      for (auto &[_, pool] : ComponentPools::componentPools)
      {
-          pool->try_erase(entity);
+          pool->try_erase(entity);//这儿并不会触发handleComponentRemoved
      }
      // 跳转版本号和entities_
      uint32_t index = ecs::entityToIndex(entity);

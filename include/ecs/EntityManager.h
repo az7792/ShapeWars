@@ -21,11 +21,14 @@ namespace ecs
           /// @brief 实体视图
           using view = std::vector<Entity>;
 
-          /// 实体添加新组件时触发
-          Signal<void, Entity> OnComponentAdded;
-
-          /// 实体删除组件时触发
-          Signal<void, Entity> OnComponentRemoved;
+          /// 获取信号对应组件的信号
+          /// 该类组件池加入或删除实体时用于通知对应的群
+          template <typename Component>
+          Signal<void, Entity> &getSignal()
+          {
+               static Signal<void, Entity> signal;
+               return signal;
+          }
 
           /// 实体更新组件时触发
           template <typename Component>
@@ -89,8 +92,8 @@ namespace ecs
 
                     // 连接信号
                     OnEntityDestroyed.connect(std::bind(&GroupType::handleEntityDestroyed, groupInstance.get(), std::placeholders::_1));
-                    OnComponentAdded.connect(std::bind(&GroupType::handleComponentAdded, groupInstance.get(), std::placeholders::_1));
-                    OnComponentRemoved.connect(std::bind(&GroupType::handleComponentRemoved, groupInstance.get(), std::placeholders::_1));
+                    (getSignal<includeComponents>().connect(std::bind(&GroupType::handleComponentAdded, groupInstance.get(), std::placeholders::_1)), ...);
+                    (getSignal<excludeComponents>().connect(std::bind(&GroupType::handleComponentRemoved, groupInstance.get(), std::placeholders::_1)), ...);
                }
 
                return groupInstance.get();
@@ -127,7 +130,7 @@ namespace ecs
                     return nullptr;
                auto &pool = ComponentPools::get<Component>();
                Component *cptr = pool.insert(entity, std::forward<Args>(args)...);
-               OnComponentAdded(entity);
+               getSignal<Component>().execute(entity);
                return cptr;
           }
 
@@ -154,7 +157,7 @@ namespace ecs
                     return;
                auto &pool = ComponentPools::get<Component>();
                pool.erase(entity);
-               OnComponentRemoved(entity);
+               getSignal<Component>().execute(entity);
           }
 
           /// @brief 获取实体的某个组件
