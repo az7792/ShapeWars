@@ -1,6 +1,9 @@
 // 键盘事件：按下与抬起
 document.addEventListener("keydown", (event) => {
      playerInput.setKeyStatus(event.key, true);
+     if (event.key === 'e') {
+          playerInput.autoFire = !playerInput.autoFire;
+     }
 });
 
 document.addEventListener("keyup", (event) => {

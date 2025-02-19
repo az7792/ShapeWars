@@ -8,6 +8,7 @@ class PlayerInput {
           'd': 5        // D
      };
      constructor() {
+          this.autoFire = false;// 是否自动开火 E 键启动
           this.mouseXInScreen = 0;
           this.mouseYInScreen = 0;
           this.mouseXInBox2D = 0.0;
@@ -29,7 +30,7 @@ class PlayerInput {
      packData() {
           ({ x: this.mouseXInBox2D, y: this.mouseYInBox2D } = screenToBox2D(this.mouseXInScreen, this.mouseYInScreen));
           //console.log(this.mouseXInBox2D, this.mouseYInBox2D);
-          
+
           let message = new Uint8Array(1 + 4 + 4 + 8);
           let offset = 0;
           message[offset++] = 0x01;  //操作指令
@@ -41,6 +42,8 @@ class PlayerInput {
           offset += 4;
           //打包按键
           let keyStatusBigInt = BigInt(0);  // 初始化为 0
+          if (this.autoFire === true)
+               keyStatusBigInt |= (1n << BigInt(PlayerInput.keyMapping['left']));
           for (let i = 0; i < Object.keys(PlayerInput.keyMapping).length; i++) {
                if (this.keyStatus[i]) {
                     keyStatusBigInt |= (1n << BigInt(i));  // 设置相应的位为 1
