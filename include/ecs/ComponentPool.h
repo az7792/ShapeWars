@@ -56,13 +56,14 @@ namespace ecs
           }
 
      public:
-          ComponentPool(size_t size = 100) : sparse_(size, nullValue_), size_(0), pageIndex_(ECS_COMPONENT_PAGE_SIZE) {};
+          ComponentPool(size_t size = 10) : sparse_(size, nullValue_), size_(0), pageIndex_(ECS_COMPONENT_PAGE_SIZE) {};
           ~ComponentPool() = default;
 
           /// @brief 获取稠密数组
           std::vector<ecs::Entity> &getDense() { return dense_; }
 
           /// @brief 插入一个实体(使实体拥有该类型组件)
+          /// @note: 如果需要保留旧实体里动态数据已经分配的空间，需要隐式弃置移动赋值运算符
           template <typename... Args>
           Component *insert(ecs::Entity entity, Args &&...args)
           {
@@ -73,7 +74,7 @@ namespace ecs
                }
                if (sparse_[index] == nullValue_)
                {
-                    if (size_ == dense_.size()) // 不可重用
+                    if (size_ == dense_.size()) // 不可重用指针
                     {
                          dense_.push_back(entity);
                          ptrs_.push_back(nullptr);
@@ -85,16 +86,16 @@ namespace ecs
                               ComponentPages_.emplace_back(std::make_unique<std::array<Component, ECS_COMPONENT_PAGE_SIZE>>());
                               pageIndex_ = 0;
                          }
-                         (&(*ComponentPages_.back())[pageIndex_])->~Component(); // 显式析构旧对象
-                         new (&(*ComponentPages_.back())[pageIndex_]) Component{std::forward<Args>(args)...};
+                         // 如果需要保留旧实体里动态数据已经分配的空间，需要隐式弃置移动赋值运算符
+                         (*ComponentPages_.back())[pageIndex_] = Component{std::forward<Args>(args)...};
                          ptrs_.back() = &(*ComponentPages_.back())[pageIndex_];
                          pageIndex_++;
                     }
-                    else // 可重用
+                    else // 可重用指针
                     {
                          dense_[size_] = entity;
-                         ptrs_[size_]->~Component(); // 显式析构旧对象
-                         new (ptrs_[size_]) Component{std::forward<Args>(args)...};
+                         // 如果需要保留旧实体里动态数据已经分配的空间，需要隐式弃置移动赋值运算符
+                         *ptrs_[size_] = Component{std::forward<Args>(args)...};
                          sparse_[index] = size_;
                          size_++;
                     }
@@ -103,19 +104,21 @@ namespace ecs
           }
 
           /// @brief 替换一个实体的组件
+          /// @note: 如果需要保留旧实体里动态数据已经分配的空间，需要隐式弃置移动赋值运算符
           template <typename... Args>
           Component *replace(ecs::Entity entity, Args &&...args)
           {
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
-               ptrs_[sparse_[index]]->~Component(); // 显式析构旧对象
-               new (ptrs_[sparse_[index]]) Component{std::forward<Args>(args)...};
+               // 如果需要保留旧实体里动态数据已经分配的空间，需要隐式弃置移动赋值运算符
+               *ptrs_[sparse_[index]] = Component{std::forward<Args>(args)...};
                return ptrs_[sparse_[index]];
           }
 
           /// @brief 删除一个实体(使实体失去该类型组件)
           void erase(ecs::Entity entity)
           {
+               //不会真的删除
                assert(has(entity));
                uint32_t index = ecs::entityToIndex(entity);
                size_--;
