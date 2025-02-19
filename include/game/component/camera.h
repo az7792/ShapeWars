@@ -4,6 +4,7 @@
 #include "config/config.h"
 #include "ecs/fwd.h"
 #include "box2d/box2d.h"
+#include <iostream>
 struct Camera
 {
      constexpr static float width = (1920.0f + 100) / 500;
@@ -24,7 +25,10 @@ struct Camera
      ~Camera() = default;
 
      Camera(float x_, float y_, float fov_)
-         : x(x_), y(y_), fov(fov_), inEntities(100) {}
+         : x(x_), y(y_), fov(fov_), inEntities(1) {}
+
+     // 为了隐式弃置移动赋值运算符，保证在插入或者替换组件时调用拷贝赋值，这样可以保留旧实体中动态容器已分配的空间
+     Camera &operator=(const Camera &) = default;
 
      b2BodyId createSensor(b2WorldId worldId)
      {
