@@ -117,13 +117,30 @@ void GameLoop::createPlayerSys()
      std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
      while (!createPlayerQueue_.empty())
      {
-          ecs::Entity entity = createEntityPlayer(em_, worldId_, createPlayerQueue_.front(), {groupIndex--});
-          int inputIndex = freeInputsQueue_.front();
-          freeInputsQueue_.pop_front();
-          playerMap_[createPlayerQueue_.front()] = entity;
-          inputMap_[entity] = inputIndex;
-          createPlayerQueue_.pop_front();
-          LOG_INFO("创建一个角色：" + std::to_string(entity));
+          auto it = playerMap_.find(createPlayerQueue_.front());
+          if (it == playerMap_.end()) // 玩家未创建实体
+          {
+               ecs::Entity entity = createEntityPlayer(em_, worldId_, createPlayerQueue_.front(), {groupIndex--});
+               int inputIndex = freeInputsQueue_.front();
+               freeInputsQueue_.pop_front();
+               playerMap_.emplace(createPlayerQueue_.front(), std::make_pair(entity, true));
+               inputMap_[entity] = inputIndex;
+               LOG_INFO("创建一个角色：" + std::to_string(entity));
+               ws_.send(std::string(1,0x06), createPlayerQueue_.front());// 通知客户端玩家已创建
+               createPlayerQueue_.pop_front();
+          }
+          else if (it->second.second == 0) // 玩家已死亡
+          {
+               ecs::Entity entity = it->second.first;
+               createPlayBody(entity);
+               it->second.second = 1; // 标记玩家存活
+               ws_.send(std::string(1,0x06), createPlayerQueue_.front());// 通知客户端玩家已创建
+               createPlayerQueue_.pop_front();
+          }
+          else
+          {
+               assert(false); // 路径不可达
+          }
      }
 }
 
@@ -134,11 +151,14 @@ void GameLoop::destroyEntitySys()
           std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
           while (!destroyPlayerQueue_.empty())
           {
-               ecs::Entity e = playerMap_[destroyPlayerQueue_.front()];
+               ecs::Entity e = playerMap_[destroyPlayerQueue_.front()].first;
                playerMap_.erase(destroyPlayerQueue_.front());
                destroyPlayerQueue_.pop_front();
-               b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
-               b2DestroyBody(*bodyId);                             // 清除玩家的刚体
+               if (em_.hasComponent<b2BodyId>(e)) // 可能在玩家死亡后掉线
+               {
+                    b2BodyId *bodyId = em_.getComponent<b2BodyId>(e);
+                    b2DestroyBody(*bodyId); // 清除玩家的刚体
+               }
                b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
                em_.destroyEntity(e);
                freeInputsQueue_.push_back(inputMap_[e]);
@@ -146,29 +166,26 @@ void GameLoop::destroyEntitySys()
           }
      }
      // 处理其他实体
-     std::vector<b2ShapeId> shapeIdCache;
      auto view = em_.getView<DeleteFlag>();
      for (auto &entity : view)
      {
           auto type = em_.getComponent<Type>(entity);
           if (type->id == CATEGORY_PLAYER) // 处理玩家实体
           {
-               // TODO:
+               b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
+               deleteBody(*bodyId);
+               em_.removeComponent<b2BodyId>(entity);
+               em_.getComponent<ContactList>(entity)->list.clear();               
+               em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次            
+               std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+               playerMap_[*em_.getComponent<TcpConnection *>(entity)].second = 0; // 标记玩家为死亡
+
+               ws_.send(std::string(1,0x05), *em_.getComponent<TcpConnection *>(entity));// 通知客户端玩家已死亡
           }
           else if (type->id == CATEGORY_BLOCK || type->id == CATEGORY_BULLET) // 处理方块实体 与 子弹实体
           {
                b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
-               int shapeNum = b2Body_GetShapeCount(*bodyId);
-               if (static_cast<size_t>(shapeNum) > shapeIdCache.size())
-               {
-                    shapeIdCache.resize(shapeNum);
-               }
-               b2Body_GetShapes(*bodyId, shapeIdCache.data(), shapeNum);
-               for (int i = 0; i < shapeNum; ++i)
-               {
-                    willDeleteShapes.emplace_back(shapeIdCache[i]);
-               }
-               b2DestroyBody(*bodyId); // 清除实体刚体
+               deleteBody(*bodyId);
                em_.destroyEntity(entity);
           }
      }
@@ -183,6 +200,65 @@ void GameLoop::delayDeleteShapesSys()
      willDeleteShapes.clear();
 }
 
+void GameLoop::deleteBody(b2BodyId bodyId)
+{
+     static std::vector<b2ShapeId> shapeIdCache;
+     int shapeNum = b2Body_GetShapeCount(bodyId);             // 获取刚体上的形状数量
+     if (static_cast<size_t>(shapeNum) > shapeIdCache.size()) // resize
+     {
+          shapeIdCache.resize(shapeNum);
+     }
+     b2Body_GetShapes(bodyId, shapeIdCache.data(), shapeNum); // 获取刚体上的形状
+     for (int i = 0; i < shapeNum; ++i)                       // 添加到待删除列表
+     {
+          willDeleteShapes.emplace_back(shapeIdCache[i]);
+     }
+     b2DestroyBody(bodyId);
+}
+
+void GameLoop::createPlayBody(ecs::Entity entity)
+{
+     // em_.replaceComponent<Position>(entity);
+     // em_.replaceComponent<Velocity>(entity);
+     //em_.replaceComponent<HP>(entity, static_cast<int16_t>(100), static_cast<int16_t>(100));
+     em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP;
+     em_.getComponent<HP>(entity)->isDirty = true;
+     // em_.replaceComponent<Attack>(entity, static_cast<int16_t>(2 * TPS));
+     // em_.replaceComponent<ContactList>(entity);
+     // em_.replaceComponent<PackData>(entity, "", "");
+     // em_.replaceComponent<Input>(entity, 0.f, 0.f, 0ull);
+     // em_.replaceComponent<TcpConnection *>(entity, tcpConnection);
+     // em_.replaceComponent<Type>(entity, static_cast<uint8_t>(CATEGORY_PLAYER));
+     // em_.getComponent<GroupIndex>(entity)->isDirty = true;
+     em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.05f); //>=16为圆形
+     // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
+
+     // 定义刚体
+     b2BodyDef bodyDef = b2DefaultBodyDef();
+     bodyDef.type = b2_dynamicBody;
+     bodyDef.position = {0.f, 0.f};
+     bodyDef.userData = static_cast<void *>(em_.getEntityPtr(entity));
+     b2BodyId bodyId = b2CreateBody(worldId_, &bodyDef);
+
+     b2ShapeDef shapeDef = b2DefaultShapeDef();
+     shapeDef.density = 1.f;   // 默认为1
+     shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
+     shapeDef.userData = bodyDef.userData;
+     shapeDef.enableContactEvents = true;
+     shapeDef.filter.categoryBits = CATEGORY_PLAYER;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
+     shapeDef.filter.groupIndex = em_.getComponent<GroupIndex>(entity)->index;
+
+     // 圆形
+     b2Circle circle;
+     circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
+     circle.radius = em_.getComponent<RegularPolygon>(entity)->radius;
+
+     shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = entity;
+
+     em_.addComponent<b2BodyId>(entity, bodyId);
+}
+
 void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
 {
      char header = buffer.readValue<char>();
@@ -192,7 +268,7 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
      {
           std::lock_guard<std::mutex> lock1(createPlayerQueueMutex_);
           std::unique_lock<std::mutex> lock2(playerAndInputMapMutex_);
-          if (playerMap_.find(conn) == playerMap_.end())
+          if (playerMap_.find(conn) == playerMap_.end() || playerMap_[conn].second == 0) // 玩家未创建实体或已死亡
                createPlayerQueue_.push_back(conn);
           break;
      }
@@ -201,7 +277,7 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
           std::unique_lock<std::mutex> lock(playerAndInputMapMutex_);
           if (playerMap_.find(conn) != playerMap_.end())
           {
-               int inputIndex = inputMap_[playerMap_[conn]];
+               int inputIndex = inputMap_[playerMap_[conn].first];
                lock.unlock();
                Input input = {};
                input.x = buffer.readValue<float>();
@@ -314,7 +390,7 @@ void GameLoop::run()
           // std::cin >> ch;
           // std::cout << ch << std::endl;
           ct++;
-          if (ct % (10*TPS) == 0)
+          if (ct % (10 * TPS) == 0)
           {
                std::cout << shapeEntityMap.size() << std::endl;
           }

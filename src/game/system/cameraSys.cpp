@@ -133,7 +133,7 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
                camera->removeEntities.push_back(*entity);
                camera->inEntities.erase(*entity);
           }
-          else if (b2Shape_IsValid(endTouch->sensorShapeId)) // 由于删除
+          else if (b2Shape_IsValid(endTouch->sensorShapeId)) // 由于刚体被删除
           {
                Camera *camera = static_cast<Camera *>(b2Shape_GetUserData(endTouch->sensorShapeId));
                uint64_t shapeId = b2StoreShapeId(endTouch->visitorShapeId);
@@ -149,13 +149,20 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
      for (auto entity : view)
      {
           Camera *camera = em.getComponent<Camera>(entity);
-          // 调整摄像机速度，平滑跟随玩家
-          b2BodyId bodyId = camera->bodyId;
-          b2Vec2 curr = b2Body_GetPosition(bodyId);
-          b2Vec2 target = b2Body_GetPosition(*em.getComponent<b2BodyId>(entity));
-          b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
-          // BUG: 006
-          b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
+          if (em.hasComponent<b2BodyId>(entity))
+          {
+               // 调整摄像机速度，平滑跟随玩家
+               b2BodyId bodyId = camera->bodyId;
+               b2Vec2 curr = b2Body_GetPosition(bodyId);
+               b2Vec2 target = b2Body_GetPosition(*em.getComponent<b2BodyId>(entity));
+               b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
+               // BUG: 006
+               b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
+          }
+          else
+          {
+               b2Body_SetLinearVelocity(camera->bodyId, b2Vec2_zero);
+          }
 
           // 处理 createEntities
           for (auto createEntity : camera->createEntities)

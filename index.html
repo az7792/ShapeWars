@@ -29,6 +29,30 @@
                padding: 10px 20px;
                /* 设置按钮的内边距 */
           }
+
+          #startGameButton {
+               position: fixed;
+               background-color: #4CAF50;
+               color: white;
+               font-size: 26px;
+               border: 2px solid #0b7502;
+               box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.3);
+               border-radius: 5px;
+               margin: 0;
+               cursor: pointer;
+               width: 200px;
+               height: 50px;
+               top: 0px;
+               left: 0px;
+               display: flex;
+               /* 使用 flex 布局 */
+               justify-content: center;
+               /* 水平居中 */
+               align-items: center;
+               /* 垂直居中 */
+               user-select: none;
+               /* 禁用文本选择 */
+          }
      </style>
 </head>
 
@@ -37,6 +61,13 @@
      <button id="upFov">upFov</button>
      <button id="downFov">downFov</button>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
+
+     <script>
+          // 获取按钮元素
+          const startButton = document.getElementById('startGameButton');
+          const upFovButton = document.getElementById('upFov');
+          const downFovButton = document.getElementById('downFov');
+     </script>
 
      <script src="./ShapeWars/lz4/lz4.js"></script> <!-- lz4 -->
 
@@ -57,15 +88,12 @@
      <script src="./ShapeWars/app.js"></script> <!-- 主程序 -->
 
      <script>
-          // 获取按钮元素
-          const startButton = document.getElementById('startGameButton');
-          const upFovButton = document.getElementById('upFov');
-          const downFovButton = document.getElementById('downFov');
-
           // 监听按钮点击事件
           startButton.addEventListener('click', function () {
                sendMessage(new Uint8Array([0]));
-               console.log('开始游戏');
+          });
+          startButton.addEventListener('contextmenu', function (event) {
+               event.preventDefault();  // 禁止右键菜单
           });
 
           upFovButton.addEventListener('click', function () {

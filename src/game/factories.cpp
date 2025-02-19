@@ -6,7 +6,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
+     em.addComponent<HP>(e, static_cast<int16_t>(1000), static_cast<int16_t>(1000));
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "");
@@ -90,9 +90,9 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
-     em.addComponent<Attack>(e, static_cast<int16_t>(100 * TPS));
+     em.addComponent<Attack>(e, static_cast<int16_t>(12 * TPS));
      em.addComponent<DamageOverTime>(e, static_cast<int16_t>(2 * TPS));
-     em.addComponent<BulletAttackNum>(e, static_cast<uint8_t>(10));
+     em.addComponent<BulletAttackNum>(e, static_cast<uint8_t>(4));
      em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "");
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BULLET));

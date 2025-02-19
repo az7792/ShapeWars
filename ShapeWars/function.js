@@ -255,6 +255,16 @@ function drawPerformance() {
      ctx.restore();
 }
 
+//绘制死亡界面(非复活状态)
+function drawDeath() {
+     if(playerStatus.isAlive)
+          return;
+     ctx.save();
+     ctx.fillStyle = "rgba(0,0,0,0.5)";
+     ctx.fillRect(0, 0, canvas.width, canvas.height);
+     ctx.restore();
+}
+
 /**
  * 绘制多边形
  * @param {[point]} points - 多边形顶点数组

@@ -16,7 +16,7 @@ function parseMessage(dataView, offset) {
                break;
           case 0x01: // 更新实体
                //当前玩家所在碰撞组
-               nowGroupIndex = readGroupIndex(dataView, offset);
+               playerStatus.nowGroupIndex = readGroupIndex(dataView, offset);
                // 摄像机位置
                camera.lerpX[0] = camera.lerpX[1];
                camera.lerpY[0] = camera.lerpY[1];
@@ -65,6 +65,15 @@ function parseMessage(dataView, offset) {
                offset.value += decompressedSize;
                let res = decompressLZ4(compressedData, compressedSize);
                parseMessage(new DataView(res.buffer), { value: 0 });
+               break;
+          case 0x05://玩家死亡消息
+               playerStatus.isAlive = false;
+               startButton.style.display = 'flex';
+               playerInput.keyStatus = new Array(64).fill(false);
+               break;
+          case 0x06://玩家创建角色消息
+               playerStatus.isAlive = true;
+               startButton.style.display = 'none';               
                break;
      }
 }

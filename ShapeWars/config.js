@@ -43,8 +43,12 @@ performanceMetrics = {
      MSPT: 0, //平均单个事务处理时间 ms
 }
 
-//当前玩家所属碰撞组
-nowGroupIndex = 0;
+playerStatus = {
+     //当前玩家所属碰撞组
+     nowGroupIndex: 0,
+     //当前玩家死活状态
+     isAlive: false,
+}
 
 //Ping
 pingTime = 0;

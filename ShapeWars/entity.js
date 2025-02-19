@@ -110,7 +110,7 @@ class PlayerEntity extends BaseEntity {
           let componentState = super.update(dataView, offset);
           if (componentState & COMP_GROUPINDEX) {
                this.groupIndex = readGroupIndex(dataView, offset);
-               if (this.groupIndex == nowGroupIndex) {
+               if (this.groupIndex == playerStatus.nowGroupIndex) {
                     this.fillColor = COLORS.bulletFillColor[0];
                     this.strokeColor = COLORS.bulletStrokeColor[0];
                } else {
@@ -147,7 +147,7 @@ class BulletEntity extends PolygonEntity {
 
           if (componentState & COMP_GROUPINDEX) {
                this.groupIndex = readGroupIndex(dataView, offset);
-               if (this.groupIndex == nowGroupIndex) {
+               if (this.groupIndex == playerStatus.nowGroupIndex) {
                     this.fillColor = COLORS.bulletFillColor[0];
                     this.strokeColor = COLORS.bulletStrokeColor[0];
                } else {

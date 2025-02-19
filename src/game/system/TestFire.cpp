@@ -5,7 +5,7 @@
 
 void TestFireSys(ecs::EntityManager &em, b2WorldId &worldId)
 {
-     auto view = em.getView<Input>();
+     auto view = em.getView<Input,b2BodyId>();
      for (auto entity : view)
      {
           Input *input = em.getComponent<Input>(entity);

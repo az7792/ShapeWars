@@ -8,6 +8,8 @@ miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
 function resizeCanvas() {
      canvas.width = window.innerWidth * scale;
      canvas.height = window.innerHeight * scale;
+     startButton.style.top = (canvas.height - startButton.offsetHeight) / 2 + "px";
+     startButton.style.left = (canvas.width - startButton.offsetWidth) / 2 + "px";
 }
 
 // 监听窗口大小变化
@@ -44,18 +46,19 @@ function update() {
      entityManager.update(deltaTime);//更新实体
      drawMiniMap();//更新小地图
      drawPerformance();//更新性能参数
+     drawDeath();//绘制玩家死亡画面
 
      requestAnimationFrame(update);
 }
 
 
- //Ping
- setInterval(() => {
-      let message = new Uint8Array(1);
-      message[0] = 0x02;
-      sendMessage(message);
-      pingTime = Date.now();
- }, 1000);
+//Ping
+setInterval(() => {
+     let message = new Uint8Array(1);
+     message[0] = 0x02;
+     sendMessage(message);
+     pingTime = Date.now();
+}, 1000);
 
 //启动
 resizeCanvas();

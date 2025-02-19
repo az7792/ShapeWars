@@ -17,7 +17,11 @@ private:
      void destroyEntitySys();
      // 延迟删除形状映射
      void delayDeleteShapesSys();
-
+     // 删除一个刚体并清理shapeEntityMap
+     void deleteBody(b2BodyId bodyId);
+     // 根据实体创建玩家刚体
+     void createPlayBody(ecs::Entity entity);
+     
 private:
      struct atomicInput
      {
@@ -35,7 +39,7 @@ private:
      uint32_t tick_;                                  // 当前游戏tick
      std::chrono::steady_clock::time_point lastTime_; // 上次刷新的时间
 
-     std::unordered_map<TcpConnection *, ecs::Entity> playerMap_; // 玩家连接到实体的映射
+     std::unordered_map<TcpConnection *, std::pair<ecs::Entity,bool>> playerMap_; // 玩家连接到实体的映射 <连接, <实体ID, 玩家是否死亡>>
      std::unordered_map<ecs::Entity, int> inputMap_;              // 玩家输入映射
      std::mutex playerAndInputMapMutex_;                          // 玩家映射锁
 
