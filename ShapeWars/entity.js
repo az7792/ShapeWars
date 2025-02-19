@@ -103,6 +103,7 @@ class PlayerEntity extends BaseEntity {
           this.maxHP = 100;
           this.HP = 100;
           this.groupIndex = 0;
+          this.deadAnimationDuration = 500;
      }
 
      update(dataView, offset) {
