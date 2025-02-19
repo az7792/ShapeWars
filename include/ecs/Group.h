@@ -30,13 +30,20 @@ namespace ecs
                }
                else
                {
-                    entities_.erase(entity); // 由于过滤，之前的实体可能不再满足条件
+                    entities_.erase(entity); // 由于过滤，之前的实体可能不再满足条件，例如加入了excludeComponents中的组件
                }
           }
 
           void handleComponentRemoved(Entity entity)
           {
-               entities_.erase(entity);
+               if ((ComponentPools::get<includeComponents>().has(entity) && ...) && (!ComponentPools::get<excludeComponents>().has(entity) && ...))
+               {
+                    entities_.insert(entity); // 由于过滤，之前的实体不满足的实体现在可能满足了，例如移除了excludeComponents中的组件
+               }
+               else
+               {
+                    entities_.erase(entity);
+               }
           }
 
      public:
