@@ -1,6 +1,7 @@
 // 连接打开时触发
 socket.onopen = () => {
      console.log("WebSocket 连接已建立");
+     performanceMetrics.isConnected = true;
 };
 
 function parseMessage(dataView, offset) {
@@ -88,6 +89,7 @@ socket.onmessage = (event) => {
 // 连接关闭时触发
 socket.onclose = () => {
      console.log("WebSocket 连接已关闭");
+     performanceMetrics.isConnected = false;
 };
 
 // 发生错误时触发

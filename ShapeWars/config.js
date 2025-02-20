@@ -37,6 +37,7 @@ serverTime = {
 
 performanceMetrics = {
      isShow: true, //是否显示性能指标
+     isConnected: false, //是否已连接到服务器
      cFPS: 0, //客户端渲染帧率
      ping: 0, //延迟 ms
      TPS: 0, //每秒事务数(服务器逻辑帧率)

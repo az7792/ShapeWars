@@ -238,26 +238,35 @@ function drawPerformance() {
      ctx.save();
      let Fsize = 16;
      ctx.font = Fsize + 'px Arial';  // 字体大小和类型
-     ctx.fillStyle = 'blue';
      let x = canvas.width - 100;
      let y = 20;
      //绘制客户端渲染帧率
-     ctx.fillText("CFPS: " + performanceMetrics.cFPS, x, y);
+     ctx.fillStyle = performanceMetrics.cFPS <= 30 ? "#ff0000" : "#00ff00";
+     ctx.fillText("FPS: " + performanceMetrics.cFPS, x, y);
      y += Fsize + 2;
      //绘制延迟
-     ctx.fillText("Ping: " + performanceMetrics.ping + "ms", x, y);
+     if (performanceMetrics.isConnected) {
+          ctx.fillStyle = performanceMetrics.ping >= 60 ? "#ff0000" : "#00ff00";
+          ctx.fillText("Ping: " + performanceMetrics.ping + "ms", x, y);
+     }
+     else {
+          ctx.fillStyle = "#ff0000";
+          ctx.fillText("Ping: -- ms", x, y);
+     }
      y += Fsize + 2;
      //绘制TPS
+     ctx.fillStyle = performanceMetrics.TPS <= 20 ? "#ff0000" : "#00ff00";
      ctx.fillText("TPS: " + performanceMetrics.TPS, x, y);
      y += Fsize + 2;
      //TODO：绘制MSPT
+     ctx.fillStyle = performanceMetrics.MSPT >= 50 ? "#ff0000" : "#00ff00";
      ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms", x, y);
      ctx.restore();
 }
 
 //绘制死亡界面(非复活状态)
 function drawDeath() {
-     if(playerStatus.isAlive)
+     if (playerStatus.isAlive)
           return;
      ctx.save();
      ctx.fillStyle = "rgba(0,0,0,0.5)";
