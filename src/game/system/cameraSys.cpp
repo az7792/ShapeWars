@@ -19,40 +19,38 @@ namespace
      // 3
      void appendRegularPolygon3(std::string *data, uint64_t &componentState, RegularPolygon *regularPolygon, bool isCreate = false)
      {
-          if (regularPolygon->isDirty || isCreate)
+          if (isCreate)
           {
                componentState |= COMP_POLYGON;
                strAppend(*data, regularPolygon->sides);
                strAppend(*data, regularPolygon->radius);
-               regularPolygon->isDirty = false;
           }
      }
 
      // 4
-     void appendHP4(std::string *data, uint64_t &componentState, HP *hp, bool isCreate = false)
+     void appendHP4(uint32_t tick, std::string *data, uint64_t &componentState, HP *hp, bool isCreate = false)
      {
-          if (hp->isDirty || isCreate) // 创建时无论是否变换都需要打包
+          if (hp->tick == tick || isCreate) // 创建时无论是否变换都需要打包
           {
                componentState |= COMP_HP;
                strAppend(*data, hp->hp);
                strAppend(*data, hp->maxHP);
-               hp->isDirty = false;
+               hp->tick = tick;
           }
      }
 
      // 6
      void appendGroupIndex6(std::string *data, uint64_t &componentState, GroupIndex *groupIndex, bool isCreate = false)
      {
-          if (groupIndex->isDirty || isCreate)
+          if (isCreate)
           {
                componentState |= COMP_GROUPINDEX;
                strAppend(*data, groupIndex->index);
-               groupIndex->isDirty = false;
           }
      }
 
      // 创建时无论是否需要更新都需要打包
-     void processEntity(ecs::EntityManager &em, ecs::Entity targetEntity, bool isCreate = false)
+     void processEntity(ecs::EntityManager &em, uint32_t tick, ecs::Entity targetEntity, bool isCreate = false)
      {
           PackData *packData = em.getComponent<PackData>(targetEntity);
           if (packData->isCreated && isCreate)
@@ -88,14 +86,14 @@ namespace
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
-               appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+               appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
-               appendHP4(data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+               appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BULLET) // 处理子弹实体
           {
@@ -109,7 +107,7 @@ namespace
      };
 }
 
-void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
+void cameraSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
      // 处理传感器事件
      b2SensorEvents sensorEvents = b2World_GetSensorEvents(worldId);
@@ -168,13 +166,13 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId)
           // 处理 createEntities
           for (auto createEntity : camera->createEntities)
           {
-               processEntity(em, createEntity, true);
+               processEntity(em, tick, createEntity, true);
           }
 
           // 处理 inEntities
           for (auto inEntity : camera->inEntities)
           {
-               processEntity(em, inEntity, false);
+               processEntity(em, tick, inEntity, false);
           }
 
           // 删除单独处理

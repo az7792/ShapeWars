@@ -120,21 +120,21 @@ void GameLoop::createPlayerSys()
           auto it = playerMap_.find(createPlayerQueue_.front());
           if (it == playerMap_.end()) // 玩家未创建实体
           {
-               ecs::Entity entity = createEntityPlayer(em_, worldId_, createPlayerQueue_.front(), {groupIndex--});
+               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, createPlayerQueue_.front(), {groupIndex--});
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
                playerMap_.emplace(createPlayerQueue_.front(), std::make_pair(entity, true));
                inputMap_[entity] = inputIndex;
                LOG_INFO("创建一个角色：" + std::to_string(entity));
-               ws_.send(std::string(1,0x06), createPlayerQueue_.front());// 通知客户端玩家已创建
+               ws_.send(std::string(1, 0x06), createPlayerQueue_.front()); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
           else if (it->second.second == 0) // 玩家已死亡
           {
                ecs::Entity entity = it->second.first;
                createPlayBody(entity);
-               it->second.second = 1; // 标记玩家存活
-               ws_.send(std::string(1,0x06), createPlayerQueue_.front());// 通知客户端玩家已创建
+               it->second.second = 1;                                      // 标记玩家存活
+               ws_.send(std::string(1, 0x06), createPlayerQueue_.front()); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
           else
@@ -175,12 +175,12 @@ void GameLoop::destroyEntitySys()
                b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
                deleteBody(*bodyId);
                em_.removeComponent<b2BodyId>(entity);
-               em_.getComponent<ContactList>(entity)->list.clear();               
-               em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次            
+               em_.getComponent<ContactList>(entity)->list.clear();
+               em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次
                std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
                playerMap_[*em_.getComponent<TcpConnection *>(entity)].second = 0; // 标记玩家为死亡
 
-               ws_.send(std::string(1,0x05), *em_.getComponent<TcpConnection *>(entity));// 通知客户端玩家已死亡
+               ws_.send(std::string(1, 0x05), *em_.getComponent<TcpConnection *>(entity)); // 通知客户端玩家已死亡
           }
           else if (type->id == CATEGORY_BLOCK || type->id == CATEGORY_BULLET) // 处理方块实体 与 子弹实体
           {
@@ -220,9 +220,9 @@ void GameLoop::createPlayBody(ecs::Entity entity)
 {
      // em_.replaceComponent<Position>(entity);
      // em_.replaceComponent<Velocity>(entity);
-     //em_.replaceComponent<HP>(entity, static_cast<int16_t>(100), static_cast<int16_t>(100));
+     // em_.replaceComponent<HP>(entity, static_cast<int16_t>(100), static_cast<int16_t>(100));
      em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP;
-     em_.getComponent<HP>(entity)->isDirty = true;
+     em_.getComponent<HP>(entity)->tick = tick_;
      // em_.replaceComponent<Attack>(entity, static_cast<int16_t>(2 * TPS));
      // em_.replaceComponent<ContactList>(entity);
      // em_.replaceComponent<PackData>(entity, "", "");
@@ -355,11 +355,11 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
-         .addSystem(std::bind(&TestRegularPolygonSys, std::ref(em_), std::ref(worldId_)))
-         .addSystem(std::bind(&TestFireSys, std::ref(em_), std::ref(worldId_)))
+         .addSystem(std::bind(&TestRegularPolygonSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&TestFireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
-         .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_)))
-         .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_)))
+         .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::delayDeleteShapesSys, this))
          .addSystem(std::bind(&GameLoop::outputSys, this));
 }

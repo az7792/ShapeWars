@@ -1,12 +1,12 @@
 #include "game/factories.h"
 #include "config/config.h"
 
-ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpConnection *tcpConnection, GroupIndex groupIndex)
+ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(1000), static_cast<int16_t>(1000));
+     em.addComponent<HP>(e, static_cast<int16_t>(1000), static_cast<int16_t>(1000), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "");
@@ -46,12 +46,12 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, TcpCo
      return e;
 }
 
-ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, RegularPolygon regularPolygon, float x, float y)
+ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, float x, float y)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "");
@@ -84,12 +84,12 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, Regula
      return e;
 }
 
-ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, ecs::Entity player)
+ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
-     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100));
+     em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(12 * TPS));
      em.addComponent<DamageOverTime>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<BulletAttackNum>(e, static_cast<uint8_t>(4));

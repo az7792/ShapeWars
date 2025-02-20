@@ -4,5 +4,5 @@ struct HP
 {
      int16_t hp;
      int16_t maxHP;
-     bool isDirty = true;
+     uint32_t tick = 0;//上次更新的时间
 };

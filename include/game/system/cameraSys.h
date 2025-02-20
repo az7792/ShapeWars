@@ -2,4 +2,4 @@
 #include "ecs/EntityManager.h"
 #include "box2d/id.h"
 
-void cameraSys(ecs::EntityManager &em, b2WorldId &worldId);
+void cameraSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick);

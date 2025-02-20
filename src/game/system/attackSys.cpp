@@ -1,7 +1,7 @@
 #include "game/system/attackSys.h"
 #include "game/component/fwd.h"
 
-void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
+void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
      b2ContactEvents contactEvents = b2World_GetContactEvents(worldId);
 
@@ -86,8 +86,8 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
                     auto hp = em.getComponent<HP>(attackId);
                     if (hp->hp > 0)
                     {
-                         hp->hp -= attack->damage / TPS;
-                         hp->isDirty = true;
+                         hp->hp = std::max(0, hp->hp - attack->damage / TPS);
+                         hp->tick = tick;
                          if (isBullet) // 处理子弹攻击攻击判定次数
                          {
                               bulletAttackNum->num--;
@@ -118,8 +118,8 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId)
           auto damageOverTime = em.getComponent<DamageOverTime>(entity);
           if (hp->hp > 0)
           {
-               hp->hp -= damageOverTime->damage / TPS;
-               hp->isDirty = true;
+               hp->hp = std::max(0, hp->hp - damageOverTime->damage / TPS);
+               hp->tick = tick;
           }
           else if (!em.hasComponent<DeleteFlag>(entity))
           {

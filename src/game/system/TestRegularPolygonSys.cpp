@@ -4,7 +4,7 @@
 #include "box2d/box2d.h"
 #include "game/system/TestRegularPolygon.h"
 
-void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId)
+void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
      auto view = em.getView<Input>();
      for (auto entity : view)
@@ -12,7 +12,7 @@ void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId)
           Input *input = em.getComponent<Input>(entity);
           if (input->state & 0b10)
           {
-               createEntityBlock(em, worldId, {5, 0.05f, true}, input->x, input->y);
+               createEntityBlock(em, worldId, tick, {5, 0.05f}, input->x, input->y);
           }
      }
 }
