@@ -12,7 +12,7 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           // ShapesStartTouching(beginEvent->shapeIdA, beginEvent->shapeIdB);
           ecs::Entity entityA = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdA));
           ecs::Entity entityB = *static_cast<ecs::Entity *>(b2Shape_GetUserData(beginEvent->shapeIdB));
-          if (em.hasComponent<BorderWall>(entityA) || em.hasComponent<BorderWall>(entityB))
+          if (em.hasComponent<BorderWall_F>(entityA) || em.hasComponent<BorderWall_F>(entityB))
           {
                continue;
           }
@@ -87,6 +87,12 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                     if (hp->hp > 0)
                     {
                          hp->hp = std::max(0, hp->hp - attack->damage / TPS);
+
+                         if (em.hasComponent<HealingOverTime>(attackId) && em.getComponent<HealingOverTime>(attackId)->healing > 0) // 打断回复
+                         {
+                              em.removeComponent<HealingOverTime>(attackId);
+                         }
+
                          hp->tick = tick;
                          if (isBullet) // 处理子弹攻击攻击判定次数
                          {
@@ -108,22 +114,6 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                          em.addComponent<DeleteFlag>(attackId);
                     }
                }
-          }
-     }
-
-     auto group2 = em.group<HP, DamageOverTime>();
-     for (auto entity : *group2)
-     {
-          auto hp = em.getComponent<HP>(entity);
-          auto damageOverTime = em.getComponent<DamageOverTime>(entity);
-          if (hp->hp > 0)
-          {
-               hp->hp = std::max(0, hp->hp - damageOverTime->damage / TPS);
-               hp->tick = tick;
-          }
-          else if (!em.hasComponent<DeleteFlag>(entity))
-          {
-               em.addComponent<DeleteFlag>(entity);
           }
      }
 }

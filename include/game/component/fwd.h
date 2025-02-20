@@ -8,13 +8,13 @@
 #include "packData.h"
 #include "regularPolygon.h"
 #include "box2d/id.h"
-#include "type.h"
+#include "type/type.h"
 #include "attack.h"
 #include "contactList.h"
-#include "borderWall.h"
+#include "type/borderWall_f.h"
 #include "groupIndex.h"
 #include "deleteFlag.h"
-#include "damageOverTime.h"
+#include "healingOverTime.h"
 #include "bulletAttackNum.h"
 
 #include <cstdint>

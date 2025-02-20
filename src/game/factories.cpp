@@ -91,7 +91,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Velocity>(e);
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(12 * TPS));
-     em.addComponent<DamageOverTime>(e, static_cast<int16_t>(2 * TPS));
+     em.addComponent<HealingOverTime>(e, static_cast<int16_t>(-2 * TPS), tick, std::numeric_limits<uint32_t>::max());
      em.addComponent<BulletAttackNum>(e, static_cast<uint8_t>(4));
      em.addComponent<ContactList>(e);
      em.addComponent<PackData>(e, "", "");
@@ -134,7 +134,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
 ecs::Entity createEntityBrderWall(ecs::EntityManager &em, b2WorldId &worldId, float width, float height)
 {
      auto entity = em.createEntity();
-     em.addComponent<BorderWall>(entity);
+     em.addComponent<BorderWall_F>(entity);
 
      // 创建墙
      b2Segment s;
