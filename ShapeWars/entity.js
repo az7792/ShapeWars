@@ -33,7 +33,7 @@ class BaseEntity {
      }
 
      initDeadStatus() {
-          this.deadPrevTime = serverTime.prev - (1/this.speedRate - 1) * (serverTime.curr - serverTime.prev);//变相增加从val[0]到val[1]的时间
+          this.deadPrevTime = serverTime.prev - (1 / this.speedRate - 1) * (serverTime.curr - serverTime.prev);//变相增加从val[0]到val[1]的时间
           this.deadTime = serverTime.curr;
      }
 
@@ -63,6 +63,10 @@ class BaseEntity {
 
           if (componentState & COMP_ANGLE) {
                this.angle[1] = readAngle(dataView, offset);
+               if (this.angle[1] - this.angle[0] > Math.PI)
+                    this.angle[0] += Math.PI * 2;
+               else if (this.angle[0] - this.angle[1] > Math.PI)
+                    this.angle[0] -= Math.PI * 2;
           }
 
           if (componentState & COMP_POLYGON) {
