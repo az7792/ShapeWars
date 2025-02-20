@@ -10,7 +10,7 @@ struct BlockRevolutionCtrl
       */
      float targetSpeed;
      float rate;              // 过度到目标速度的速率
-     float velocityAngle;     // 速度方向(弧度制)
      uint16_t revolutionTime; // 公转一圈需要时间(秒) 每tick的朝向 velocityDirection += 2*PI/(revolutionTime/TPS) 逆时针就减
      bool isClockwise = true; // 是否顺时针转动
+     float velocityAngle = 0.f;     // 速度方向(弧度制)
 };

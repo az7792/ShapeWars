@@ -15,4 +15,11 @@ void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t 
                createEntityBlock(em, worldId, tick, {5, 0.05f}, input->x, input->y);
           }
      }
+
+     if (shapeEntityMap.size() <= 1500)
+     {
+          float x = (std::rand() % 800) / 100;
+          float y = (std::rand() % 800) / 100;
+          createEntityBlock(em, worldId, tick, {5, 0.05f}, x - 4.f, y - 4.f);
+     }
 }

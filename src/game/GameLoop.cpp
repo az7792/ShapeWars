@@ -360,6 +360,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&TestFireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&blockRotationCtrlSys, std::ref(em_)))
+         .addSystem(std::bind(&blockRevolutionCtrlSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&restoreHPSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))

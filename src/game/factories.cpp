@@ -56,6 +56,9 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<Velocity>(e);
      em.addComponent<Angle>(e, 0.f);
      em.addComponent<BlockRotationCtrl>(e, static_cast<uint16_t>(30), static_cast<bool>(std::rand() % 2));
+     // TODO: 调整世界比例，1m:500px -> 1m:50px
+     // BUG[009]: 目标速率或者rate太低由于box2d的现在可能导致某一帧过后物理速度直接变为0(这儿变化大小是相对的)
+     em.addComponent<BlockRevolutionCtrl>(e, 0.5f, 0.1f, static_cast<uint16_t>(30), static_cast<bool>(std::rand() % 2), static_cast<float>(std::rand() % 360 / 180.f * M_PI));
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
