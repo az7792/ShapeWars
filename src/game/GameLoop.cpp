@@ -236,6 +236,7 @@ void GameLoop::createPlayBody(ecs::Entity entity)
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
+     bodyDef.fixedRotation = true;
      bodyDef.position = {0.f, 0.f};
      bodyDef.userData = static_cast<void *>(em_.getEntityPtr(entity));
      b2BodyId bodyId = b2CreateBody(worldId_, &bodyDef);

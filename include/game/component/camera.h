@@ -34,6 +34,7 @@ struct Camera
      {
           b2BodyDef bodyDef = b2DefaultBodyDef();
           bodyDef.type = b2_kinematicBody;
+          bodyDef.fixedRotation = true;
           bodyDef.position = {x, y};
           b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 

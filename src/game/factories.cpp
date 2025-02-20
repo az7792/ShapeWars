@@ -22,6 +22,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
+     bodyDef.fixedRotation = true;
      bodyDef.position = {0.f, 0.f};
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
@@ -61,6 +62,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
+     bodyDef.fixedRotation = true;
      bodyDef.position = {x, y};
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
@@ -103,6 +105,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
+     bodyDef.fixedRotation = true;
      bodyDef.position = b2Body_GetPosition(*em.getComponent<b2BodyId>(player));
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
@@ -140,6 +143,7 @@ ecs::Entity createEntityBrderWall(ecs::EntityManager &em, b2WorldId &worldId, fl
      b2Segment s;
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.position = (b2Vec2){0.f, 0.f};
+     bodyDef.fixedRotation = true;
      b2BodyId Wall = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef(); // 默认为静态
