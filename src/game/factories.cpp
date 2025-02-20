@@ -1,11 +1,13 @@
 #include "game/factories.h"
 #include "config/config.h"
+#include <ctime>
 
 ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
+     em.addComponent<Angle>(e, 0.f);
      em.addComponent<HP>(e, static_cast<int16_t>(1000), static_cast<int16_t>(1000), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);
@@ -52,6 +54,8 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
+     em.addComponent<Angle>(e, 0.f);
+     em.addComponent<BlockRotationCtrl>(e, static_cast<uint16_t>(30), static_cast<bool>(std::rand() % 2));
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
      em.addComponent<ContactList>(e);

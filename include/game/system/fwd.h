@@ -4,5 +4,6 @@
 #include "cameraSys.h"
 #include "attackSys.h"
 #include "restoreHPSys.h"
+#include "blockRotationCtrlSys.h"
 #include "TestRegularPolygon.h"
 #include "TestFire.h"

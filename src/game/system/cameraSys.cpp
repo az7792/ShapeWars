@@ -16,6 +16,13 @@ namespace
           strAppend(*data, position.y);
      }
 
+     // 2
+     void appendAngle2(std::string *data, Angle *angle, uint64_t &componentState, bool isCreate = false)
+     {
+          componentState |= COMP_ANGLE;
+          strAppend(*data, angle->angle);
+     }
+
      // 3
      void appendRegularPolygon3(std::string *data, uint64_t &componentState, RegularPolygon *regularPolygon, bool isCreate = false)
      {
@@ -92,6 +99,7 @@ namespace
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendAngle2(data,em.getComponent<Angle>(targetEntity), componentState, isCreate);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
           }

@@ -6,6 +6,7 @@
 // valgrind --leak-check=full --show-leak-kinds=all ./server
 int main()
 {
+     std::srand(std::time(0));
      /// 务必于协议表顺序一致，最好不要轻易调整顺序，哪怕这个字段永远用不到
      ecs::ComponentTypeID::registerComponent<Position>();       // 0
      ecs::ComponentTypeID::registerComponent<Velocity>();       // 1

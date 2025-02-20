@@ -16,6 +16,8 @@
 #include "deleteFlag.h"
 #include "healingOverTime.h"
 #include "bulletAttackNum.h"
+#include "blockRotationCtrl.h"
+#include "blockRevolutionCtrl.h"
 
 #include <cstdint>
 
