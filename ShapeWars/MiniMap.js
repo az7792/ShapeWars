@@ -41,10 +41,10 @@ class MiniMap {
           this.fillRect(0, 0, width, height, COLORS.backgroundValid);
 
           //test start
-          for (let i = 0; i < 90; i++) {
-               miniMap.fillRect(0, i, 100, 1, [2 * i, 255 - 2 * i, 100 + i, 255]);
-          }
-          miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
+          // for (let i = 0; i < 90; i++) {
+          //      miniMap.fillRect(0, i, 100, 1, [2 * i, 255 - 2 * i, 100 + i, 255]);
+          // }
+          // miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
           //test end
      }
 }

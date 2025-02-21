@@ -225,3 +225,4 @@
      - fillColor和strokeColor
 - 生成多种颜色的方块
      - 绿，蓝，紫，橙
+- 调整地图颜色
