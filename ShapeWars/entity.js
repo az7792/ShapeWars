@@ -29,7 +29,7 @@ class BaseEntity {
      showMe(deltaTime) {
           drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
           if (this.HP < this.maxHP)
-               drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - 0.1, this.HP, this.maxHP);
+               drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - (this.sides >= 16 ? this.r : (this.r / Math.cos(Math.PI / this.sides))), this.HP, this.maxHP);
      }
 
      initDeadStatus() {
