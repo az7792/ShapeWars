@@ -109,7 +109,6 @@ function readStyle(dataView, offset) {
      offset.value += 4;
      let strokeColor = dataView.getUint32(offset.value, true);
      offset.value += 4;
-     console.log("fillColor: " + fillColor + ", strokeColor: " + strokeColor);
 
      return [uint32ToHexRGBA(fillColor), uint32ToHexRGBA(strokeColor)];
 }
