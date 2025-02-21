@@ -116,7 +116,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = 1.f;   // 默认为1
+     shapeDef.density = 5.f;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;

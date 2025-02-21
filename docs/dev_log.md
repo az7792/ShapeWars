@@ -215,3 +215,5 @@
 ## 2025年2月21日
 - 世界比例尺由`1m = 500px`调整为`1m = 50px`
 - 修复[BUG-008](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md),[BUG-009](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
+- 随机生成多种方块
+- 调整子弹的密度
