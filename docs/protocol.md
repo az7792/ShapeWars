@@ -28,7 +28,9 @@
 - 7 : 名称
   - ui8 名称长度
   - string 名称
-- 8 : 
+- 8 : 填充样式
+  - ui32 fillColor
+  - ui32 strokeColor
 - 9 : 
 
 ## client to server protocol

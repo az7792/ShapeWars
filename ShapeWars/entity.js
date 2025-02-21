@@ -15,16 +15,16 @@ class BaseEntity {
           this.deadAnimationDuration = 200;//ms
           this.speedRate = 0.3;//控制速度为死亡时速度的倍数
      }
-     hexToRGBA(hex, alpha) {
-          hex = hex.replace('#', '');
 
-          let r = parseInt(hex.substring(0, 2), 16);
-          let g = parseInt(hex.substring(2, 4), 16);
-          let b = parseInt(hex.substring(4, 6), 16);
+     updateRGBA(color, alpha) {
+          alpha = Math.min(255, Math.max(0, alpha));
 
-          // 返回 RGBA 格式的颜色
-          return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          if (color.length === 9) {//#RRGGBBAA
+               return color.substring(0, 7) + alpha.toString(16).padStart(2, '0');
+          } //RRGGBB
+          return color + alpha.toString(16).padStart(2, '0');
      }
+
 
      showMe(deltaTime) {
           drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
@@ -40,11 +40,12 @@ class BaseEntity {
      showDeadAnimation(currentTime) {
           let delta = (currentTime - this.deadTime) / this.deadAnimationDuration;
 
-          let alpha = Math.max(0, 1 - delta);//透明度
+          //透明度
+          let alpha = Math.floor(255 * Math.max(0, 1 - delta));//HACK：应该从原始透明的开始下降，而不是从1(255)开始下降
           let deadR = this.r * (1 + 0.3 * delta);//半径
 
-          let rgbaFillColor = this.hexToRGBA(this.fillColor, alpha);
-          let rgbaStrokeColor = this.hexToRGBA(this.strokeColor, alpha);
+          let rgbaFillColor = this.updateRGBA(this.fillColor, alpha);
+          let rgbaStrokeColor = this.updateRGBA(this.strokeColor, alpha);
           currentTime -= (serverTime.curr - serverTime.prev);//修正时间,当实体死亡时,客户端会在一个服务器tick后才知道实体死亡
           drawRegularPolygon(this.sides, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
      }
@@ -75,6 +76,10 @@ class BaseEntity {
 
           if (componentState & COMP_HP) {
                [this.HP, this.maxHP] = readHP(dataView, offset);
+          }
+
+          if (componentState & COMP_STYLE) {
+               [this.fillColor, this.strokeColor] = readStyle(dataView, offset);
           }
 
           return componentState;

@@ -1,4 +1,14 @@
 /**
+ * 读取实体ID的index部分
+ * @returns 实体ID的index部分
+ */
+function readEntityIDIndex(dataView, offset) {
+     let entityID = dataView.getUint32(offset.value, true);
+     offset.value += 4;
+     return entityID & 0x000FFFFF;
+}
+
+/**
  * 读取位置
  * @returns [x,y]
  */
@@ -89,3 +99,29 @@ function readName(dataView, offset) {
 
      return new TextDecoder().decode(nameBytes);//使用 TextDecoder 解码字节流
 }
+
+/**
+ * 读取填充样式
+ * @return [填充颜色,描边颜色]
+ */
+function readStyle(dataView, offset) {
+     let fillColor = dataView.getUint32(offset.value, true);
+     offset.value += 4;
+     let strokeColor = dataView.getUint32(offset.value, true);
+     offset.value += 4;
+     console.log("fillColor: " + fillColor + ", strokeColor: " + strokeColor);
+
+     return [uint32ToHexRGBA(fillColor), uint32ToHexRGBA(strokeColor)];
+}
+
+// 将 Uint32 转换为 RRGGBBAA 字符串
+function uint32ToHexRGBA(color) {
+     const r = (color >> 24) & 0xFF; // R
+     const g = (color >> 16) & 0xFF; // G
+     const b = (color >> 8) & 0xFF;  // B
+     const a = color & 0xFF;         // A
+
+     // 转换为 2 位 16 进制字符串并拼接
+     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}${a.toString(16).padStart(2, '0')}`;
+ }
+ 

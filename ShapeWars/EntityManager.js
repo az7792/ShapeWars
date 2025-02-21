@@ -6,8 +6,7 @@ class EntityManager {
      }
      //添加实体
      addEntityByDataView(dataView, offset) {
-          let entityId = dataView.getUint32(offset.value, true);//实体id
-          offset.value += 4;
+          let entityId = readEntityIDIndex(dataView, offset);//实体id的index部分
           let entityType = readTypeID(dataView, offset);//实体类型
           if (entityType == CATEGORY_PLAYER) {
                this.addEntity(EntityManager.entityTypeToLevel[entityType], entityId, PlayerEntity.create(dataView, offset));
@@ -20,8 +19,7 @@ class EntityManager {
 
      //移出实体
      removeEntityByDataView(dataView, offset) {
-          let entityId = dataView.getUint32(offset.value, true);//实体id
-          offset.value += 4;
+          let entityId = readEntityIDIndex(dataView, offset);//实体id的index部分
           for (let i = 0; i < this.SparseSet.length; i++) {
                this.SparseSet[i].try_remove(entityId);
           }
@@ -29,8 +27,7 @@ class EntityManager {
 
      //删除实体
      deleteEntityByDataView(dataView, offset) {
-          let entityId = dataView.getUint32(offset.value, true);//实体id
-          offset.value += 4;
+          let entityId = readEntityIDIndex(dataView, offset);//实体id的index部分
           for (let i = 0; i < this.SparseSet.length; i++) {
                if (this.SparseSet[i].has(entityId)) {
                     let entity = this.SparseSet[i].get(entityId);
@@ -44,8 +41,7 @@ class EntityManager {
 
      //更新实体
      updateEntityByDataView(dataView, offset) {
-          let entityId = dataView.getUint32(offset.value, true);//实体id
-          offset.value += 4;
+          let entityId = readEntityIDIndex(dataView, offset);//实体id的index部分
           let entityType = dataView.getUint8(offset.value);//实体类型
           offset.value += 1;
           this.SparseSet[EntityManager.entityTypeToLevel[entityType]].get(entityId).update(dataView, offset);

@@ -67,6 +67,17 @@ namespace
           }
      }
 
+     // 8
+     void appendStyle8(std::string *data, uint64_t &componentState, Style *style, bool isCreate = false)
+     {
+          if (isCreate)
+          {
+               componentState |= COMP_STYLE;
+               strAppend(*data, style->fillColor);
+               strAppend(*data, style->strokeColor);
+          }
+     }
+
      // 创建时无论是否需要更新都需要打包
      void processEntity(ecs::EntityManager &em, uint32_t tick, ecs::Entity targetEntity, bool isCreate = false)
      {
@@ -114,6 +125,7 @@ namespace
                appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState, isCreate);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
+               appendStyle8(data, componentState, em.getComponent<Style>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BULLET) // 处理子弹实体
           {
