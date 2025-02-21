@@ -21,3 +21,14 @@
 #define CATEGORY_BULLET (1u << 2)
 #define CATEGORY_CAMERA (1u << 3)
 #define CATEGORY_BORDER_WALL (1u << 4)
+
+//方块填充颜色
+#define BOLCK_FILL_GREEN 0x3ff566ff
+#define BOLCK_FILL_BLUE 0x4c69a0ff
+#define BOLCK_FILL_PURPLE 0xff57e6ff
+#define BOLCK_FILL_ORANGE 0xffac4dff
+//方块边框颜色
+#define BOLCK_STROKE_GREEN 0x238f28ff
+#define BOLCK_STROKE_BLUE 0x32467cff
+#define BOLCK_STROKE_PURPLE 0xa83c98ff
+#define BOLCK_STROKE_ORANGE 0xc7873dff

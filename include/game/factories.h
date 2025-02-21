@@ -16,7 +16,7 @@ inline std::vector<b2ShapeId> willDeleteShapes;
 ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex, std::string name);
 
 // 创建资源方块
-ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, float x, float y);
+ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, Style style, float x, float y);
 
 // 创建子弹
 ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player);

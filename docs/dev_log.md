@@ -223,3 +223,5 @@
 - 实体ID由只同步index改为全部同步
 - 加入Style组件
      - fillColor和strokeColor
+- 生成多种颜色的方块
+     - 绿，蓝，紫，橙

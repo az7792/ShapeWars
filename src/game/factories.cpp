@@ -50,7 +50,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      return e;
 }
 
-ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, float x, float y)
+ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, Style style, float x, float y)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
@@ -64,7 +64,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<PackData>(e, "", "");
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BLOCK));
      em.addComponent<RegularPolygon>(e, regularPolygon);
-     em.addComponent<Style>(e, static_cast<uint32_t>(0x00ff00ff), static_cast<uint32_t>(0xff0000ff));
+     em.addComponent<Style>(e, style);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
