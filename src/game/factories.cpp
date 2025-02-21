@@ -16,7 +16,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<TcpConnection *>(e, tcpConnection);
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_PLAYER));
      em.addComponent<GroupIndex>(e, groupIndex);
-     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.05f); //>=16为圆形
+     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      em.addComponent<Camera>(e, 0.f, 0.f, 1.f);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
@@ -41,7 +41,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      // 圆形
      b2Circle circle;
      circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
-     circle.radius = 0.05f;
+     circle.radius = em.getComponent<RegularPolygon>(e)->radius;
 
      shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = e;
 
@@ -56,8 +56,6 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<Velocity>(e);
      em.addComponent<Angle>(e, 0.f);
      em.addComponent<BlockRotationCtrl>(e, static_cast<uint16_t>(30), static_cast<bool>(std::rand() % 2));
-     // TODO: 调整世界比例，1m:500px -> 1m:50px
-     // BUG[009]: 目标速率或者rate太低由于box2d的现在可能导致某一帧过后物理速度直接变为0(这儿变化大小是相对的)
      em.addComponent<BlockRevolutionCtrl>(e, 0.5f, 0.1f, static_cast<uint16_t>(30), static_cast<bool>(std::rand() % 2), static_cast<float>(std::rand() % 360 / 180.f * M_PI));
      em.addComponent<HP>(e, static_cast<int16_t>(100), static_cast<int16_t>(100), tick);
      em.addComponent<Attack>(e, static_cast<int16_t>(2 * TPS));
@@ -107,7 +105,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BULLET));
      em.addComponent<GroupIndex>(e, em.getComponent<GroupIndex>(player)->index);
      em.addComponent<ecs::Entity>(e, player);
-     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.02f); //>=16为圆形
+     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.2f); //>=16为圆形
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -129,12 +127,12 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      // 圆形
      b2Circle circle;
      circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
-     circle.radius = 0.02f;
+     circle.radius = em.getComponent<RegularPolygon>(e)->radius;
 
      shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = e;
      auto *input = em.getComponent<Input>(player);
      b2Vec2 vel = (b2Vec2){input->x, input->y} - bodyDef.position;
-     vel = b2Normalize(vel) * 1.f;
+     vel = b2Normalize(vel) * 10.f;
      b2Body_SetLinearVelocity(bodyId, vel);
 
      em.addComponent<b2BodyId>(e, bodyId);

@@ -230,7 +230,7 @@ void GameLoop::createPlayBody(ecs::Entity entity)
      // em_.replaceComponent<TcpConnection *>(entity, tcpConnection);
      // em_.replaceComponent<Type>(entity, static_cast<uint8_t>(CATEGORY_PLAYER));
      // em_.getComponent<GroupIndex>(entity)->isDirty = true;
-     em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.05f); //>=16为圆形
+     //em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
 
      // 定义刚体
@@ -321,8 +321,8 @@ void GameLoop::handleOnOpen(TcpConnection *conn)
 {
      std::string message;
      message.push_back(0x00);          // 0x00 初始化地图
-     strAppend<float>(message, 10.0f); // width
-     strAppend<float>(message, 10.0f); // height
+     strAppend<float>(message, 100.0f); // width
+     strAppend<float>(message, 100.0f); // height
      ws_.send(message, conn);
 }
 
@@ -349,7 +349,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      worldId_ = b2CreateWorld(&worldDef);
 
      // 创建墙
-     createEntityBrderWall(em_, worldId_, 5.f, 5.f);
+     createEntityBrderWall(em_, worldId_, 50.f, 50.f);
 
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))

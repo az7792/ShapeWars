@@ -19,16 +19,17 @@ void playerMovementSys(ecs::EntityManager &em, b2WorldId &worldId)
           if (input->state & (1ull << 5)) // D
                dx += 1;
           b2Vec2 vel = b2Vec2_zero;
+          float speed = 5.f;
           if (dx == 0 && dy == 0)
                vel.x = vel.y = 0;
           else if (dx != 0 && dy != 0)
           {
-               vel.x = 0.5f * dx / sqrtf32(2), vel.y = 0.5f * dy / sqrtf32(2);
+               vel.x = speed * dx / sqrtf32(2), vel.y = speed * dy / sqrtf32(2);
           }
           else if (dx != 0)
-               vel.x = 0.5f * dx, vel.y = 0;
+               vel.x = speed * dx, vel.y = 0;
           else if (dy != 0)
-               vel.y = 0.5f * dy, vel.x = 0;
+               vel.y = speed * dy, vel.x = 0;
           b2Body_SetLinearVelocity(*bodyId, vel);
      }
 }

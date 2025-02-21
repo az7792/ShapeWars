@@ -8,7 +8,7 @@ b2Vec2 SmoothDampVelocity(b2Vec2 current, b2Vec2 target, b2Vec2 currentVelocity,
      float distance = b2Length(direction);
 
      // 如果距离很小，直接返回零速度
-     if (distance < 0.002f) // 小于1px
+     if (distance < 0.02f) // 小于1px
      {
           return b2Vec2_zero;
      }

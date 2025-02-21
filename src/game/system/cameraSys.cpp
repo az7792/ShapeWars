@@ -163,8 +163,7 @@ void cameraSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                b2Vec2 target = b2Body_GetPosition(*em.getComponent<b2BodyId>(entity));
                b2Vec2 currVelocity = b2Body_GetLinearVelocity(bodyId);
                // BUG: 006
-               // BUG：008
-               b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 1.f));
+               b2Body_SetLinearVelocity(bodyId, SmoothDampVelocity(curr, target, currVelocity, 0.1f, 50.f));
           }
           else
           {

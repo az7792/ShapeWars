@@ -211,3 +211,7 @@
 - 为刚体组件添加固定旋转(物理上无法转动)
 - 前端对角度进行修正，使得向夹角小的方向插值
 - 增加实体自转系统，用于资源方块的自转
+
+## 2025年2月21日
+- 世界比例尺由`1m = 500px`调整为`1m = 50px`
+- 修复[BUG-008](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md),[BUG-009](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)

@@ -7,8 +7,8 @@
 #include <iostream>
 struct Camera
 {
-     constexpr static float width = (1920.0f + 100) / 500;
-     constexpr static float height = (1080.0f + 100) / 500;
+     constexpr static float width = (1920.0f + 100) / 50;
+     constexpr static float height = (1080.0f + 100) / 50;
      float x;
      float y;
      float fov;
