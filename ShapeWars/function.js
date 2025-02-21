@@ -329,6 +329,7 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      angle = -angle;
 
      ctx.save();
+     ctx.lineJoin = "round";
      ctx.beginPath();
 
      if (sides >= 16) {
