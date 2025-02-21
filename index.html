@@ -18,6 +18,8 @@
                left: 0;
                width: 100%;
                height: 100%;
+               z-index: 1;
+               /* 确保 canvas 在底层 */
           }
 
           button {
@@ -52,17 +54,41 @@
                /* 垂直居中 */
                user-select: none;
                /* 禁用文本选择 */
+               z-index: 10;
+               /* 确保输入框在 canvas 之上 */
+          }
+
+          #nameInput {
+               position: fixed;
+               background-color: #4CAF50;
+               color: white;
+               font-size: 26px;
+               border: 2px solid #0b7502;
+               box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.3);
+               border-radius: 5px;
+               margin: 0;
+               width: 200px;
+               height: 50px;
+               top: 0px;
+               left: 0px;
+               padding-left: 10px;
+               box-sizing: border-box;
+               z-index: 10;
+               /* 确保输入框在 canvas 之上 */
           }
      </style>
 </head>
 
 <body>
+     <input id="nameInput" type="text" placeholder="请输入名称" maxlength="10">
      <button id="startGameButton">开始游戏</button>
      <button id="upFov">upFov</button>
      <button id="downFov">downFov</button>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
 
      <script>
+          //获取名称输入框
+          const nameInput = document.getElementById('nameInput');
           // 获取按钮元素
           const startButton = document.getElementById('startGameButton');
           const upFovButton = document.getElementById('upFov');
@@ -90,8 +116,19 @@
      <script>
           // 监听按钮点击事件
           startButton.addEventListener('click', function () {
-               sendMessage(new Uint8Array([0]));
+               const encodedName = new TextEncoder().encode(nameInput.value);//文本
+               const nameLength = encodedName.length; // 文本长度(字节)
+
+               let len = 1 + 1 + nameLength; // header + len + str
+               let arr = new Uint8Array(len);
+
+               arr[0] = 0x00;  // 创建角色
+               arr[1] = nameLength;  // 名称的字节长度
+               arr.set(encodedName, 2);
+
+               sendMessage(arr);
           });
+
           startButton.addEventListener('contextmenu', function (event) {
                event.preventDefault();  // 禁止右键菜单
           });

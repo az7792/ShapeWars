@@ -107,8 +107,15 @@ class PlayerEntity extends BaseEntity {
           this.maxHP = 100;
           this.HP = 100;
           this.groupIndex = 0;
+          this.name = "";
           this.deadAnimationDuration = 500;
      }
+
+     showMe(deltaTime) {
+          super.showMe(deltaTime);
+          drawName(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name);
+     }
+
 
      update(dataView, offset) {
           let componentState = super.update(dataView, offset);
@@ -121,6 +128,9 @@ class PlayerEntity extends BaseEntity {
                     this.fillColor = COLORS.bulletFillColor[1];
                     this.strokeColor = COLORS.bulletStrokeColor[1];
                }
+          }
+          if (componentState & COMP_NAME) {
+               this.name = readName(dataView, offset);
           }
      }
 }

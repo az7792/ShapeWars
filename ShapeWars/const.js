@@ -22,3 +22,4 @@ const COMP_POLYGON = BigInt(1 << 3);  // 0b00001000 正多边形
 const COMP_HP = BigInt(1 << 4);       // 0b00010000 血量
 const COMP_TYPE = BigInt(1 << 5);     // 0b00100000 类型
 const COMP_GROUPINDEX = BigInt(1 << 6);   // 0b01000000 碰撞组索引
+const COMP_NAME = BigInt(1 << 7);   // 0b10000000 名称

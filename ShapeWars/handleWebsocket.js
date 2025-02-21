@@ -70,11 +70,13 @@ function parseMessage(dataView, offset) {
           case 0x05://玩家死亡消息
                playerStatus.isAlive = false;
                startButton.style.display = 'flex';
+               nameInput.style.display = 'flex';
                playerInput.keyStatus = new Array(64).fill(false);
                break;
           case 0x06://玩家创建角色消息
                playerStatus.isAlive = true;
                startButton.style.display = 'none';               
+               nameInput.style.display = 'none';
                break;
      }
 }

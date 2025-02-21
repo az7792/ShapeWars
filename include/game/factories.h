@@ -13,7 +13,7 @@ inline std::unordered_map<uint64_t, ecs::Entity> shapeEntityMap;
 inline std::vector<b2ShapeId> willDeleteShapes;
 
 // 创建玩家
-ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex);
+ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex, std::string name);
 
 // 创建资源方块
 ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, float x, float y);

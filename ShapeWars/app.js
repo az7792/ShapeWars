@@ -10,6 +10,8 @@ function resizeCanvas() {
      canvas.height = window.innerHeight * scale;
      startButton.style.top = (canvas.height - startButton.offsetHeight) / 2 + "px";
      startButton.style.left = (canvas.width - startButton.offsetWidth) / 2 + "px";
+     nameInput.style.top = (canvas.height - nameInput.offsetHeight) / 2 - startButton.offsetHeight -20+ "px";
+     nameInput.style.left = (canvas.width - nameInput.offsetWidth) / 2 + "px";
 }
 
 // 监听窗口大小变化

@@ -75,3 +75,17 @@ function readGroupIndex(dataView, offset) {
      offset.value += 4;
      return index;
 }
+
+/**
+ * 读取名称
+ * @returns 名称
+ */
+function readName(dataView, offset) {
+     let len = dataView.getUint8(offset.value, true);
+     offset.value += 1;
+
+     const nameBytes = new Uint8Array(dataView.buffer, offset.value, len);
+     offset.value += len;
+
+     return new TextDecoder().decode(nameBytes);//使用 TextDecoder 解码字节流
+}

@@ -2,7 +2,7 @@
 #include "config/config.h"
 #include <ctime>
 
-ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex)
+ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, TcpConnection *tcpConnection, GroupIndex groupIndex, std::string name)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
@@ -16,6 +16,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<TcpConnection *>(e, tcpConnection);
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_PLAYER));
      em.addComponent<GroupIndex>(e, groupIndex);
+     em.addComponent<Name>(e, name);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      em.addComponent<Camera>(e, 0.f, 0.f, 1.f);
      Camera *camera = em.getComponent<Camera>(e);

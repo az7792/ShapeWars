@@ -56,6 +56,17 @@ namespace
           }
      }
 
+     // 7
+     void appendName7(std::string *data, uint64_t &componentState, Name *name, bool isCreate = false)
+     {
+          if (isCreate)
+          {
+               componentState |= COMP_NAME;
+               strAppend<uint8_t>(*data, static_cast<uint8_t>(name->name.size()));
+               *data += name->name;
+          }
+     }
+
      // 创建时无论是否需要更新都需要打包
      void processEntity(ecs::EntityManager &em, uint32_t tick, ecs::Entity targetEntity, bool isCreate = false)
      {
@@ -95,11 +106,12 @@ namespace
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
+               appendName7(data, componentState, em.getComponent<Name>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
-               appendAngle2(data,em.getComponent<Angle>(targetEntity), componentState, isCreate);
+               appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState, isCreate);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
           }

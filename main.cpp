@@ -15,6 +15,7 @@ int main()
      ecs::ComponentTypeID::registerComponent<HP>();             // 4
      ecs::ComponentTypeID::registerComponent<Type>();           // 5
      ecs::ComponentTypeID::registerComponent<GroupIndex>();     // 6
+     ecs::ComponentTypeID::registerComponent<Name>();           // 7
 
      Logger::instance().setLevel(LogLevel::DEBUG);
      GameLoop gameLoop;

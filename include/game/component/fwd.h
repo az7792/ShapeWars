@@ -13,6 +13,7 @@
 #include "contactList.h"
 #include "type/borderWall_f.h"
 #include "groupIndex.h"
+#include "name.h"
 #include "deleteFlag.h"
 #include "healingOverTime.h"
 #include "bulletAttackNum.h"
@@ -28,3 +29,4 @@ const uint64_t COMP_POLYGON = (1ull << 3);    // 0b00001000 正多边形
 const uint64_t COMP_HP = (1ull << 4);         // 0b00010000 血量
 const uint64_t COMP_TYPE = (1ull << 5);       // 0b00100000 类型
 const uint64_t COMP_GROUPINDEX = (1ull << 6); // 0b01000000 碰撞组索引
+const uint64_t COMP_NAME = (1ull << 7);       // 0b10000000 名称

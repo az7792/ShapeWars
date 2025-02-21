@@ -365,6 +365,28 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      ctx.restore();
 }
 
+//绘制名称
+function drawName(x, y, name) {
+     // 变换到屏幕坐标系
+     ({ x, y } = box2DtoScreen(x, y));
+
+     ctx.save();
+
+     // 字体大小
+     let Fsize = 16;
+     ctx.font = Fsize + 'px Arial';// 字体大小和类型
+
+     // 获取文本宽度
+     const textWidth = ctx.measureText(name).width;
+
+     // 绘制文字
+     ctx.fillStyle = "white";
+     ctx.fillText(name, x - textWidth / 2, y + Fsize / 2 - Fsize);
+
+     ctx.restore();
+}
+
+
 // 绘制血条
 function drawHealthBar(x, y, health, maxHealth) {
      // 变换到屏幕坐标系

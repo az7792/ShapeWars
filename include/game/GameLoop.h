@@ -3,6 +3,7 @@
 #include "net/WebSocketServer.h"
 #include "box2d/box2d.h"
 #include <shared_mutex>
+#include <tuple>
 
 class GameLoop
 {
@@ -20,7 +21,7 @@ private:
      // 删除一个刚体并清理shapeEntityMap
      void deleteBody(b2BodyId bodyId);
      // 根据实体创建玩家刚体
-     void createPlayBody(ecs::Entity entity);
+     void createPlayBody(ecs::Entity entity,std::string name);
      
 private:
      struct atomicInput
@@ -43,7 +44,8 @@ private:
      std::unordered_map<ecs::Entity, int> inputMap_;              // 玩家输入映射
      std::mutex playerAndInputMapMutex_;                          // 玩家映射锁
 
-     std::deque<TcpConnection *> createPlayerQueue_;  // 等待创建玩家的队列
+     using playerCreateInfo = std::tuple<TcpConnection *, std::string>; // 创建玩家信息
+     std::deque<playerCreateInfo> createPlayerQueue_;  // 等待创建玩家的队列
      std::deque<TcpConnection *> destroyPlayerQueue_; // 等待销毁玩家的队列
      std::mutex createPlayerQueueMutex_;              // 创建玩家队列锁
      std::mutex destroyPlayerQueueMutex_;             // 销毁玩家队列锁

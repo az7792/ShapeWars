@@ -117,24 +117,28 @@ void GameLoop::createPlayerSys()
      std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
      while (!createPlayerQueue_.empty())
      {
-          auto it = playerMap_.find(createPlayerQueue_.front());
+          auto it = playerMap_.find(std::get<0>(createPlayerQueue_.front()));
           if (it == playerMap_.end()) // 玩家未创建实体
           {
-               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, createPlayerQueue_.front(), {groupIndex--});
+               TcpConnection *tcpConnection = std::get<0>(createPlayerQueue_.front());
+               std::string name = std::get<1>(createPlayerQueue_.front());
+               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, tcpConnection, {groupIndex--}, name);
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
-               playerMap_.emplace(createPlayerQueue_.front(), std::make_pair(entity, true));
+               playerMap_.emplace(tcpConnection, std::make_pair(entity, true));
                inputMap_[entity] = inputIndex;
                LOG_INFO("创建一个角色：" + std::to_string(entity));
-               ws_.send(std::string(1, 0x06), createPlayerQueue_.front()); // 通知客户端玩家已创建
+               ws_.send(std::string(1, 0x06), tcpConnection); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
           else if (it->second.second == 0) // 玩家已死亡
           {
+               TcpConnection *tcpConnection = std::get<0>(createPlayerQueue_.front());
+               std::string name = std::get<1>(createPlayerQueue_.front());
                ecs::Entity entity = it->second.first;
-               createPlayBody(entity);
+               createPlayBody(entity,name);
                it->second.second = 1;                                      // 标记玩家存活
-               ws_.send(std::string(1, 0x06), createPlayerQueue_.front()); // 通知客户端玩家已创建
+               ws_.send(std::string(1, 0x06), tcpConnection); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
           else
@@ -216,7 +220,7 @@ void GameLoop::deleteBody(b2BodyId bodyId)
      b2DestroyBody(bodyId);
 }
 
-void GameLoop::createPlayBody(ecs::Entity entity)
+void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
 {
      // em_.replaceComponent<Position>(entity);
      // em_.replaceComponent<Velocity>(entity);
@@ -230,7 +234,8 @@ void GameLoop::createPlayBody(ecs::Entity entity)
      // em_.replaceComponent<TcpConnection *>(entity, tcpConnection);
      // em_.replaceComponent<Type>(entity, static_cast<uint8_t>(CATEGORY_PLAYER));
      // em_.getComponent<GroupIndex>(entity)->isDirty = true;
-     //em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
+     em_.replaceComponent<Name>(entity, name);
+     // em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
 
      // 定义刚体
@@ -269,8 +274,10 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
      {
           std::lock_guard<std::mutex> lock1(createPlayerQueueMutex_);
           std::unique_lock<std::mutex> lock2(playerAndInputMapMutex_);
+          uint8_t nameLen = buffer.readValue<uint8_t>();
+          std::string name = buffer.readAsString(nameLen);
           if (playerMap_.find(conn) == playerMap_.end() || playerMap_[conn].second == 0) // 玩家未创建实体或已死亡
-               createPlayerQueue_.push_back(conn);
+               createPlayerQueue_.push_back(std::make_tuple(conn, name));
           break;
      }
      case 0x01: // 操作指令
