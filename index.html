@@ -32,8 +32,18 @@
                /* 设置按钮的内边距 */
           }
 
-          #startGameButton {
+          #gameControls {
                position: fixed;
+               top: 10px;
+               left: 10px;
+               z-index: 10;
+               /* 确保控制区在canvas之上 */
+               display: flex;
+               flex-direction: column;
+               gap: 10px;
+          }
+
+          #startGameButton {
                background-color: #4CAF50;
                color: white;
                font-size: 26px;
@@ -44,22 +54,13 @@
                cursor: pointer;
                width: 200px;
                height: 50px;
-               top: 0px;
-               left: 0px;
                display: flex;
-               /* 使用 flex 布局 */
                justify-content: center;
-               /* 水平居中 */
                align-items: center;
-               /* 垂直居中 */
                user-select: none;
-               /* 禁用文本选择 */
-               z-index: 10;
-               /* 确保输入框在 canvas 之上 */
           }
 
           #nameInput {
-               position: fixed;
                background-color: #4CAF50;
                color: white;
                font-size: 26px;
@@ -69,19 +70,17 @@
                margin: 0;
                width: 200px;
                height: 50px;
-               top: 0px;
-               left: 0px;
                padding-left: 10px;
                box-sizing: border-box;
-               z-index: 10;
-               /* 确保输入框在 canvas 之上 */
           }
      </style>
 </head>
 
 <body>
-     <input id="nameInput" type="text" placeholder="请输入名称" maxlength="10">
-     <button id="startGameButton">开始游戏</button>
+     <div id="gameControls">
+          <input id="nameInput" type="text" placeholder="请输入名称" maxlength="10">
+          <button id="startGameButton">开始游戏</button>
+     </div>
      <button id="upFov">upFov</button>
      <button id="downFov">downFov</button>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>

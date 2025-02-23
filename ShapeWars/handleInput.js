@@ -29,8 +29,14 @@ canvas.addEventListener("mouseup", (event) => {
 
 //鼠标移动
 canvas.addEventListener("mousemove", (event) => {
-     playerInput.mouseXInScreen = event.clientX;
-     playerInput.mouseYInScreen = event.clientY;
+     const rect = canvas.getBoundingClientRect();
+     // 设备的像素比率
+     const scaleX = canvas.width / rect.width;
+     const scaleY = canvas.height / rect.height;
+
+     //鼠标在 canvas 上的实际位置
+     playerInput.mouseXInScreen = (event.clientX - rect.left) * scaleX;
+     playerInput.mouseYInScreen = (event.clientY - rect.top) * scaleY;
 });
 
 window.addEventListener('blur', function () {

@@ -4,16 +4,16 @@
 // }
 // miniMap.fillRect(0, 0, 5, 95, [11, 24, 14, 255]);
 
-miniMap.fillRect(0,0,100,100,[205,205,205,255])
+miniMap.fillRect(0, 0, 100, 100, [205, 205, 205, 255])
 
 //更新画布大小
 function resizeCanvas() {
+     const scale = window.localStorage.getItem("no_retina") ? 1 : window.devicePixelRatio;
      canvas.width = window.innerWidth * scale;
      canvas.height = window.innerHeight * scale;
-     startButton.style.top = (canvas.height - startButton.offsetHeight) / 2 + "px";
-     startButton.style.left = (canvas.width - startButton.offsetWidth) / 2 + "px";
-     nameInput.style.top = (canvas.height - nameInput.offsetHeight) / 2 - startButton.offsetHeight -20+ "px";
-     nameInput.style.left = (canvas.width - nameInput.offsetWidth) / 2 + "px";
+
+     gameControls.style.top = (canvas.height - gameControls.offsetHeight) / 2 / scale + "px";
+     gameControls.style.left = (canvas.width - gameControls.offsetWidth) / 2 / scale + "px";
 }
 
 // 监听窗口大小变化
