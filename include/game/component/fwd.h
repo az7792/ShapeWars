@@ -15,6 +15,8 @@
 #include "groupIndex.h"
 #include "name.h"
 #include "style.h"
+#include "parent.h"
+#include "children.h"
 #include "deleteFlag.h"
 #include "healingOverTime.h"
 #include "bulletAttackNum.h"

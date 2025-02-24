@@ -106,7 +106,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<PackData>(e, "", "");
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BULLET));
      em.addComponent<GroupIndex>(e, em.getComponent<GroupIndex>(player)->index);
-     em.addComponent<ecs::Entity>(e, player);
+     em.addComponent<Parent>(e, player);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.2f); //>=16为圆形
 
      // 定义刚体
