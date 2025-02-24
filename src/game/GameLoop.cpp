@@ -166,6 +166,14 @@ void GameLoop::destroyEntitySys()
                     b2DestroyBody(*bodyId); // 清除玩家的刚体
                }
                b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
+
+               //清除玩家的炮管
+               std::vector<ecs::Entity> &barrelEntities = em_.getComponent<Children>(e)->children;
+               for (auto be : barrelEntities)
+               {
+                    em_.destroyEntity(be);
+               }
+               //清除玩家
                em_.destroyEntity(e);
                freeInputsQueue_.push_back(inputMap_[e]);
                inputMap_.erase(e);

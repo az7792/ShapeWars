@@ -18,7 +18,7 @@
 #include "parent.h"
 #include "children.h"
 #include "flag/deleteFlag.h"
-#include "flag/canFire.h"
+#include "fireStatus.h"
 #include "healingOverTime.h"
 #include "bulletAttackNum.h"
 #include "blockRotationCtrl.h"

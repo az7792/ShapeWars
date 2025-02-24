@@ -103,9 +103,11 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
 ecs::Entity createEntityBarrel(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player, float offsetAngle)
 {
      ecs::Entity e = em.createEntity();
-     em.addComponent<Barrel>(e, 0.5f, 0.8f, 1.f, 1.f, offsetAngle, 3u);
+     em.addComponent<Barrel>(e, 0.5f, 0.5f, 1.f, 1.f, offsetAngle, 4u);
+     em.addComponent<FireStatus>(e,static_cast<uint8_t>(0b00000001));
      em.addComponent<Parent>(e, player);
 
+     //添加到父对象的炮管列表中
      em.getComponent<Children>(player)->children.push_back(e);
      return e;
 }

@@ -16,25 +16,46 @@ void TestFireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                {
                     auto *barrel = em.getComponent<Barrel>(barrelEntity);
                     if (tick - barrel->LastTick >= barrel->cooldown)
-                         em.addComponent<CanFire>(barrelEntity);
+                         em.getComponent<FireStatus>(barrelEntity)->status = static_cast<uint8_t>(0b00000001);
                }
           }
      }
 
-     static std::vector<ecs::Entity> willDeleteCanFire;
-     willDeleteCanFire.clear();
-     auto group2 = em.group<CanFire, Barrel>();
+     auto group2 = em.group<Barrel>();
      for (auto entity : *group2)
      {
           auto *barrel = em.getComponent<Barrel>(entity);
           Parent *parent = em.getComponent<Parent>(entity);
+          FireStatus *fireStatus = em.getComponent<FireStatus>(entity);
           float angle = em.getComponent<Angle>(parent->parent)->angle + barrel->offsetAngle;
-          createEntityBullet(em, worldId, tick, parent->parent, angle);
-          barrel->LastTick = tick;
-          willDeleteCanFire.push_back(entity);
-     }
-     for (auto entity : willDeleteCanFire)
-     {
-          em.removeComponent<CanFire>(entity);
+
+          if (fireStatus->status & 0b00000001) // 可以发设
+          {
+               createEntityBullet(em, worldId, tick, parent->parent, angle);
+               barrel->LastTick = tick;
+               assert(fabs(barrel->nowLength - barrel->length) <= 1e-5);
+               barrel->nowLength -= 0.1f * barrel->length / (barrel->cooldown / 2);
+               fireStatus->status = static_cast<uint8_t>(0b00000010);
+          }
+          else if (fireStatus->status & 0b00000010) // 发射中，第一段
+          {
+               if (tick - barrel->LastTick + 1 >= barrel->cooldown / 2)
+               {
+                    fireStatus->status = static_cast<uint8_t>(0b00000100);
+                    barrel->nowLength = (1.f - 0.1f) * barrel->length;
+               }
+               else
+                    barrel->nowLength -= 0.1f * barrel->length / (barrel->cooldown / 2);
+          }
+          else if (fireStatus->status & 0b00000100) // 发射中，第二段
+          {
+               if (tick - barrel->LastTick + 1 >= barrel->cooldown)
+               {
+                    fireStatus->status = static_cast<uint8_t>(0b00000000);
+                    barrel->nowLength = barrel->length;
+               }
+               else
+                    barrel->nowLength += 0.1f * barrel->length / (barrel->cooldown / 2);
+          }
      }
 }
