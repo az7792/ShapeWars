@@ -18,8 +18,11 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
 // 创建资源方块
 ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, RegularPolygon regularPolygon, Style style, float x, float y);
 
+// 创建炮管
+ecs::Entity createEntityBarrel(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player, float offsetAngle);
+
 // 创建子弹
-ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player);
+ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player, float angle);
 
 /**
  * 以(0,0)为中心，建立边界墙

@@ -17,7 +17,7 @@ namespace
      }
 
      // 2
-     void appendAngle2(std::string *data, Angle *angle, uint64_t &componentState, bool isCreate = false)
+     void appendAngle2(std::string *data, Angle *angle, uint64_t &componentState)
      {
           componentState |= COMP_ANGLE;
           strAppend(*data, angle->angle);
@@ -78,6 +78,21 @@ namespace
           }
      }
 
+     // 9
+     void appendBarrelList9(ecs::EntityManager &em, std::string *data, uint64_t &componentState, std::vector<ecs::Entity> *barrelList)
+     {
+          componentState |= COMP_BARRELLIST;
+          strAppend<uint8_t>(*data, static_cast<uint8_t>(barrelList->size()));
+          for (size_t i = 0; i < barrelList->size(); ++i)
+          {
+               Barrel *barrel = em.getComponent<Barrel>(barrelList->at(i));
+               strAppend(*data, barrel->widthL);
+               strAppend(*data, barrel->widthR);
+               strAppend(*data, barrel->nowLength);
+               strAppend(*data, barrel->offsetAngle);
+          }
+     }
+
      // 创建时无论是否需要更新都需要打包
      void processEntity(ecs::EntityManager &em, uint32_t tick, ecs::Entity targetEntity, bool isCreate = false)
      {
@@ -114,15 +129,17 @@ namespace
           if (type->id == CATEGORY_PLAYER) // 处理玩家实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
                appendName7(data, componentState, em.getComponent<Name>(targetEntity), isCreate);
+               appendBarrelList9(em, data, componentState, &(em.getComponent<Children>(targetEntity)->children));
           }
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
-               appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState, isCreate);
+               appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendHP4(tick, data, componentState, em.getComponent<HP>(targetEntity), isCreate);
                appendStyle8(data, componentState, em.getComponent<Style>(targetEntity), isCreate);

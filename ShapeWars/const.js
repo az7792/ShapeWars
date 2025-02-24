@@ -11,7 +11,7 @@ const playerInput = new PlayerInput();
 
 
 const CATEGORY_PLAYER = 0;
-const CATEGORY_BLOCK  = 1;
+const CATEGORY_BLOCK = 1;
 const CATEGORY_BULLET = 2;
 
 const COMP_POSITION = BigInt(1 << 0); // 0b00000001 位置
@@ -23,3 +23,4 @@ const COMP_TYPE = BigInt(1 << 5);     // 0b00100000 类型
 const COMP_GROUPINDEX = BigInt(1 << 6);   // 0b01000000 碰撞组索引
 const COMP_NAME = BigInt(1 << 7);   // 0b10000000 名称
 const COMP_STYLE = BigInt(1 << 8);  //0b100000000 填充样式
+const COMP_BARRELLIST = BigInt(1 << 9); // 枪管列表

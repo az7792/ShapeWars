@@ -9,13 +9,15 @@
 
 void GameLoop::inputSys()
 {
-     auto view = em_.getView<Input>();
+     auto group = em_.group<Input, b2BodyId>();
      std::unique_lock<std::mutex> lock(playerAndInputMapMutex_);
-     for (auto &entity : view)
+     for (auto &entity : *group)
      {
           // 需要保证ecs与inputMap_是同步的
           atomicInput &aInput = input_[inputMap_[entity]];
-          em_.replaceComponent<Input>(entity, aInput.x.load(), aInput.y.load(), aInput.state.load());
+          Input *input = em_.replaceComponent<Input>(entity, aInput.x.load(), aInput.y.load(), aInput.state.load());
+          b2Vec2 pos = b2Body_GetPosition(*em_.getComponent<b2BodyId>(entity));
+          em_.getComponent<Angle>(entity)->angle = atan2(input->y - pos.y, input->x - pos.x);
      }
 }
 
@@ -136,8 +138,8 @@ void GameLoop::createPlayerSys()
                TcpConnection *tcpConnection = std::get<0>(createPlayerQueue_.front());
                std::string name = std::get<1>(createPlayerQueue_.front());
                ecs::Entity entity = it->second.first;
-               createPlayBody(entity,name);
-               it->second.second = 1;                                      // 标记玩家存活
+               createPlayBody(entity, name);
+               it->second.second = 1;                         // 标记玩家存活
                ws_.send(std::string(1, 0x06), tcpConnection); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
@@ -327,7 +329,7 @@ void GameLoop::handleOnError(TcpConnection *conn)
 void GameLoop::handleOnOpen(TcpConnection *conn)
 {
      std::string message;
-     message.push_back(0x00);          // 0x00 初始化地图
+     message.push_back(0x00);           // 0x00 初始化地图
      strAppend<float>(message, 100.0f); // width
      strAppend<float>(message, 100.0f); // height
      ws_.send(message, conn);

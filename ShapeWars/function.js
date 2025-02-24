@@ -282,15 +282,15 @@ function drawDeath() {
  */
 function drawPolygon(points, fillColor, strokeColor) {
      for (let i = 0; i < points.length; i++) {
-          points[i] = box2DtoScreen(points[i].x, points[i].y, canvas);
+          ({ x: points[i][0], y: points[i][1] } = box2DtoScreen(points[i][0], points[i][1]));
      }
 
      ctx.save();
+     ctx.lineJoin = "round";
      ctx.beginPath();
-
-     ctx.moveTo(points[0].x, points[0].y);
+     ctx.moveTo(points[0][0], points[0][1]);
      for (let i = 1; i < points.length; i++) {
-          ctx.lineTo(points[i].x, points[i].y);
+          ctx.lineTo(points[i][0], points[i][1]);
      }
      ctx.closePath();//自动闭合路径
 

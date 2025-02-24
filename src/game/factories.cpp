@@ -18,9 +18,16 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<GroupIndex>(e, groupIndex);
      em.addComponent<Name>(e, name);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
+     em.addComponent<Children>(e);
      em.addComponent<Camera>(e, 0.f, 0.f, 1.f);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
+
+     // 添加炮管
+     createEntityBarrel(em, worldId, tick, e, 0.f);
+     createEntityBarrel(em, worldId, tick, e, M_PI / 2.f);
+     createEntityBarrel(em, worldId, tick, e, M_PI);
+     createEntityBarrel(em, worldId, tick, e, M_PI / 2.f * 3.f);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -93,7 +100,17 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      return e;
 }
 
-ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player)
+ecs::Entity createEntityBarrel(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player, float offsetAngle)
+{
+     ecs::Entity e = em.createEntity();
+     em.addComponent<Barrel>(e, 0.5f, 0.8f, 1.f, 1.f, offsetAngle, 3u);
+     em.addComponent<Parent>(e, player);
+
+     em.getComponent<Children>(player)->children.push_back(e);
+     return e;
+}
+
+ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, ecs::Entity player, float angle)
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
@@ -132,8 +149,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      circle.radius = em.getComponent<RegularPolygon>(e)->radius;
 
      shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = e;
-     auto *input = em.getComponent<Input>(player);
-     b2Vec2 vel = (b2Vec2){input->x, input->y} - bodyDef.position;
+     b2Vec2 vel = (b2Vec2){cosf(angle), sinf(angle)};
      vel = b2Normalize(vel) * 10.f;
      b2Body_SetLinearVelocity(bodyId, vel);
 

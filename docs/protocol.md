@@ -31,7 +31,13 @@
 - 8 : 填充样式
   - ui32 fillColor
   - ui32 strokeColor
-- 9 : 
+- 9 : 炮管列表
+  - ui8 炮管数量
+  - f32 widthL
+  - f32 widthR
+  - f32 nowLength
+  - f32 offsetAngle
+  - ...data2
 
 ## client to server protocol
 

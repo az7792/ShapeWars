@@ -114,9 +114,12 @@ class PlayerEntity extends BaseEntity {
           this.groupIndex = 0;
           this.name = "";
           this.deadAnimationDuration = 500;
+          this.Barrels = [];
      }
 
      showMe(deltaTime) {
+          for (let i = 0; i < this.Barrels.length; i++)
+               this.Barrels[i].showMe(deltaTime, lerp(this.x, deltaTime), lerp(this.y, deltaTime), lerp(this.angle, deltaTime));
           super.showMe(deltaTime);
           drawName(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name);
      }
@@ -136,6 +139,17 @@ class PlayerEntity extends BaseEntity {
           }
           if (componentState & COMP_NAME) {
                this.name = readName(dataView, offset);
+          }
+
+          if (componentState & COMP_BARRELLIST) {
+               let size = dataView.getUint8(offset.value, true);
+               offset.value += 1;
+               while (this.Barrels.length < size) {
+                    this.Barrels.push(new Barrel());
+               }
+               for (let i = 0; i < size; i++) {
+                    this.Barrels[i].update(dataView, offset);
+               }
           }
      }
 }
@@ -174,5 +188,57 @@ class BulletEntity extends PolygonEntity {
                     this.strokeColor = COLORS.bulletStrokeColor[1];
                }
           }
+     }
+}
+
+class Barrel {
+     constructor() {
+          this.widthL = 0.5;
+          this.widthR = 0.5;
+          this.length = [0.5, 0.5];
+          this.offsetAngle = 0;
+     }
+
+     update(dataView, offset) {
+          this.length[0] = this.length[1];
+
+          this.widthL = dataView.getFloat32(offset.value, true);
+          offset.value += 4;
+          this.widthR = dataView.getFloat32(offset.value, true);
+          offset.value += 4;
+          this.length[1] = dataView.getFloat32(offset.value, true);
+          offset.value += 4;
+          this.offsetAngle = dataView.getFloat32(offset.value, true);
+          offset.value += 4;
+     }
+
+     showMe(deltaTime, x, y, angle) {
+          angle += this.offsetAngle;
+          let points = [];
+          const cosTheta = Math.cos(angle);
+          const sinTheta = Math.sin(angle);
+
+          // 计算靠近圆心的边的左右端点
+          const left1X = x - sinTheta * (this.widthL / 2);
+          const left1Y = y + cosTheta * (this.widthL / 2);
+          const right1X = x + sinTheta * (this.widthL / 2);
+          const right1Y = y - cosTheta * (this.widthL / 2);
+
+          // 计算远离圆心的边的中心点坐标
+          const tmpLength = lerp(this.length, deltaTime);
+          const endX = x + cosTheta * tmpLength;
+          const endY = y + sinTheta * tmpLength;
+
+          // 计算远离圆心的边的左右端点
+          const left2X = endX - sinTheta * (this.widthR / 2);
+          const left2Y = endY + cosTheta * (this.widthR / 2);
+          const right2X = endX + sinTheta * (this.widthR / 2);
+          const right2Y = endY - cosTheta * (this.widthR / 2);
+
+          points.push([left1X, left1Y]);
+          points.push([right1X, right1Y]);
+          points.push([right2X, right2Y]);
+          points.push([left2X, left2Y]);
+          drawPolygon(points, COLORS.barrelFillColor, COLORS.barrelStrokeColor);          
      }
 }

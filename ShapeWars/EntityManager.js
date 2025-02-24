@@ -1,5 +1,5 @@
 class EntityManager {
-     static entityTypeToLevel = [1, 0, 2]; // 实体类型到渲染层级的映射
+     static entityTypeToLevel = [2, 0, 1]; // 实体类型到渲染层级的映射
      constructor() {
           this.SparseSet = [new SparseSet(), new SparseSet(), new SparseSet()]; //[资源方块，玩家，子弹] 分层渲染，越小越先渲染
           this.deadEntities = []; //待删除的实体列表,用于播放动画
