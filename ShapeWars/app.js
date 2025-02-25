@@ -51,6 +51,7 @@ function update() {
      drawMiniMap();//更新小地图
      drawPerformance();//更新性能参数
      drawPlayerInfo();//绘制操作者的信息(在屏幕底部显示)
+     drawStandings(); //绘制排名
      drawDeath();//绘制玩家死亡画面
 
      requestAnimationFrame(update);

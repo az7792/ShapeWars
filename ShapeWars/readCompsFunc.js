@@ -122,15 +122,32 @@ function uint32ToHexRGBA(color) {
 
      // 转换为 2 位 16 进制字符串并拼接
      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}${a.toString(16).padStart(2, '0')}`;
- }
- 
+}
 
- /**
-  * 读取得分
-  * @returns 分数
-  */
- function readScore(dataView, offset) {
+
+/**
+ * 读取得分
+ * @returns 分数
+ */
+function readScore(dataView, offset) {
      let score = dataView.getInt32(offset.value, true);
      offset.value += 4;
      return score;
- }
+}
+
+function readStandings(dataView, offset) {
+     let len = dataView.getUint8(offset.value, true);
+     offset.value += 1;
+
+     while (standings.length < len) {
+          standings.push(["", 0]);
+     }
+     while (standings.length > len) {
+          standings.pop();
+     }
+
+     for (let i = 0; i < len; i++) {
+          standings[i][0] = readName(dataView, offset);
+          standings[i][1] = readScore(dataView, offset);
+     }
+}

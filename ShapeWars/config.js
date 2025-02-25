@@ -49,10 +49,12 @@ performanceMetrics = {
 playerStatus = {
      //当前玩家所属碰撞组
      nowGroupIndex: 0,
-     nowEntityId:0,
+     nowEntityId: 0,
      //当前玩家死活状态
      isAlive: false,
 }
+
+standings = [];//排名数据 [[name, score],...]
 
 //Ping
 pingTime = 0;

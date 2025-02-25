@@ -22,6 +22,8 @@ private:
      void deleteBody(b2BodyId bodyId);
      // 根据实体创建玩家刚体
      void createPlayBody(ecs::Entity entity,std::string name);
+     // 同步排行榜
+     void outputStandingsSys();
      
 private:
      struct atomicInput

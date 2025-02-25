@@ -169,13 +169,13 @@ void GameLoop::destroyEntitySys()
                }
                b2DestroyBody(em_.getComponent<Camera>(e)->bodyId); // 清除摄像机刚体
 
-               //清除玩家的炮管
+               // 清除玩家的炮管
                std::vector<ecs::Entity> &barrelEntities = em_.getComponent<Children>(e)->children;
                for (auto be : barrelEntities)
                {
                     em_.destroyEntity(be);
                }
-               //清除玩家
+               // 清除玩家
                em_.destroyEntity(e);
                freeInputsQueue_.push_back(inputMap_[e]);
                inputMap_.erase(e);
@@ -277,6 +277,45 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = entity;
 
      em_.addComponent<b2BodyId>(entity, bodyId);
+}
+
+void GameLoop::outputStandingsSys()
+{
+     static uint32_t lastTick = 0;
+     static std::vector<ecs::Entity> entities;
+     std::string message;
+     if (tick_ - lastTick >= TPS) // 1s同步一次
+     {
+          entities.clear(), message.clear(), lastTick = tick_;
+
+          auto group = em_.group<Input, b2BodyId>();
+          for (auto &entity : *group)
+          {
+               entities.push_back(entity);
+          }
+
+          std::sort(entities.begin(), entities.end(), [this](ecs::Entity a, ecs::Entity b)
+                    {
+               assert(em_.hasComponent<Score>(a) && em_.hasComponent<Score>(b));
+               return em_.getComponent<Score>(a)->score > em_.getComponent<Score>(b)->score; });
+
+          size_t len = std::min(entities.size(), static_cast<size_t>(5));
+          strAppend<uint8_t>(message, static_cast<uint8_t>(0x07));
+          strAppend<uint8_t>(message, static_cast<uint8_t>(len));
+          for (size_t i = 0; i < len; i++)
+          {
+               Name *name = em_.getComponent<Name>(entities[i]);
+               strAppend<uint8_t>(message, static_cast<uint8_t>(name->name.size()));
+               message += name->name;
+               strAppend<int32_t>(message, em_.getComponent<Score>(entities[i])->score);
+          }
+
+          auto group2 = em_.group<TcpConnection *>();
+          for (auto &e : *group2)
+          {
+               ws_.send(message, *em_.getComponent<TcpConnection *>(e));
+          }
+     }
 }
 
 void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
@@ -387,7 +426,8 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&restoreHPSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::delayDeleteShapesSys, this))
-         .addSystem(std::bind(&GameLoop::outputSys, this));
+         .addSystem(std::bind(&GameLoop::outputSys, this))
+         .addSystem(std::bind(&GameLoop::outputStandingsSys, this));
 }
 
 GameLoop::~GameLoop()

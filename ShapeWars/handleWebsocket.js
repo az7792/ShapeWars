@@ -85,6 +85,9 @@ function parseMessage(dataView, offset) {
                startButton.style.display = 'none';               
                nameInput.style.display = 'none';
                break;
+          case 0x07://排行榜消息
+               readStandings(dataView, offset);
+               break;
      }
 }
 

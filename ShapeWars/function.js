@@ -238,8 +238,8 @@ function drawPerformance() {
      ctx.save();
      let Fsize = 16;
      ctx.font = Fsize + 'px Arial';  // 字体大小和类型
-     let x = canvas.width - 100;
-     let y = 20;
+     let x = canvas.width - 120;
+     let y = canvas.height - 100;
      //绘制客户端渲染帧率
      ctx.fillStyle = performanceMetrics.cFPS <= 30 ? "#ff0000" : "#00ff00";
      ctx.fillText("FPS: " + performanceMetrics.cFPS, x, y);
@@ -372,13 +372,7 @@ function drawNameAndScore(x, y, name, score) {
      ({ x, y } = box2DtoScreen(x, y));
 
      // 计算得分文本
-     let scoreStr;
-     if (score >= 1e6)
-          scoreStr = (score / 1e6).toFixed(1) + "M";
-     else if (score >= 1e3)
-          scoreStr = (score / 1e3).toFixed(1) + "K";
-     else
-          scoreStr = score.toString();
+     let scoreStr = getScoreStr(score);
 
      ctx.save();
 
@@ -495,17 +489,68 @@ function drawPlayerInfo() {
      Fsize = 40;
      ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
      startY -= (height / 2 + Fsize / 2);
-     let scoreStr;
-     if (player.score >= 1e6)
-          scoreStr = (player.score / 1e6).toFixed(1) + "M";
-     else if (player.score >= 1e3)
-          scoreStr = (player.score / 1e3).toFixed(1) + "K";
-     else
-          scoreStr = player.score.toString();
-     str = player.name + "|score:" + scoreStr;
+     let scoreStr = getScoreStr(player.score);
+     str = player.name + "-score:" + scoreStr;
      ctx.fillText(str, startX + width / 2, startY + height / 2 + 2);
      ctx.strokeText(str, startX + width / 2, startY + height / 2 + 2);
 
+     ctx.restore();
+}
+
+//绘制排行榜
+function drawStandings() {
+     if (standings.length == 0) return;
+
+     let MaxScore = standings[0][1];//默认第一名占满栏位
+     let standingsBarWidth = 300;
+     let standingsBarHeight = 20;
+     let startX = canvas.width - standingsBarWidth - 10;
+     let startY = 20;
+     let radius = 10;
+     ctx.save();
+     let Fsize = 20;
+     ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
+     ctx.textAlign = "center"; // 设置文本居中
+     ctx.textBaseline = "middle"; // 设置文本垂直居中
+
+     //"Standings"
+     ctx.fillStyle = "white";
+     ctx.strokeStyle = "black";
+     ctx.lineWidth = 1;
+     ctx.fillText("Standings", startX + standingsBarWidth / 2, startY);
+     ctx.strokeText("Standings", startX + standingsBarWidth / 2, startY);
+     startY += Fsize;
+
+     //排行榜
+     for (let i = 0; i < standings.length; i++, startY += standingsBarHeight + 3) {
+          let len = Math.min(standings[i][1] / MaxScore * standingsBarWidth, standingsBarWidth);
+          // 画底色（暗绿色）
+          ctx.fillStyle = "#004400";
+          ctx.beginPath();
+          drawRoundedRect(startX, startY, standingsBarWidth, standingsBarHeight, radius);
+          ctx.fill();
+
+          // 画得分（亮绿色）
+          ctx.fillStyle = "#00ff00";
+          ctx.beginPath();
+          drawRoundedRect(startX, startY, len, standingsBarHeight, radius);
+          ctx.fill();
+
+          // 画边框（黑色）
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          drawRoundedRect(startX, startY, standingsBarWidth, standingsBarHeight, radius);
+          ctx.stroke();
+
+          //绘制名字和得分
+          let str = standings[i][0] + "-" + getScoreStr(standings[i][1]);
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 1;
+          ctx.fillText(str, startX + standingsBarWidth / 2, startY + standingsBarHeight / 2);
+          ctx.strokeText(str, startX + standingsBarWidth / 2, startY + standingsBarHeight / 2);
+     }
      ctx.restore();
 }
 
@@ -522,4 +567,13 @@ function drawRoundedRect(x, y, width, height, radius) {
      ctx.lineTo(x, y + radius);
      ctx.quadraticCurveTo(x, y, x + radius, y);
      ctx.closePath();
+}
+
+function getScoreStr(score) {
+     if (score >= 1e6)
+          return (score / 1e6).toFixed(1) + "M";
+     else if (score >= 1e3)
+          return (score / 1e3).toFixed(1) + "K";
+     else
+          return score.toString();
 }
