@@ -24,3 +24,4 @@ const COMP_GROUPINDEX = BigInt(1 << 6);   // 0b01000000 碰撞组索引
 const COMP_NAME = BigInt(1 << 7);   // 0b10000000 名称
 const COMP_STYLE = BigInt(1 << 8);  //0b100000000 填充样式
 const COMP_BARRELLIST = BigInt(1 << 9); // 枪管列表
+const COMP_SCORE = BigInt(1 << 10); // 得分

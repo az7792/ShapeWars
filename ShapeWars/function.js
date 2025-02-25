@@ -366,27 +366,39 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      ctx.restore();
 }
 
-//绘制名称
-function drawName(x, y, name) {
+//绘制名字和分数
+function drawNameAndScore(x, y, name, score) {
      // 变换到屏幕坐标系
      ({ x, y } = box2DtoScreen(x, y));
 
+     // 计算得分文本
+     let scoreStr;
+     if (score >= 1e6)
+          scoreStr = (score / 1e6).toFixed(1) + "M";
+     else if (score >= 1e3)
+          scoreStr = (score / 1e3).toFixed(1) + "K";
+     else
+          scoreStr = score.toString();
+
      ctx.save();
 
-     // 字体大小
      let Fsize = 25 / camera.fov;
-     ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
+     ctx.font = 'bold ' + Fsize + 'px Arial Rounded'; // 字体大小和类型
 
      // 获取文本宽度
-     const textWidth = ctx.measureText(name).width;
+     const nameWidth = ctx.measureText(name).width;
+     const scoreWidth = ctx.measureText(scoreStr).width;
 
+     // 绘制名字：白色填充，黑色描边
      ctx.fillStyle = "white";
      ctx.strokeStyle = "black";
-     //描边大小
      ctx.lineWidth = 1;
-     // 绘制文字
-     ctx.fillText(name, x - textWidth / 2, y + Fsize / 2 - Fsize);
-     ctx.strokeText(name, x - textWidth / 2, y + Fsize / 2 - Fsize);
+     ctx.fillText(name, x - (nameWidth + scoreWidth) / 2, y + Fsize / 2 - Fsize);
+     ctx.strokeText(name, x - (nameWidth + scoreWidth) / 2, y + Fsize / 2 - Fsize);
+
+     // 绘制得分：红色
+     ctx.fillStyle = "red";
+     ctx.fillText(scoreStr, x - (nameWidth + scoreWidth) / 2 + nameWidth, y + Fsize / 2 - Fsize);
 
      ctx.restore();
 }
@@ -479,11 +491,18 @@ function drawPlayerInfo() {
      ctx.fillText(str, startX + width / 2, startY + height / 2 + 2);
      ctx.strokeText(str, startX + width / 2, startY + height / 2 + 2);
 
-     //--------名字----------
+     //--------名字和得分---------
      Fsize = 40;
      ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
      startY -= (height / 2 + Fsize / 2);
-     str = player.name;
+     let scoreStr;
+     if (player.score >= 1e6)
+          scoreStr = (player.score / 1e6).toFixed(1) + "M";
+     else if (player.score >= 1e3)
+          scoreStr = (player.score / 1e3).toFixed(1) + "K";
+     else
+          scoreStr = player.score.toString();
+     str = player.name + "|score:" + scoreStr;
      ctx.fillText(str, startX + width / 2, startY + height / 2 + 2);
      ctx.strokeText(str, startX + width / 2, startY + height / 2 + 2);
 

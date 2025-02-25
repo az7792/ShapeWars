@@ -116,6 +116,7 @@ class PlayerEntity extends BaseEntity {
           this.deadAnimationDuration = 500;
           this.Barrels = [];
           this.isOperator = false;
+          this.score = 0;
      }
 
      showMe(deltaTime) {
@@ -123,7 +124,7 @@ class PlayerEntity extends BaseEntity {
                this.Barrels[i].showMe(deltaTime, lerp(this.x, deltaTime), lerp(this.y, deltaTime), lerp(this.angle, deltaTime));
           super.showMe(deltaTime);
           if (!this.isOperator)
-               drawName(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name);
+               drawNameAndScore(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name,this.score);
      }
 
 
@@ -152,6 +153,10 @@ class PlayerEntity extends BaseEntity {
                for (let i = 0; i < size; i++) {
                     this.Barrels[i].update(dataView, offset);
                }
+          }
+
+          if (componentState & COMP_SCORE) {
+               this.score = readScore(dataView, offset);
           }
      }
 }
