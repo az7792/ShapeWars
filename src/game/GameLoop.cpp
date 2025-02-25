@@ -32,6 +32,8 @@ void GameLoop::outputSys()
           Camera *camera = em_.getComponent<Camera>(entity);
           message.clear();
           strAppend<uint8_t>(message, 0x01); // 更新实体数据
+          // 玩家ID
+          strAppend<uint32_t>(message, entity);
           // 操作的玩家所属碰撞组
           strAppend<int32_t>(message, em_.getComponent<GroupIndex>(entity)->index);
 

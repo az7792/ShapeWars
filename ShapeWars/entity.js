@@ -115,13 +115,15 @@ class PlayerEntity extends BaseEntity {
           this.name = "";
           this.deadAnimationDuration = 500;
           this.Barrels = [];
+          this.isOperator = false;
      }
 
      showMe(deltaTime) {
           for (let i = 0; i < this.Barrels.length; i++)
                this.Barrels[i].showMe(deltaTime, lerp(this.x, deltaTime), lerp(this.y, deltaTime), lerp(this.angle, deltaTime));
           super.showMe(deltaTime);
-          drawName(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name);
+          if (!this.isOperator)
+               drawName(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name);
      }
 
 

@@ -374,19 +374,22 @@ function drawName(x, y, name) {
      ctx.save();
 
      // 字体大小
-     let Fsize = 16;
-     ctx.font = Fsize + 'px Arial';// 字体大小和类型
+     let Fsize = 25 / camera.fov;
+     ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
 
      // 获取文本宽度
      const textWidth = ctx.measureText(name).width;
 
-     // 绘制文字
      ctx.fillStyle = "white";
+     ctx.strokeStyle = "black";
+     //描边大小
+     ctx.lineWidth = 1;
+     // 绘制文字
      ctx.fillText(name, x - textWidth / 2, y + Fsize / 2 - Fsize);
+     ctx.strokeText(name, x - textWidth / 2, y + Fsize / 2 - Fsize);
 
      ctx.restore();
 }
-
 
 // 绘制血条
 function drawHealthBar(x, y, health, maxHealth) {
@@ -421,6 +424,68 @@ function drawHealthBar(x, y, health, maxHealth) {
      ctx.beginPath();
      drawRoundedRect(startX, startY, width, height, radius);
      ctx.stroke();
+
+     ctx.restore();
+}
+
+//绘制玩家信息
+function drawPlayerInfo() {
+
+     let player = entityManager.getEntity(playerStatus.nowEntityId);
+     if (!player) return;
+     ctx.save();
+     ctx.textAlign = "center"; // 设置文本居中
+     ctx.textBaseline = "middle"; // 设置文本垂直居中     
+
+     //--------血条----------
+     let width = Math.min(300, player.maxHP); // 血条宽度
+     let height = 20; // 血条高度
+     let barWidth = width * player.HP / player.maxHP; // 当前血量对应的宽度
+     let radius = 10; // 圆角半径
+
+
+     let startX = canvas.width / 2 - width / 2;
+     let startY = canvas.height - height - 10;
+
+     // 画底色（暗绿色）
+     ctx.fillStyle = "#004400";
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, width, height, radius);
+     ctx.fill();
+
+     // 画血量（亮绿色）
+     ctx.fillStyle = "#00ff00";
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, barWidth, height, radius);
+     ctx.fill();
+
+     // 画边框（黑色）
+     ctx.strokeStyle = "#000000";
+     ctx.lineWidth = 2;
+     ctx.beginPath();
+     drawRoundedRect(startX, startY, width, height, radius);
+     ctx.stroke();
+
+     // 字体大小
+     let Fsize = 20;
+     ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
+     // 字体颜色
+     ctx.fillStyle = "white";
+     ctx.strokeStyle = "black";
+     //描边大小
+     ctx.lineWidth = 1;
+
+     let str = player.HP + " / " + player.maxHP;
+     ctx.fillText(str, startX + width / 2, startY + height / 2 + 2);
+     ctx.strokeText(str, startX + width / 2, startY + height / 2 + 2);
+
+     //--------名字----------
+     Fsize = 40;
+     ctx.font = 'bold ' + Fsize + 'px Arial Rounded';// 字体大小和类型
+     startY -= (height / 2 + Fsize / 2);
+     str = player.name;
+     ctx.fillText(str, startX + width / 2, startY + height / 2 + 2);
+     ctx.strokeText(str, startX + width / 2, startY + height / 2 + 2);
 
      ctx.restore();
 }

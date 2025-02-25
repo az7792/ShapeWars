@@ -49,7 +49,7 @@ void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t 
           }
      }
 
-     if (shapeEntityMap.size() <= 1000)
+     if (shapeEntityMap.size() <= 500)
      {
           // TODO:设置不同血量与不同密度
           float x = (std::rand() % 960) / 10;

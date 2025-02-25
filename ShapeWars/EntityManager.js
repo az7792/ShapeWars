@@ -47,6 +47,13 @@ class EntityManager {
           this.SparseSet[EntityManager.entityTypeToLevel[entityType]].get(entityId).update(dataView, offset);
      }
 
+     getEntity(id) {
+          for (let i = 0; i < this.SparseSet.length; i++) {
+               if (this.SparseSet[i].has(id))
+                    return this.SparseSet[i].get(id);
+          }
+     }
+
 
      addEntity(level, id, entity) { this.SparseSet[level].add(id, entity); }
      removeEntity(level, id) {

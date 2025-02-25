@@ -16,6 +16,8 @@ function parseMessage(dataView, offset) {
                miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize)
                break;
           case 0x01: // 更新实体
+               //当前玩家ID
+               playerStatus.nowEntityId = readEntityIDIndex(dataView, offset);
                //当前玩家所在碰撞组
                playerStatus.nowGroupIndex = readGroupIndex(dataView, offset);
                // 摄像机位置
@@ -50,6 +52,11 @@ function parseMessage(dataView, offset) {
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
                performanceMetrics.TPS = Math.round(1000 / (serverTime.curr - serverTime.prev));
+               //更新玩家是否为操作者
+               let player = entityManager.getEntity(playerStatus.nowEntityId);
+               if (player) {
+                    player.isOperator = true;
+               }
                sendMessage(playerInput.packData());
                break;
           case 0x02://Ping
