@@ -24,6 +24,7 @@
 #include "blockRotationCtrl.h"
 #include "blockRevolutionCtrl.h"
 #include "barrel.h"
+#include "score.h"
 
 #include <cstdint>
 
@@ -37,3 +38,4 @@ const uint64_t COMP_GROUPINDEX = (1ull << 6); // 0b01000000 碰撞组索引
 const uint64_t COMP_NAME = (1ull << 7);       // 0b10000000 名称
 const uint64_t COMP_STYLE = (1ull << 8);      //0b100000000 填充样式
 const uint64_t COMP_BARRELLIST = (1ull << 9);      //枪管列表
+const uint64_t COMP_SCORE = (1ull << 10);      //得分

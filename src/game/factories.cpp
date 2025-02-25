@@ -20,6 +20,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      em.addComponent<Children>(e);
      em.addComponent<Camera>(e, 0.f, 0.f, 1.f);
+     em.addComponent<Score>(e, 0);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 
@@ -72,6 +73,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BLOCK));
      em.addComponent<RegularPolygon>(e, regularPolygon);
      em.addComponent<Style>(e, style);
+     em.addComponent<Score>(e, 10);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -104,10 +106,10 @@ ecs::Entity createEntityBarrel(ecs::EntityManager &em, b2WorldId &worldId, uint3
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Barrel>(e, 0.5f, 0.5f, 1.f, 1.f, offsetAngle, 4u);
-     em.addComponent<FireStatus>(e,static_cast<uint8_t>(0b00000001));
+     em.addComponent<FireStatus>(e, static_cast<uint8_t>(0b00000001));
      em.addComponent<Parent>(e, player);
 
-     //添加到父对象的炮管列表中
+     // 添加到父对象的炮管列表中
      em.getComponent<Children>(player)->children.push_back(e);
      return e;
 }
@@ -127,6 +129,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<GroupIndex>(e, em.getComponent<GroupIndex>(player)->index);
      em.addComponent<Parent>(e, player);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), 0.2f); //>=16为圆形
+     em.addComponent<Score>(e, 0);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();

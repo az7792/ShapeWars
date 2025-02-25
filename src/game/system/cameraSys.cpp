@@ -42,7 +42,6 @@ namespace
                componentState |= COMP_HP;
                strAppend(*data, hp->hp);
                strAppend(*data, hp->maxHP);
-               hp->tick = tick;
           }
      }
 
@@ -93,6 +92,16 @@ namespace
           }
      }
 
+     // 10
+     void appendScore10(uint32_t tick, std::string *data, uint64_t &componentState, Score *score, bool isCreate = false)
+     {
+          if (score->tick == tick || isCreate) // 创建时无论是否变换都需要打包
+          {
+               componentState |= COMP_SCORE;
+               strAppend(*data, score->score);
+          }
+     }
+
      // 创建时无论是否需要更新都需要打包
      void processEntity(ecs::EntityManager &em, uint32_t tick, ecs::Entity targetEntity, bool isCreate = false)
      {
@@ -135,6 +144,7 @@ namespace
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
                appendName7(data, componentState, em.getComponent<Name>(targetEntity), isCreate);
                appendBarrelList9(em, data, componentState, &(em.getComponent<Children>(targetEntity)->children));
+               appendScore10(tick, data, componentState, em.getComponent<Score>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {

@@ -38,6 +38,8 @@
   - f32 nowLength
   - f32 offsetAngle
   - ...data2
+- 10 : 得分
+  - i32 得分
 
 ## client to server protocol
 

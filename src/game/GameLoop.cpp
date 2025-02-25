@@ -249,6 +249,8 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      em_.replaceComponent<Name>(entity, name);
      // em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
      // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
+     em_.getComponent<Score>(entity)->score /= 4;
+     em_.getComponent<Score>(entity)->tick = tick_;
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -380,6 +382,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&blockRotationCtrlSys, std::ref(em_)))
          .addSystem(std::bind(&blockRevolutionCtrlSys, std::ref(em_), std::ref(worldId_)))
+         .addSystem(std::bind(&contactListSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&attackSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&restoreHPSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
