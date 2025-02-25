@@ -51,9 +51,12 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 
                     // 处理积分
                     ecs::Entity scoreGeter = type == CATEGORY_BULLET ? em.getComponent<Parent>(entity)->parent : entity;
-                    Score *score = em.getComponent<Score>(scoreGeter);
-                    score->score += em.getComponent<Score>(attackId)->score / 2;
-                    score->tick = tick;
+                    if (em.entityIsValid(scoreGeter))
+                    {
+                         Score *score = em.getComponent<Score>(scoreGeter);
+                         score->score += em.getComponent<Score>(attackId)->score / 2;
+                         score->tick = tick;
+                    }
 
                     assert(type != CATEGORY_BULLET || em.getComponent<Score>(entity)->score == 0);
                }
