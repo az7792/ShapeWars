@@ -2,5 +2,5 @@
 #include "ecs/fwd.h"
 struct Parent
 {
-     ecs::Entity parent;
+     ecs::Entity id;
 };

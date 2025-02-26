@@ -126,7 +126,23 @@ void GameLoop::createPlayerSys()
           {
                TcpConnection *tcpConnection = std::get<0>(createPlayerQueue_.front());
                std::string name = std::get<1>(createPlayerQueue_.front());
-               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, tcpConnection, {groupIndex--}, name);
+
+               // 创建新玩家实体
+               PlayerParams playerParams;
+               playerParams.tcpConnection = tcpConnection;
+               playerParams.groupIndex = groupIndex--;
+               playerParams.name = name;
+               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, playerParams);
+
+               BarrelParams barrelParams;
+               barrelParams.parentEntity = entity;
+               barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.5f;
+               barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
+               barrelParams.barrel.offsetAngle = 0.f;
+               barrelParams.barrel.cooldown = 4;
+               int barrelNum = rand() % 8 + 1;
+               addBarrelsToPlayer(em_, barrelNum, barrelParams);
+
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
                playerMap_.emplace(tcpConnection, std::make_pair(entity, true));

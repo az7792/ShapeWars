@@ -50,7 +50,7 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                     em.addComponent<DeleteFlag>(attackId);
 
                     // 处理积分
-                    ecs::Entity scoreGeter = type == CATEGORY_BULLET ? em.getComponent<Parent>(entity)->parent : entity;
+                    ecs::Entity scoreGeter = type == CATEGORY_BULLET ? em.getComponent<Parent>(entity)->id : entity;
                     if (em.entityIsValid(scoreGeter))
                     {
                          Score *score = em.getComponent<Score>(scoreGeter);
