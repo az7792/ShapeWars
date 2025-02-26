@@ -35,6 +35,8 @@ camera = {
 serverTime = {
      prev: 0,//前一帧
      curr: 0,//当前帧
+     historyFrameInterval: new Array(120).fill(33),//历史帧间隔
+     header: 0, //队头指针
 }
 
 performanceMetrics = {

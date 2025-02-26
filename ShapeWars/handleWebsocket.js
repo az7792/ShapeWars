@@ -51,6 +51,8 @@ function parseMessage(dataView, offset) {
                //更新时间
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
+               serverTime.historyFrameInterval[serverTime.header] = serverTime.prev == 0 ? 33 : serverTime.curr - serverTime.prev;
+               serverTime.header = (serverTime.header + 1) % serverTime.historyFrameInterval.length;
                performanceMetrics.TPS = Math.round(1000 / (serverTime.curr - serverTime.prev));
                //更新玩家是否为操作者
                let player = entityManager.getEntity(playerStatus.nowEntityId);
@@ -82,7 +84,7 @@ function parseMessage(dataView, offset) {
                break;
           case 0x06://玩家创建角色消息
                playerStatus.isAlive = true;
-               startButton.style.display = 'none';               
+               startButton.style.display = 'none';
                nameInput.style.display = 'none';
                break;
           case 0x07://排行榜消息

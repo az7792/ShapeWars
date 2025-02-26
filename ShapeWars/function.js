@@ -261,6 +261,51 @@ function drawPerformance() {
      //TODO：绘制MSPT
      ctx.fillStyle = performanceMetrics.MSPT >= 50 ? "#ff0000" : "#00ff00";
      ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms", x, y);
+
+     // 绘制网络帧间隔图表
+     const chartX = canvas.width - 240 - 20; // 右侧留出20px边距
+     const chartY = canvas.height - 260;      // 图表顶部位置
+     const chartWidth = 240;
+     const chartHeight = 120;// 10 - 50 -> 30-150
+
+     // 绘制半透明背景
+     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+     ctx.fillRect(chartX, chartY, chartWidth, chartHeight);
+
+     // 绘制绿色参考线
+     ctx.beginPath();
+     ctx.strokeStyle = '#00ff00';
+     ctx.setLineDash([5, 3]); // 虚线样式
+
+     // 计算参考线位置（从底部向上计算）
+     const lineY28 = chartY + chartHeight - mapValue(28, 10, 50, 30, 150) + 30;
+     const lineY38 = chartY + chartHeight - mapValue(38, 10, 50, 30, 150) + 30;
+     //console.log(lineY28, lineY38);
+     
+     ctx.moveTo(chartX, lineY28);
+     ctx.lineTo(chartX + chartWidth, lineY28);
+     ctx.moveTo(chartX, lineY38);
+     ctx.lineTo(chartX + chartWidth, lineY38);
+     ctx.stroke();
+
+     // 绘制帧间隔折线
+     ctx.beginPath();
+     ctx.strokeStyle = '#ffa500'; // 橙色折线
+     ctx.lineWidth = 2;
+     ctx.setLineDash([]); // 重置为实线
+
+     for (let i = 0; i < serverTime.historyFrameInterval.length; i++) {
+          const index = (serverTime.header + i) % serverTime.historyFrameInterval.length;
+
+          // 计算坐标位置
+          const x = chartX + i * (chartWidth / serverTime.historyFrameInterval.length);
+          const y = chartY + chartHeight - mapValue(serverTime.historyFrameInterval[index], 10, 50, 30, 150) + 30;
+
+          // 连接数据点
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+     }
+     ctx.stroke();
+
      ctx.restore();
 }
 
@@ -576,4 +621,9 @@ function getScoreStr(score) {
           return (score / 1e3).toFixed(1) + "K";
      else
           return score.toString();
+}
+
+//将x从[a,b]映射到[c,d]
+function mapValue(x, a, b, c, d) {
+     return c + ((x - a) * (d - c)) / (b - a);
 }
