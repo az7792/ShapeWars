@@ -51,8 +51,7 @@ function parseMessage(dataView, offset) {
                //更新时间
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
-               serverTime.historyFrameInterval[serverTime.header] = serverTime.prev == 0 ? 33 : serverTime.curr - serverTime.prev;
-               serverTime.header = (serverTime.header + 1) % serverTime.historyFrameInterval.length;
+               serverTime.historyFrameInterval.push(serverTime.prev == 0 ? 33 : serverTime.curr - serverTime.prev);
                performanceMetrics.TPS = Math.round(1000 / (serverTime.curr - serverTime.prev));
                //更新玩家是否为操作者
                let player = entityManager.getEntity(playerStatus.nowEntityId);

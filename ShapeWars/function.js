@@ -281,7 +281,7 @@ function drawPerformance() {
      const lineY28 = chartY + chartHeight - mapValue(28, 10, 50, 30, 150) + 30;
      const lineY38 = chartY + chartHeight - mapValue(38, 10, 50, 30, 150) + 30;
      //console.log(lineY28, lineY38);
-     
+
      ctx.moveTo(chartX, lineY28);
      ctx.lineTo(chartX + chartWidth, lineY28);
      ctx.moveTo(chartX, lineY38);
@@ -295,11 +295,10 @@ function drawPerformance() {
      ctx.setLineDash([]); // 重置为实线
 
      for (let i = 0; i < serverTime.historyFrameInterval.length; i++) {
-          const index = (serverTime.header + i) % serverTime.historyFrameInterval.length;
 
           // 计算坐标位置
           const x = chartX + i * (chartWidth / serverTime.historyFrameInterval.length);
-          const y = chartY + chartHeight - mapValue(serverTime.historyFrameInterval[index], 10, 50, 30, 150) + 30;
+          const y = chartY + chartHeight - mapValue(serverTime.historyFrameInterval.at(i), 10, 50, 30, 150) + 30;
 
           // 连接数据点
           i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
