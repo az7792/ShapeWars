@@ -140,7 +140,7 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 4;
-               //HACK:测试用
+               // HACK:测试用
                int barrelNum = rand() % 8 + 1;
                if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
                     addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
@@ -175,7 +175,7 @@ void GameLoop::createPlayerSys()
 void GameLoop::destroyEntitySys()
 {
      { // 处理因为网络断开导致的玩家删除
-          //TODO：加入断线重连
+          // TODO：加入断线重连
           std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
           std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
           while (!destroyPlayerQueue_.empty())
@@ -364,6 +364,10 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
                Input input = {};
                input.x = buffer.readValue<float>();
                input.y = buffer.readValue<float>();
+               if (std::isnan(input.x))
+                    input.x = 0.f;
+               if (std::isnan(input.y))
+                    input.y = 0.f;
                input.state = buffer.readValue<uint64_t>();
                input_[inputIndex].x.store(input.x);
                input_[inputIndex].y.store(input.y);
