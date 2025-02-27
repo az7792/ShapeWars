@@ -33,7 +33,7 @@ class BaseEntity {
      }
 
      initDeadStatus() {
-          this.deadPrevTime = serverTime.prev - (1 / this.speedRate - 1) * (serverTime.curr - serverTime.prev);//变相增加从val[0]到val[1]的时间
+          this.deadPrevTime = (serverTime.curr - serverTime.avgFrameInterval) - (1 / this.speedRate - 1) * serverTime.avgFrameInterval;//变相增加从val[0]到val[1]的时间
           this.deadTime = serverTime.curr;
      }
 
@@ -46,7 +46,7 @@ class BaseEntity {
 
           let rgbaFillColor = this.updateRGBA(this.fillColor, alpha);
           let rgbaStrokeColor = this.updateRGBA(this.strokeColor, alpha);
-          currentTime -= (serverTime.curr - serverTime.prev);//修正时间,当实体死亡时,客户端会在一个服务器tick后才知道实体死亡
+          currentTime -= serverTime.avgFrameInterval;//修正时间,当实体死亡时,客户端会在一个服务器tick后才知道实体死亡
           drawRegularPolygon(this.sides, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
      }
 
