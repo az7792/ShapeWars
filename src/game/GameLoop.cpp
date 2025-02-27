@@ -140,8 +140,12 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 4;
+               //HACK:测试用
                int barrelNum = rand() % 8 + 1;
-               addBarrelsToPlayer(em_, barrelNum, barrelParams);
+               if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
+                    addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
+               else
+                    addBarrelsToPlayer(em_, barrelNum, barrelParams);
 
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
