@@ -8,6 +8,7 @@ namespace
 {
      BlockParams getSidesAndStyle()
      {
+          //TODO:根据区域密度来生成方块
           BlockParams params;
 
           params.position.x = (std::rand() % 960) / 10 - 48.f;

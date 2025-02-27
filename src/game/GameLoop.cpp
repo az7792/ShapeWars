@@ -175,6 +175,7 @@ void GameLoop::createPlayerSys()
 void GameLoop::destroyEntitySys()
 {
      { // 处理因为网络断开导致的玩家删除
+          //TODO：加入断线重连
           std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
           std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
           while (!destroyPlayerQueue_.empty())
