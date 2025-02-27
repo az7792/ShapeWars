@@ -35,7 +35,7 @@ namespace
           else
                params.style = {BOLCK_FILL_ORANGE, BOLCK_STROKE_ORANGE}, params.score *= 4;
 
-          if (rand() % 100 == 0)
+          if (params.polygon.sides >=4 && rand() % 100 == 0)
                params.polygon.radius = 1.5f, params.score *= 30, params.initialHP = params.maxHP *= 50;
           return params;
      }
