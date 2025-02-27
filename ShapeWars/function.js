@@ -224,22 +224,24 @@ function drawMiniMap() {
 
 //绘制性能指标
 function drawPerformance() {
-     // performanceMetrics = {
-     //      isShow: true, //是否显示性能指标
-     //      clientfps: 0, //客户端渲染帧率
-     //      serverfps: 0, //服务器逻辑帧率
-     //      ping: 0, //延迟 ms
-     //      TPS: 0, //每秒事务数
-     //      MSPT: 0, //平均单个事务处理时间 ms
-     // }
-
      if (!performanceMetrics.isShow)
           return;
      ctx.save();
+     // 绘制网络帧间隔图表
+     const chartX = canvas.width - 240;
+     const chartY = canvas.height - 360;
+     const chartWidth = 240;
+     const chartHeight = 220;
+
+     // 绘制半透明背景
+     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+     ctx.fillRect(chartX, chartY, chartWidth, chartHeight);
+
+
      let Fsize = 16;
      ctx.font = Fsize + 'px Arial';  // 字体大小和类型
-     let x = canvas.width - 120;
-     let y = canvas.height - 100;
+     let x = chartX;
+     let y = chartY + Fsize;
      //绘制客户端渲染帧率
      ctx.fillStyle = performanceMetrics.cFPS <= 30 ? "#ff0000" : "#00ff00";
      ctx.fillText("FPS: " + performanceMetrics.cFPS, x, y);
@@ -256,21 +258,15 @@ function drawPerformance() {
      y += Fsize + 2;
      //绘制TPS
      ctx.fillStyle = performanceMetrics.TPS <= 20 ? "#ff0000" : "#00ff00";
-     ctx.fillText("TPS: " + performanceMetrics.TPS, x, y);
+     ctx.fillText("TPS: " + performanceMetrics.TPS + "  (近似值)", x, y);
      y += Fsize + 2;
      //TODO：绘制MSPT
      ctx.fillStyle = performanceMetrics.MSPT >= 50 ? "#ff0000" : "#00ff00";
-     ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms", x, y);
-
-     // 绘制网络帧间隔图表
-     const chartX = canvas.width - 240 - 20; // 右侧留出20px边距
-     const chartY = canvas.height - 260;      // 图表顶部位置
-     const chartWidth = 240;
-     const chartHeight = 120;// 10 - 50 -> 30-150
-
-     // 绘制半透明背景
-     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-     ctx.fillRect(chartX, chartY, chartWidth, chartHeight);
+     ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms(未同步)", x, y);
+     y += Fsize + 2;
+     // 绘制网络波动
+     ctx.fillStyle = "#ffa500";
+     ctx.fillText("网络帧间隔图表: ", x, y);
 
      // 绘制绿色参考线
      ctx.beginPath();

@@ -36,6 +36,7 @@ serverTime = {
      prev: 0,//前一帧
      curr: 0,//当前帧
      historyFrameInterval: new Queue(120, 33),//历史帧间隔
+     avgFrameInterval: 33,//平均帧间隔
 }
 
 performanceMetrics = {

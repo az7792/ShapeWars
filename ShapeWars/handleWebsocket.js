@@ -51,8 +51,15 @@ function parseMessage(dataView, offset) {
                //更新时间
                serverTime.prev = serverTime.curr;
                serverTime.curr = Date.now();
-               serverTime.historyFrameInterval.push(serverTime.prev == 0 ? 33 : serverTime.curr - serverTime.prev);
-               performanceMetrics.TPS = Math.round(1000 / (serverTime.curr - serverTime.prev));
+               if(serverTime.prev === 0)
+                    serverTime.prev = serverTime.curr - 33;
+               let frameInterval = serverTime.curr - serverTime.prev;
+               if (serverTime.historyFrameInterval.length < serverTime.historyFrameInterval.maxSize)
+                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * (serverTime.historyFrameInterval.length) + frameInterval) / (serverTime.historyFrameInterval.length + 1);
+               else
+                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * serverTime.historyFrameInterval.maxSize - serverTime.historyFrameInterval.at(0) + frameInterval) / serverTime.historyFrameInterval.maxSize;
+               serverTime.historyFrameInterval.push(frameInterval);
+               performanceMetrics.TPS = Math.round(1000 / serverTime.avgFrameInterval);
                //更新玩家是否为操作者
                let player = entityManager.getEntity(playerStatus.nowEntityId);
                if (player) {
