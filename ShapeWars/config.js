@@ -6,10 +6,10 @@ const COLORS = {
      backgroundLine: "#cfcfcf",//背景块线条颜色
      barrelFillColor: "#b7b7b7",//炮塔填充颜色
      barrelStrokeColor: "#727272",//炮塔边框颜色
-     playerFillColor: ["#d75f56", "#6984ae", "#edb6bc", "#e8d179"],
-     playerStrokeColor: ["#9e5044", "#4c69a0", "#c88194", "#c28f4f"],
-     bulletFillColor: ["#d75f56", "#6984ae", "#edb6bc", "#e8d179"],
-     bulletStrokeColor: ["#9e5044", "#4c69a0", "#c88194", "#c28f4f"],
+     playerFillColor: ["#6984ae", "#d75f56", "#edb6bc", "#e8d179"],
+     playerStrokeColor: ["#4c69a0", "#9e5044", "#c88194", "#c28f4f"],
+     bulletFillColor: ["#6984ae", "#d75f56", "#edb6bc", "#e8d179"],
+     bulletStrokeColor: ["#4c69a0", "#9e5044", "#c88194", "#c28f4f"],
 };
 
 // box2d 物理世界参数

@@ -23,12 +23,13 @@
 #define CATEGORY_BORDER_WALL (1u << 4)
 
 //方块填充颜色
-#define BOLCK_FILL_GREEN 0x3ff566ff
-#define BOLCK_FILL_BLUE 0x4c69a0ff
-#define BOLCK_FILL_PURPLE 0xff57e6ff
-#define BOLCK_FILL_ORANGE 0xffac4dff
+#define BOLCK_FILL_GREEN 0x99cc33ff
+#define BOLCK_FILL_BLUE 0x3399ccff
+#define BOLCK_FILL_PURPLE 0x9966ccff
+#define BOLCK_FILL_ORANGE 0xff9900ff
 //方块边框颜色
-#define BOLCK_STROKE_GREEN 0x238f28ff
-#define BOLCK_STROKE_BLUE 0x32467cff
-#define BOLCK_STROKE_PURPLE 0xa83c98ff
-#define BOLCK_STROKE_ORANGE 0xc7873dff
+#define BOLCK_STROKE_GREEN 0x336600ff
+#define BOLCK_STROKE_BLUE 0x336699ff
+#define BOLCK_STROKE_PURPLE 0x663399ff
+#define BOLCK_STROKE_ORANGE 0xcc6600ff
+//TODO: 各类配置项放不同配置文件中，避免重复编译不相关的cpp，对于可动态配置的项，采用文件读取的方式
