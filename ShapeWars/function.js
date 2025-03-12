@@ -228,7 +228,7 @@ function drawPerformance() {
           return;
      ctx.save();
      // 绘制网络帧间隔图表
-     const chartX = canvas.width - 240;
+     const chartX = canvas.width - 240 - 25;
      const chartY = canvas.height - 360;
      const chartWidth = 240;
      const chartHeight = 220;
@@ -282,11 +282,36 @@ function drawPerformance() {
      ctx.lineTo(chartX + chartWidth, lineY28);
      ctx.moveTo(chartX, lineY38);
      ctx.lineTo(chartX + chartWidth, lineY38);
+     for (let i = 0; i < 150; i += 10) {//绘制参考线值
+          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, 30, 150) + 30;
+          ctx.moveTo(chartX + chartWidth - 5, lineYi);
+          ctx.lineTo(chartX + chartWidth, lineYi);
+     }
      ctx.stroke();
+     for (let i = 0; i < 150; i += 10) {//绘制参考线值
+          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, 30, 150) + 30;
+          ctx.fillText(i, chartX + chartWidth, lineYi);     
+     }
 
      // 绘制帧间隔折线
      ctx.beginPath();
      ctx.strokeStyle = '#ffa500'; // 橙色折线
+     ctx.lineWidth = 2;
+     ctx.setLineDash([]); // 重置为实线
+
+     for (let i = 0; i < serverTime.historyFrameIntervalRecv.length; i++) {
+
+          // 计算坐标位置
+          const x = chartX + i * (chartWidth / serverTime.historyFrameIntervalRecv.length);
+          const y = chartY + chartHeight - mapValue(serverTime.historyFrameIntervalRecv.at(i), 10, 50, 30, 150) + 30;
+
+          // 连接数据点
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+     }
+     ctx.stroke();
+
+     ctx.beginPath();
+     ctx.strokeStyle = '#0000ff'; // 蓝色折线
      ctx.lineWidth = 2;
      ctx.setLineDash([]); // 重置为实线
 

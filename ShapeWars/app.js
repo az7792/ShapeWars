@@ -23,10 +23,12 @@ window.onresize = () => {
 
 //更新画布
 let lastUpdataCFPSTime = Date.now();
+let lastCFPSTime = lastUpdataCFPSTime;
 let animationFrameCount = 0;
 function update() {
-     let deltaTime;
      let currTime = Date.now();
+
+     serverTime.deltaTime = Math.max(0, Math.min(1.5, (currTime - serverTime.curr) / serverTime.avgFrameInterval));
 
      //更新客户端帧率(服务器帧率在网络部分更新)
      animationFrameCount++;
@@ -35,19 +37,16 @@ function update() {
           animationFrameCount = 0;
           lastUpdataCFPSTime = currTime;
      }
+     lastCFPSTime = currTime;
 
-     //计算插值使用的时间变化
-     if (serverTime.curr == serverTime.prev)
-          deltaTime = 1;
-     else
-          deltaTime = Math.max(0, Math.min(1, (currTime - serverTime.curr) / (serverTime.curr - serverTime.prev)));
+
      // 插值摄像机位置
-     camera.x = lerp(camera.lerpX, deltaTime);
-     camera.y = lerp(camera.lerpY, deltaTime);
+     camera.x = lerp(camera.lerpX, serverTime.deltaTime);
+     camera.y = lerp(camera.lerpY, serverTime.deltaTime);
 
      //绘制画面
      drawBackground();//更新背景
-     entityManager.update(deltaTime);//更新实体
+     entityManager.update(serverTime.deltaTime);//更新实体(插值)
      drawMiniMap();//更新小地图
      drawPerformance();//更新性能参数
      drawPlayerInfo();//绘制操作者的信息(在屏幕底部显示)

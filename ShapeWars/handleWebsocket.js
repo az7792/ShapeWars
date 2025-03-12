@@ -1,8 +1,84 @@
+const adjustableInterval = new AdjustableInterval(() => popBuf(), 33);
+
 // 连接打开时触发
 socket.onopen = () => {
      console.log("WebSocket 连接已建立");
+     adjustableInterval.start();
      performanceMetrics.isConnected = true;
 };
+ let bufLen = 1;
+ let maxDeltaTime = 1.5;
+// let noPacketCount = 0;
+// function popBuf() {
+//      if (wsBuf.length <= bufLen) {//HACK
+//           if (wsBuf.length >= 1 && serverTime.deltaTime >= maxDeltaTime) {
+//                parseEntity(...wsBuf.at(0));
+//                wsBuf.pop();
+//                maxDeltaTime = Math.min(2, maxDeltaTime + 0.2)
+//           }
+//           return;
+//      }
+//      parseEntity(...wsBuf.at(0));
+//      wsBuf.pop();
+//      maxDeltaTime = Math.min(1.5, maxDeltaTime - 0.1)
+// }
+
+function popBuf() {
+     if (wsBuf.length > bufLen || (wsBuf.length >= 1 && serverTime.deltaTime >= maxDeltaTime)) {
+          parseEntity(...wsBuf.at(0));
+          wsBuf.pop();
+     }
+}
+
+// 更新实体
+function parseEntity(dataView, offset) {
+     //当前玩家ID
+     playerStatus.nowEntityId = readEntityIDIndex(dataView, offset);
+     //当前玩家所在碰撞组
+     playerStatus.nowGroupIndex = readGroupIndex(dataView, offset);
+     // 摄像机位置
+     camera.lerpX[0] = camera.lerpX[1];
+     camera.lerpY[0] = camera.lerpY[1];
+     [camera.lerpX[1], camera.lerpY[1]] = readPosition(dataView, offset);
+     //需要移出的实体列表
+     let listLen = dataView.getUint16(offset.value, true);
+     offset.value += 2;
+     while (listLen--) {
+          entityManager.removeEntityByDataView(dataView, offset);
+     }
+     //需要删除的实体列表
+     listLen = dataView.getUint16(offset.value, true);
+     offset.value += 2;
+     while (listLen--) {
+          entityManager.deleteEntityByDataView(dataView, offset);
+     }
+     //需要增加的实体列表
+     listLen = dataView.getUint16(offset.value, true);
+     offset.value += 2;
+     while (listLen--) {
+          entityManager.addEntityByDataView(dataView, offset);
+     }
+     //需要更新的实体列表
+     listLen = dataView.getUint16(offset.value, true);
+     offset.value += 2;
+     while (listLen--) {
+          entityManager.updateEntityByDataView(dataView, offset);
+     }
+     //更新时间
+     serverTime.prev = serverTime.curr;
+     serverTime.curr = Date.now();
+     if (serverTime.prev === 0)
+          serverTime.prev = serverTime.curr - 33;
+     let frameInterval = serverTime.curr - serverTime.prev;
+     serverTime.historyFrameInterval.push(frameInterval);
+     adjustableInterval.setInterval(Math.ceil(serverTime.avgFrameInterval) - wsBuf.length);
+     //更新玩家是否为操作者
+     let player = entityManager.getEntity(playerStatus.nowEntityId);
+     if (player) {
+          player.isOperator = true;
+     }
+     sendMessage(playerInput.packData());
+}
 
 function parseMessage(dataView, offset) {
      let MessageType = dataView.getUint8(offset.value, true);
@@ -13,59 +89,36 @@ function parseMessage(dataView, offset) {
                offset.value += 4;
                MAPINFO.height = dataView.getFloat32(offset.value, true);
                offset.value += 4;
-               miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize)
+               miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
                break;
           case 0x01: // 更新实体
-               //当前玩家ID
-               playerStatus.nowEntityId = readEntityIDIndex(dataView, offset);
-               //当前玩家所在碰撞组
-               playerStatus.nowGroupIndex = readGroupIndex(dataView, offset);
-               // 摄像机位置
-               camera.lerpX[0] = camera.lerpX[1];
-               camera.lerpY[0] = camera.lerpY[1];
-               [camera.lerpX[1], camera.lerpY[1]] = readPosition(dataView, offset);
-               //需要移出的实体列表
-               let listLen = dataView.getUint16(offset.value, true);
-               offset.value += 2;
-               while (listLen--) {
-                    entityManager.removeEntityByDataView(dataView, offset);
-               }
-               //需要删除的实体列表
-               listLen = dataView.getUint16(offset.value, true);
-               offset.value += 2;
-               while (listLen--) {
-                    entityManager.deleteEntityByDataView(dataView, offset);
-               }
-               //需要增加的实体列表
-               listLen = dataView.getUint16(offset.value, true);
-               offset.value += 2;
-               while (listLen--) {
-                    entityManager.addEntityByDataView(dataView, offset);
-               }
-               //需要更新的实体列表
-               listLen = dataView.getUint16(offset.value, true);
-               offset.value += 2;
-               while (listLen--) {
-                    entityManager.updateEntityByDataView(dataView, offset);
-               }
-               //更新时间
-               serverTime.prev = serverTime.curr;
-               serverTime.curr = Date.now();
-               if(serverTime.prev === 0)
-                    serverTime.prev = serverTime.curr - 33;
-               let frameInterval = serverTime.curr - serverTime.prev;
-               if (serverTime.historyFrameInterval.length < serverTime.historyFrameInterval.maxSize)
-                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * (serverTime.historyFrameInterval.length) + frameInterval) / (serverTime.historyFrameInterval.length + 1);
+               //计算平均帧间隔
+               serverTime.prevRecv = serverTime.currRecv;
+               serverTime.currRecv = Date.now();
+               if (serverTime.prevRecv === 0)
+                    serverTime.prevRecv = serverTime.currRecv - 33;
+               let frameInterval = serverTime.currRecv - serverTime.prevRecv;
+               if (serverTime.historyFrameIntervalRecv.length < serverTime.historyFrameIntervalRecv.maxSize)
+                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * (serverTime.historyFrameIntervalRecv.length) + frameInterval) / (serverTime.historyFrameIntervalRecv.length + 1);
                else
-                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * serverTime.historyFrameInterval.maxSize - serverTime.historyFrameInterval.at(0) + frameInterval) / serverTime.historyFrameInterval.maxSize;
-               serverTime.historyFrameInterval.push(frameInterval);
+                    serverTime.avgFrameInterval = (serverTime.avgFrameInterval * serverTime.historyFrameIntervalRecv.maxSize - serverTime.historyFrameIntervalRecv.at(0) + frameInterval) / serverTime.historyFrameIntervalRecv.maxSize;
+               serverTime.historyFrameIntervalRecv.push(frameInterval);
                performanceMetrics.TPS = Math.round(1000 / serverTime.avgFrameInterval);
-               //更新玩家是否为操作者
-               let player = entityManager.getEntity(playerStatus.nowEntityId);
-               if (player) {
-                    player.isOperator = true;
+
+               // if (wsBuf.length >= wsBuf.maxSize) {
+               //      parseEntity(...wsBuf.at(0));
+               //      wsBuf.pop();
+               // } else if (serverTime.deltaTime >= 1 && wsBuf.length == 0) {
+               //      parseEntity(dataView, offset);
+               // }
+               // else {
+               //      wsBuf.push([dataView, offset]);
+               // }
+               if (wsBuf.length >= wsBuf.maxSize) {
+                    parseEntity(...wsBuf.at(0));
+                    wsBuf.pop();
                }
-               sendMessage(playerInput.packData());
+               wsBuf.push([dataView, offset]);
                break;
           case 0x02://Ping
                break;
@@ -110,6 +163,7 @@ socket.onmessage = (event) => {
 socket.onclose = () => {
      console.log("WebSocket 连接已关闭");
      performanceMetrics.isConnected = false;
+     adjustableInterval.stop();
 };
 
 // 发生错误时触发

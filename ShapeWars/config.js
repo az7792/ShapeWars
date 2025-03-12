@@ -35,8 +35,12 @@ camera = {
 serverTime = {
      prev: 0,//前一帧
      curr: 0,//当前帧
+     prevRecv: 0,//前一帧接收时间
+     currRecv: 0,//当前帧接收时间
      historyFrameInterval: new Queue(120, 33),//历史帧间隔
+     historyFrameIntervalRecv: new Queue(120, 33),//历史帧接收间隔
      avgFrameInterval: 33,//平均帧间隔
+     deltaTime:0,
 }
 
 performanceMetrics = {

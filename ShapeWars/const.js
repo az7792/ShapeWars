@@ -8,6 +8,7 @@ const entityManager = new EntityManager();
 const socket = new WebSocket("ws://localhost:7792");
 socket.binaryType = 'arraybuffer';
 const playerInput = new PlayerInput();
+const wsBuf = new Queue(10, [null, { value: 0 }, null]);//webSocket缓冲区
 
 
 const CATEGORY_PLAYER = 0;
