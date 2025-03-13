@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #pragma once
 #include <vector>
 #include <cstdint> // for uint32_t

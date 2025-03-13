@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "net/EventLoop.h"
 #include "net/Epoll.h"
 #include "net/Channel.h"

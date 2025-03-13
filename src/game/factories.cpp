@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "game/factories.h"
 #include "config/config.h"
 #include <ctime>

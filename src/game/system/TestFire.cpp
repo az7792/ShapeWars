@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "game/system/TestFire.h"
 #include "game/component/fwd.h"
 #include "game/factories.h"

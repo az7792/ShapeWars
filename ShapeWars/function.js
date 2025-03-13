@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 //插值函数
 function lerp(val, deltaTime) {
      return (val[0] + (val[1] - val[0]) * deltaTime);

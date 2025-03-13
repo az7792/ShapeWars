@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "ecs/EntityManager.h"
 #include <bits/stdc++.h>
 using namespace std;

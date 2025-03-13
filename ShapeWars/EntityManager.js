@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 class EntityManager {
      static entityTypeToLevel = [2, 0, 1]; // 实体类型到渲染层级的映射
      constructor() {

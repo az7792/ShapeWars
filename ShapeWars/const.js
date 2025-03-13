@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 const canvas = document.getElementById("canvas");
 canvas.addEventListener("contextmenu", function (event) {//禁用浏览器右键菜单
      event.preventDefault();

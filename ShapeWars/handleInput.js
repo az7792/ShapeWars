@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 // 键盘事件：按下与抬起
 document.addEventListener("keydown", (event) => {
      playerInput.setKeyStatus(event.key, true);

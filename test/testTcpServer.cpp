@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include <iostream>
 #include <thread>
 #include "box2d/box2d.h"

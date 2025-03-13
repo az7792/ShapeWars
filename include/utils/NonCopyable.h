@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 /// @brief 派生类无法进行拷贝构造和赋值构造
 class NonCopyable
 {

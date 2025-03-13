@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "ecs/EntityManager.h"
 
 // Group &ecs::EntityManager::group(const std::vector<uint32_t> &direct, const std::vector<uint32_t> &indirect)

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 class AdjustableInterval {
      constructor(callback, initialInterval) {
           this.callback = callback;

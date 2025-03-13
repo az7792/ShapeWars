@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "utils/Time.h"
 
 Time::Time() : timestamp(std::time(nullptr)), year(0), month(0), day(0),

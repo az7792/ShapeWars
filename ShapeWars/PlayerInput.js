@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 class PlayerInput {
      static keyMapping = {
           'left': 0,    // 左键

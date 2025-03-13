@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #pragma once
 #include <cstdint>
 /// @brief 持续对自己进行加血

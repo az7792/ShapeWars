@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "net/InetAddress.h"
 
 InetAddress::InetAddress(std::string ip, uint16_t port)

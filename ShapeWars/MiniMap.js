@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 // 存放小地图和背景地图数据
 class MiniMap {
      constructor(width, height) {

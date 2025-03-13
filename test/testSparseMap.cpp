@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "utils/SparseMap.h"
 #include <unordered_set>
 #include <map>

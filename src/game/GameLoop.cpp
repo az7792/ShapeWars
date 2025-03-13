@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "game/GameLoop.h"
 #include "config/config.h"
 #include "game/system/fwd.h" //所有系统

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "net/Channel.h"
 #include "net/EventLoop.h"
 #include <sys/epoll.h> //仅用于使用EPOLLIN，EPOLLOUT等宏

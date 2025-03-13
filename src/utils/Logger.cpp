@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "utils/Logger.h"
 
 Logger::Logger() : logLevel_(LogLevel::INFO), timeFormat_(TimeFormat::DateTime)

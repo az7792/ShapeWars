@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 const adjustableInterval = new AdjustableInterval(() => popBuf(), 33);
 
 // 连接打开时触发

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "game/system/fwd.h"
 #include "game/component/fwd.h"
 #include "box2d/box2d.h"

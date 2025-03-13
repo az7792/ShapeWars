@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 /**
  * 读取实体ID的index部分
  * @returns 实体ID的index部分

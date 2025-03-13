@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "net/Acceptor.h"
 #include "net/SocketOps.h"
 #include "utils/Logger.h"

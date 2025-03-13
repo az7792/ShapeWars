@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 #include "game/system/cameraSys.h"
 #include "game/utils.h"
 #include "box2d/box2d.h"

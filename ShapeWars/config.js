@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Xuefei Ai
+// SPDX-License-Identifier: MIT
+
 //颜色常量
 const COLORS = {
      miniMapBorder: "#cfcfcf",//小地图边框颜色
