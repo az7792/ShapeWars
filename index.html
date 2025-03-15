@@ -5,6 +5,8 @@
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>ShapeWars</title>
+     <!-- 默认图标 -->
+     <link id="dynamic-favicon" rel="icon" type="image/png" href="./ShapeWars/favicon/6.png">
      <style>
           html,
           body {
@@ -86,6 +88,16 @@
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
 
      <script>
+          // 动态设置图标
+          const faviconElement = document.getElementById('dynamic-favicon');
+          const favicons = [
+               './ShapeWars/favicon/3.png',
+               './ShapeWars/favicon/4.png',
+               './ShapeWars/favicon/5.png',
+               './ShapeWars/favicon/6.png'
+          ];     
+          faviconElement.href = favicons[Math.floor(Math.random() * favicons.length)];
+
           //获取名称输入框
           const nameInput = document.getElementById('nameInput');
           // 获取按钮元素
