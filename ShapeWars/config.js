@@ -43,7 +43,7 @@ serverTime = {
      historyFrameInterval: new Queue(120, 33),//历史帧间隔
      historyFrameIntervalRecv: new Queue(120, 33),//历史帧接收间隔
      avgFrameInterval: 33,//平均帧间隔
-     deltaTime:0,
+     deltaTime:1.1,
 }
 
 performanceMetrics = {
