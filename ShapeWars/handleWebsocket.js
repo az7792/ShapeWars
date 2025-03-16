@@ -1,33 +1,14 @@
 // SPDX-FileCopyrightText: 2025 Xuefei Ai
 // SPDX-License-Identifier: MIT
 
-const adjustableInterval = new AdjustableInterval(() => popBuf(), 33);
-
 // 连接打开时触发
 socket.onopen = () => {
      console.log("WebSocket 连接已建立");
-     adjustableInterval.start();
      performanceMetrics.isConnected = true;
 };
- let bufLen = 1;
- let maxDeltaTime = 1.5;
-// let noPacketCount = 0;
-// function popBuf() {
-//      if (wsBuf.length <= bufLen) {//HACK
-//           if (wsBuf.length >= 1 && serverTime.deltaTime >= maxDeltaTime) {
-//                parseEntity(...wsBuf.at(0));
-//                wsBuf.pop();
-//                maxDeltaTime = Math.min(2, maxDeltaTime + 0.2)
-//           }
-//           return;
-//      }
-//      parseEntity(...wsBuf.at(0));
-//      wsBuf.pop();
-//      maxDeltaTime = Math.min(1.5, maxDeltaTime - 0.1)
-// }
 
 function popBuf() {
-     if (wsBuf.length > bufLen || (wsBuf.length >= 1 && serverTime.deltaTime >= maxDeltaTime)) {
+     if (wsBuf.length >= 1) {
           parseEntity(...wsBuf.at(0));
           wsBuf.pop();
      }
@@ -66,15 +47,7 @@ function parseEntity(dataView, offset) {
      offset.value += 2;
      while (listLen--) {
           entityManager.updateEntityByDataView(dataView, offset);
-     }
-     //更新时间
-     serverTime.prev = serverTime.curr;
-     serverTime.curr = Date.now();
-     if (serverTime.prev === 0)
-          serverTime.prev = serverTime.curr - 33;
-     let frameInterval = serverTime.curr - serverTime.prev;
-     serverTime.historyFrameInterval.push(frameInterval);
-     adjustableInterval.setInterval(Math.ceil(serverTime.avgFrameInterval) - wsBuf.length);
+     }     
      //更新玩家是否为操作者
      let player = entityManager.getEntity(playerStatus.nowEntityId);
      if (player) {
@@ -108,15 +81,6 @@ function parseMessage(dataView, offset) {
                serverTime.historyFrameIntervalRecv.push(frameInterval);
                performanceMetrics.TPS = Math.round(1000 / serverTime.avgFrameInterval);
 
-               // if (wsBuf.length >= wsBuf.maxSize) {
-               //      parseEntity(...wsBuf.at(0));
-               //      wsBuf.pop();
-               // } else if (serverTime.deltaTime >= 1 && wsBuf.length == 0) {
-               //      parseEntity(dataView, offset);
-               // }
-               // else {
-               //      wsBuf.push([dataView, offset]);
-               // }
                if (wsBuf.length >= wsBuf.maxSize) {
                     parseEntity(...wsBuf.at(0));
                     wsBuf.pop();
@@ -166,7 +130,6 @@ socket.onmessage = (event) => {
 socket.onclose = () => {
      console.log("WebSocket 连接已关闭");
      performanceMetrics.isConnected = false;
-     adjustableInterval.stop();
 };
 
 // 发生错误时触发

@@ -28,10 +28,38 @@ window.onresize = () => {
 let lastUpdataCFPSTime = Date.now();
 let lastCFPSTime = lastUpdataCFPSTime;
 let animationFrameCount = 0;
-function update() {
-     let currTime = Date.now();
 
-     serverTime.deltaTime = Math.max(0, Math.min(1.5, (currTime - serverTime.curr) / serverTime.avgFrameInterval));
+let accumulator = 0;          // 未消费的时间累积量（毫秒）
+let lastRenderTime = null;    // 上一次渲染的时间戳
+let currTime = Date.now();
+let serverTimePrev_ = 0;
+let serverTimeCurr_ = 0;
+let avg = 33;
+function update() {
+     let Len = 1;
+     if (serverTime.deltaTime >= 1) {          
+          if (wsBuf.length >= Len) {
+               popBuf();
+               let offset = (serverTime.deltaTime - 1) * avg; // 由于渲染帧间隔往往不为服务器帧间隔的倍数，因此插值进度不会刚到为1，而是>1
+               avg = serverTime.avgFrameInterval;
+               serverTime.curr = currTime - offset;
+               avg -= mapValue(Math.max(0, wsBuf.length - Len), 0, wsBuf.maxSize, 0, 10);//防止缓冲区堆积
+               avg = Math.max(5, avg);
+               //console.log(wsBuf.length,offset,avg);
+               //统计逻辑帧加载的帧间隔(蓝线)
+               serverTimePrev_ = serverTimeCurr_;
+               serverTimeCurr_ = serverTime.curr;
+               if (serverTimePrev_ === 0)
+                    serverTimePrev_ = serverTimeCurr_ - 33;
+               let frameInterval = serverTimeCurr_ - serverTimePrev_;
+               serverTime.historyFrameInterval.push(frameInterval);
+          } else {
+               //console.log("no enough data");
+          }
+     }
+     currTime = Date.now();
+     serverTime.deltaTime = Math.max(0, Math.min(2, (currTime - serverTime.curr) / avg));   
+
 
      //更新客户端帧率(服务器帧率在网络部分更新)
      animationFrameCount++;
