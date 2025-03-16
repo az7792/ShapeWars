@@ -66,6 +66,7 @@ function parseMessage(dataView, offset) {
                MAPINFO.height = dataView.getFloat32(offset.value, true);
                offset.value += 4;
                miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
+               //TODO : 同步地图背景
                break;
           case 0x01: // 更新实体
                //计算平均帧间隔

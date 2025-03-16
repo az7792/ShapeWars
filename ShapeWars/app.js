@@ -29,12 +29,11 @@ let lastUpdataCFPSTime = Date.now();
 let lastCFPSTime = lastUpdataCFPSTime;
 let animationFrameCount = 0;
 
-let accumulator = 0;          // 未消费的时间累积量（毫秒）
-let lastRenderTime = null;    // 上一次渲染的时间戳
 let currTime = Date.now();
+//用于统计统计逻辑帧加载的帧间隔
 let serverTimePrev_ = 0;
 let serverTimeCurr_ = 0;
-let avg = 33;
+let avg = 33;//实际用于插值间隔的值
 function update() {
      let Len = 1;//MAYBE : 动态调整缓冲区大小
      if (serverTime.deltaTime >= 1) {          
