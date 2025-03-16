@@ -54,5 +54,6 @@ foreach(TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME} PRIVATE src_objects
         ${CMAKE_CURRENT_SOURCE_DIR}/../lib/libbox2d.a
         ${CMAKE_CURRENT_SOURCE_DIR}/../lib/liblz4.a
+        pthread
     )
 endforeach()
