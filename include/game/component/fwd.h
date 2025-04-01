@@ -28,6 +28,7 @@
 #include "blockRevolutionCtrl.h"
 #include "barrel.h"
 #include "score.h"
+#include "attribute.h"
 
 #include <cstdint>
 

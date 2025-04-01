@@ -28,7 +28,7 @@ struct PlayerParams
      TcpConnection *tcpConnection = nullptr; // 玩家的TCP连接
      int32_t groupIndex = 0;                 // 玩家所在碰撞组的索引
      std::string name;                       // 玩家的名字
-     int16_t attack = 3 * TPS;               // 玩家刚体的攻击力
+     int16_t attack = 1 * TPS;               // 玩家刚体的攻击力
      b2Vec2 position{0.f, 0.f};              // 玩家的初始位置
      int16_t initialHP = 1000;               // 玩家的初始血量
      int16_t maxHP = 1000;                   // 玩家的最大血量

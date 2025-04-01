@@ -1,0 +1,109 @@
+/* UI容器 */
+.pd-ui-container {
+    position: fixed;
+    left: -300px;
+    bottom: 50px;
+    width: 280px;
+    padding: 10px;
+    border-radius: 0 10px 10px 0;
+    transition: left 0.3s ease;
+    user-select: none;
+    z-index: 1000;
+}
+
+.pd-ui-container.active {
+    left: 0;
+}
+
+/* 展开按钮 */
+.pd-toggle-btn {
+    position: fixed;
+    left: 0;
+    bottom: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1001;
+}
+
+/* 属性项 */
+.pd-attribute-item {
+    margin: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 进度条容器 */
+.pd-progress-container {
+    display: flex;
+    gap: 3px;
+    width: 200px;
+    height: 15px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 名称叠加样式 */
+.pd-attribute-name {
+    position: absolute;
+    color: white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    white-space: nowrap;
+    letter-spacing: 7px;
+}
+
+/* 进度条块 */
+.pd-progress-block {
+    flex: 1;
+    height: 100%;
+    background: #555;
+    transition: background 0.3s ease;
+}
+
+.pd-progress-block.active {
+    background: var(--pd-progress-color);
+}
+
+/* 加减按钮 */
+.pd-btn {
+    width: 40px;
+    height: 15px;
+    border: none;
+    background: var(--pd-btn-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* “加” 按钮 - 右边圆角 */
+.pd-btn.increment {
+    border-radius: 0 10px 10px 0;
+    margin-left: 0;
+}
+
+/* “减” 按钮 - 左边圆角 */
+.pd-btn.decrement {
+    border-radius: 10px 0 0 10px;
+    margin-right: 0;
+}
+
+.pd-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}

@@ -47,7 +47,7 @@ function parseEntity(dataView, offset) {
      offset.value += 2;
      while (listLen--) {
           entityManager.updateEntityByDataView(dataView, offset);
-     }     
+     }
      //更新玩家是否为操作者
      let player = entityManager.getEntity(playerStatus.nowEntityId);
      if (player) {
@@ -116,6 +116,10 @@ function parseMessage(dataView, offset) {
                break;
           case 0x07://排行榜消息
                readStandings(dataView, offset);
+               break;
+          case 0x08:
+               let [isUp, index] = readAttributes(dataView, offset);
+               pointUI.updateValue(isUp, index);
                break;
      }
 }

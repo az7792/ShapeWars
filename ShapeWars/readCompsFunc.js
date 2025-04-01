@@ -154,3 +154,17 @@ function readStandings(dataView, offset) {
           standings[i][1] = readScore(dataView, offset);
      }
 }
+
+/**
+ * 读取属性加点变化
+ * @returns [变化量，属性index]
+ */
+function readAttributes(dataView, offset) {
+     let val = dataView.getUint8(offset.value, true);
+     offset.value += 1;
+
+     let isUp = ((val & 0x80) >> 7) == 1 ? 1 : -1; // 0b10000000
+     let attrIndex = val & 0x7F; // 0b01111111
+
+     return [isUp, attrIndex];
+}

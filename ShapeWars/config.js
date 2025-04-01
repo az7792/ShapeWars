@@ -67,3 +67,18 @@ standings = [];//排名数据 [[name, score],...]
 
 //Ping
 pingTime = 0;
+
+
+// 属性数据
+let pdAttributes = [
+     { id: 0, name: "回复速度", value: 0, max: 8, progressColor: '#FF6F61', btnColor: '#FF6F61' },
+     { id: 1, name: "最大生命值", value: 0, max: 8, progressColor: '#6B5B95', btnColor: '#6B5B95' },
+     { id: 2, name: "身体碰撞伤害", value: 0, max: 8, progressColor: '#88B04B', btnColor: '#88B04B' },
+     { id: 3, name: "子弹伤害", value: 0, max: 8, progressColor: '#FFA500', btnColor: '#FFA500' },
+     { id: 4, name: "子弹伤害判定次数", value: 0, max: 8, progressColor: '#92A8D1', btnColor: '#92A8D1' },
+     { id: 5, name: "子弹血量", value: 0, max: 8, progressColor: '#955251', btnColor: '#955251' },
+     { id: 6, name: "子弹速度", value: 0, max: 8, progressColor: '#B565A7', btnColor: '#B565A7' },
+     { id: 7, name: "子弹质量", value: 0, max: 8, progressColor: '#009B77', btnColor: '#009B77' },
+     { id: 8, name: "子弹射速", value: 0, max: 8, progressColor: '#DD4124', btnColor: '#DD4124' },
+     { id: 9, name: "角色移动速度", value: 0, max: 8, progressColor: '#D65076', btnColor: '#D65076' }
+];

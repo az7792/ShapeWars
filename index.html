@@ -7,6 +7,7 @@
      <title>ShapeWars</title>
      <!-- 默认图标 -->
      <link id="dynamic-favicon" rel="icon" type="image/png" href="./ShapeWars/favicon/6.png">
+     <link rel="stylesheet" href="./ShapeWars/css/PointDistributionUI.css">
      <style>
           html,
           body {
@@ -24,7 +25,16 @@
                /* 确保 canvas 在底层 */
           }
 
-          button {
+          #upFov {
+               position: relative;
+               z-index: 10;
+               /* 确保按钮在canvas之上 */
+               margin: 10px;
+               /* 设置一些外边距 */
+               padding: 10px 20px;
+               /* 设置按钮的内边距 */
+          }
+          #downFov{
                position: relative;
                z-index: 10;
                /* 确保按钮在canvas之上 */
@@ -83,6 +93,8 @@
           <input id="nameInput" type="text" placeholder="请输入名称" maxlength="10">
           <button id="startGameButton">开始游戏</button>
      </div>
+     <div class="pd-toggle-btn" id="pd-toggleBtn">▶</div>
+     <div class="pd-ui-container" id="pd-attributeUI"></div>
      <button id="upFov">upFov</button>
      <button id="downFov">downFov</button>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
@@ -111,6 +123,8 @@
      <script src="./ShapeWars/queue.js"></script><!--定长队列-->
 
      <script src="./ShapeWars/AdjustableInterval.js"></script><!--可变间隔定时器-->
+
+     <script src="./ShapeWars/PointDistributionUI.js"></script> <!-- 加点分配UI -->
 
      <script src="./ShapeWars/config.js"></script> <!-- 配置文件 -->
      <script src="./ShapeWars/readCompsFunc.js"></script> <!-- 读取组件数据函数 -->

@@ -22,7 +22,7 @@ canvas.addEventListener("mousedown", (event) => {
      }
 });
 
-canvas.addEventListener("mouseup", (event) => {
+window.addEventListener("mouseup", (event) => {
      if (event.button === 0) {  // 0 是左键
           playerInput.setKeyStatus('left', false);
      } else if (event.button === 2) {  // 2 是右键

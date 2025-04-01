@@ -13,6 +13,9 @@ socket.binaryType = 'arraybuffer';
 const playerInput = new PlayerInput();
 const wsBuf = new Queue(10, [null, { value: 0 }, null]);//webSocket缓冲区
 
+// 加点UI
+const pointUI = new PointDistributionUI(pdAttributes, 'pd-attributeUI', 'pd-toggleBtn');
+
 
 const CATEGORY_PLAYER = 0;
 const CATEGORY_BLOCK = 1;

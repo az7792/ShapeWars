@@ -25,6 +25,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Children>(e);
      em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f);
      em.addComponent<Score>(e, 0);
+     em.addComponent<Attribute>(e);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 

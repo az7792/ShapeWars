@@ -10,10 +10,82 @@
 #include "lz4/lz4.h"
 #include <cstring>
 
+void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
+{
+     if (!em_.hasComponents<Score, Attribute>(entity))
+          return;
+     int8_t isUp = ((v & 0x80) >> 7) == 1 ? 1 : -1; // 0b10000000
+     uint8_t attr = v & 0x7F;                       // 0b01111111
+
+     Attribute *attribute = em_.getComponent<Attribute>(entity);
+     Score *score = em_.getComponent<Score>(entity);
+
+     // 无法更改
+     if (isUp == 1 && (attribute->attr[attr] == 8 || score->score < 1000))
+          return;
+     if (isUp == -1 && (attribute->attr[attr] == 0 || score->score < 2000))
+          return;
+
+     // 可以更改
+     std::string recvStr = {0x08, static_cast<char>(v)}; // 返回确认信息
+
+     if (attr == 0) // 回复速度
+     {
+     }
+     else if (attr == 1 && em_.hasComponent<HP>(entity)) // 最大生命值
+     {
+          HP *hp = em_.getComponent<HP>(entity);
+          hp->maxHP += isUp * 100;
+          if (isUp == 1)
+          {
+               hp->hp += 100;
+          }
+          else //-1
+          {
+               hp->hp = hp->hp > hp->maxHP ? hp->maxHP : hp->hp;
+          }
+          hp->tick = tick_;
+     }
+     else if (attr == 2 && em_.hasComponent<Attack>(entity)) // 身体碰撞伤害
+     {
+          Attack *attack = em_.getComponent<Attack>(entity);
+          attack->damage += isUp * TPS;
+     }
+     else if (attr == 3) // 子弹伤害
+     {
+     }
+     else if (attr == 4) // 子弹伤害判定次数
+     {
+     }
+     else if (attr == 5) // 子弹血量
+     {
+     }
+     else if (attr == 6) // 子弹速度
+     {
+     }
+     else if (attr == 7) // 子弹质量
+     {
+     }
+     else if (attr == 8) // 子弹射速
+     {
+     }
+     else if (attr == 9 && em_.hasComponent<Velocity>(entity)) // 角色移动速度
+     {
+          Velocity *vel = em_.getComponent<Velocity>(entity);
+          vel->maxSpeed += isUp * 0.5;
+     }
+
+     attribute->attr[attr] += isUp;
+     score->score -= isUp == 1 ? 1000 : 2000;
+     score->tick = tick_;
+
+     ws_.send(recvStr, *em_.getComponent<TcpConnection *>(entity)); // 返回确认
+}
+
 void GameLoop::inputSys()
 {
      auto group = em_.group<Input, b2BodyId>();
-     std::unique_lock<std::mutex> lock(playerAndInputMapMutex_);
+     std::unique_lock<std::mutex> lock(playerMutex_);
      for (auto &entity : *group)
      {
           // 需要保证ecs与inputMap_是同步的
@@ -21,6 +93,25 @@ void GameLoop::inputSys()
           Input *input = em_.replaceComponent<Input>(entity, aInput.x.load(), aInput.y.load(), aInput.state.load());
           b2Vec2 pos = b2Body_GetPosition(*em_.getComponent<b2BodyId>(entity));
           em_.getComponent<Angle>(entity)->angle = atan2(input->y - pos.y, input->x - pos.x);
+     }
+}
+
+void GameLoop::attributeSys()
+{
+     auto group = em_.group<Input, b2BodyId>();
+     std::unique_lock<std::mutex> lock(playerMutex_);
+     for (auto &entity : *group)
+     {
+          int index = inputMap_[entity];
+          std::unique_lock<std::shared_mutex> lock2(inputMutex_[index]); // 写锁
+          std::deque<uint8_t> &dq = attributeBuf_[index];
+          while (!dq.empty())
+          {
+               uint8_t attr = dq.front();
+               dq.pop_front();
+               modifyAttribute(entity, attr);
+          }
+          assert(dq.empty() && dq.size() == 0);
      }
 }
 
@@ -121,7 +212,7 @@ void GameLoop::createPlayerSys()
 {
      static int32_t groupIndex = -1;
      std::lock_guard<std::mutex> lock1(createPlayerQueueMutex_);
-     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     std::lock_guard<std::mutex> lock2(playerMutex_);
      while (!createPlayerQueue_.empty())
      {
           auto it = playerMap_.find(std::get<0>(createPlayerQueue_.front()));
@@ -180,7 +271,7 @@ void GameLoop::destroyEntitySys()
      { // 处理因为网络断开导致的玩家删除
           // TODO：加入断线重连
           std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
-          std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+          std::lock_guard<std::mutex> lock2(playerMutex_);
           while (!destroyPlayerQueue_.empty())
           {
                ecs::Entity e = playerMap_[destroyPlayerQueue_.front()].first;
@@ -217,7 +308,7 @@ void GameLoop::destroyEntitySys()
                em_.removeComponent<b2BodyId>(entity);
                em_.getComponent<ContactList>(entity)->list.clear();
                em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次
-               std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+               std::lock_guard<std::mutex> lock2(playerMutex_);
                playerMap_[*em_.getComponent<TcpConnection *>(entity)].second = 0; // 标记玩家为死亡
 
                ws_.send(std::string(1, 0x05), *em_.getComponent<TcpConnection *>(entity)); // 通知客户端玩家已死亡
@@ -275,6 +366,7 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
      em_.getComponent<Score>(entity)->score /= 4;
      em_.getComponent<Score>(entity)->tick = tick_;
+     em_.getComponent<Attribute>(entity)->attr.fill(0);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -350,7 +442,7 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
      case 0x00: // 创建角色
      {
           std::lock_guard<std::mutex> lock1(createPlayerQueueMutex_);
-          std::unique_lock<std::mutex> lock2(playerAndInputMapMutex_);
+          std::unique_lock<std::mutex> lock2(playerMutex_);
           uint8_t nameLen = buffer.readValue<uint8_t>();
           std::string name = buffer.readAsString(nameLen);
           if (playerMap_.find(conn) == playerMap_.end() || playerMap_[conn].second == 0) // 玩家未创建实体或已死亡
@@ -359,7 +451,7 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
      }
      case 0x01: // 操作指令
      {
-          std::unique_lock<std::mutex> lock(playerAndInputMapMutex_);
+          std::unique_lock<std::mutex> lock(playerMutex_);
           if (playerMap_.find(conn) != playerMap_.end())
           {
                int inputIndex = inputMap_[playerMap_[conn].first];
@@ -384,6 +476,26 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
           ws_.send(message, conn);
           break;
      }
+     case 0x03: // Pong
+     {
+          break;
+     }
+     case 0x04: // lz4压缩包
+     {
+          break;
+     }
+     case 0x05: // 属性升级包
+     {
+          std::unique_lock<std::mutex> lock(playerMutex_);
+          if (playerMap_.find(conn) != playerMap_.end())
+          {
+               int index = inputMap_[playerMap_[conn].first];
+               lock.unlock();
+               std::unique_lock<std::shared_mutex> lock2(inputMutex_[index]); // 写锁
+               attributeBuf_[index].push_back(buffer.readValue<uint8_t>());   // 缓存起来由ecs系统处理
+          }
+          break;
+     }
      default:
           break;
      }
@@ -392,7 +504,7 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
 void GameLoop::handleOnClose(TcpConnection *conn)
 {
      std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
-     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     std::lock_guard<std::mutex> lock2(playerMutex_);
      if (playerMap_.find(conn) != playerMap_.end()) // 玩家不一定创建了实体
           destroyPlayerQueue_.push_back(conn);
 }
@@ -400,7 +512,7 @@ void GameLoop::handleOnClose(TcpConnection *conn)
 void GameLoop::handleOnError(TcpConnection *conn)
 {
      std::lock_guard<std::mutex> lock1(destroyPlayerQueueMutex_);
-     std::lock_guard<std::mutex> lock2(playerAndInputMapMutex_);
+     std::lock_guard<std::mutex> lock2(playerMutex_);
      if (playerMap_.find(conn) != playerMap_.end()) // 玩家不一定创建了实体
           destroyPlayerQueue_.push_back(conn);
 }
@@ -441,6 +553,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
 
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))
+         .addSystem(std::bind(&GameLoop::attributeSys, this))
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
