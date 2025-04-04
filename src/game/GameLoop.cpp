@@ -557,8 +557,8 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
-         .addSystem(std::bind(&TestRegularPolygonSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
-         .addSystem(std::bind(&TestFireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&regularPolygonGenSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&fireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&blockRotationCtrlSys, std::ref(em_)))
          .addSystem(std::bind(&blockRevolutionCtrlSys, std::ref(em_), std::ref(worldId_)))

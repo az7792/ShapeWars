@@ -276,3 +276,8 @@
      - 1 ：最大生命值
      - 2 ：身体碰撞伤害
      - 9 ：角色移动速度
+
+## 2025年4月4日
+- 开火系统和正多边形生成系统更名
+     - TestFireSys -> FireSys
+     - TestRegularPolygonSys -> regularPolygonGenSys

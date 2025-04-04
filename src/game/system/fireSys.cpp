@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2025 Xuefei Ai
 // SPDX-License-Identifier: MIT
 
-#include "game/system/TestFire.h"
+#include "game/system/fireSys.h"
 #include "game/component/fwd.h"
 #include "game/factories.h"
 #include "box2d/box2d.h"
 
-void TestFireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
+void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
      auto group = em.group<Input, b2BodyId>();
      for (auto entity : *group)

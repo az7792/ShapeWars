@@ -9,6 +9,6 @@
 #include "restoreHPSys.h"
 #include "blockRotationCtrlSys.h"
 #include "blockRevolutionCtrlSys.h"
-#include "TestRegularPolygon.h"
-#include "TestFire.h"
+#include "regularPolygonGenSys.h"
+#include "fireSys.h"
 #include "contactListSys.h"

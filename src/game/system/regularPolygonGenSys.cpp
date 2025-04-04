@@ -5,7 +5,7 @@
 #include "game/component/fwd.h"
 #include "game/factories.h"
 #include "box2d/box2d.h"
-#include "game/system/TestRegularPolygon.h"
+#include "game/system/regularPolygonGenSys.h"
 
 namespace
 {
@@ -45,7 +45,7 @@ namespace
      }
 }
 
-void TestRegularPolygonSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
+void regularPolygonGenSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
      auto view = em.getView<Input>();
      for (auto entity : view)
