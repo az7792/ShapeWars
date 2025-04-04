@@ -121,12 +121,12 @@
 - 为bug列表添加编号
 - 完成资源方块测试
      - DONE:未添加删除逻辑
-- 修复[BUG-004](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
+- 修复[BUG-004](./bugList.md)
 
 ## 2025年2月11日
 - 为新连接禁用Nagle算法
 - 处理同一时间同一连接到达多个包的情况
-- 修复[BUG-001](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md),产生[BUG-005](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
+- 修复[BUG-001](./bugList.md),产生[BUG-005](./bugList.md)
 - `AttackList`更名为`ContactList`
 
 ## 2025年2月12日
@@ -175,7 +175,7 @@
 ## 2025年2月18日
 - 添加死亡动画，实体逐渐变大变透明，并保持一定倍率的原始速度继续移动
      - TODO: 添加受击反馈
-- 修复[BUG-003](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
+- 修复[BUG-003](./bugList.md)
 - 绘制性能指标
 - 为第三方库添加LICENSE文件
 
@@ -214,7 +214,7 @@
 
 ## 2025年2月21日
 - 世界比例尺由`1m = 500px`调整为`1m = 50px`
-- 修复[BUG-008](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md),[BUG-009](https://github.com/az7792/ShapeWars/blob/master/docs/bugList.md)
+- 修复[BUG-008](./bugList.md),[BUG-009](./bugList.md)
 - 随机生成多种方块
 - 调整子弹的密度
 - 优化血条绘制位置
@@ -284,3 +284,4 @@
 - 增加射速加点
 - 修复[BUG-010](./bugList.md)
 - 增加[BUG-012](./bugList.md)
+- 更改项目引用文档连接地址为相对位置
