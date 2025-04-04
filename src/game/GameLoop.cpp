@@ -66,8 +66,27 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      else if (attr == 7) // 子弹质量
      {
      }
-     else if (attr == 8) // 子弹射速
+     else if (attr == 8 && em_.hasComponent<Children>(entity)) // 子弹射速
      {
+          Children *children = em_.getComponent<Children>(entity);
+          for (ecs::Entity &e : children->children)
+          {
+               if (!em_.hasComponent<Barrel>(e))
+               {
+                    continue;
+               }
+               if(attribute->attr[attr] == 0 && isUp == 1)
+                    em_.getComponent<Barrel>(e)->cooldown -= 3;
+               else if(attribute->attr[attr] == 1 && isUp == -1)
+                    em_.getComponent<Barrel>(e)->cooldown += 3;
+               else if(attribute->attr[attr] == 1 && isUp == 1)
+                    em_.getComponent<Barrel>(e)->cooldown -= 2;
+               else if(attribute->attr[attr] == 2 && isUp == -1)
+                    em_.getComponent<Barrel>(e)->cooldown += 2;
+               else
+                    em_.getComponent<Barrel>(e)->cooldown -= isUp;
+               
+          }
      }
      else if (attr == 9 && em_.hasComponent<Velocity>(entity)) // 角色移动速度
      {
@@ -233,7 +252,7 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.5f;
                barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
                barrelParams.barrel.offsetAngle = 0.f;
-               barrelParams.barrel.cooldown = 4;
+               barrelParams.barrel.cooldown = 15;
                // HACK:测试用
                int barrelNum = rand() % 8 + 1;
                if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')

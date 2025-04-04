@@ -10,7 +10,7 @@
  * @param length 梯形长度
  * @param nowLength 当前长度
  * @param offsetAngle 相对玩家朝向的偏移角度
- * @param cooldown 冷却时间(tick) 必须是2的倍数
+ * @param cooldown 冷却时间(tick) 必须是>=2
  * @param LastTick 上一次发射的时间(tick)
  */
 struct Barrel

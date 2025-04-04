@@ -281,3 +281,6 @@
 - 开火系统和正多边形生成系统更名
      - TestFireSys -> FireSys
      - TestRegularPolygonSys -> regularPolygonGenSys
+- 增加射速加点
+- 修复[BUG-010](./bugList.md)
+- 增加[BUG-012](./bugList.md)
