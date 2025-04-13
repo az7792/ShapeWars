@@ -24,7 +24,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), params.polygonRadius); //>=16为圆形
      em.addComponent<Children>(e);
      em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f);
-     em.addComponent<Score>(e, 0);
+     em.addComponent<Score>(e, static_cast<int32_t>(1e5));//HACK : 1e5 测试用
      em.addComponent<Attribute>(e);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);

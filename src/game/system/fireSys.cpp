@@ -5,6 +5,28 @@
 #include "game/component/fwd.h"
 #include "game/factories.h"
 #include "box2d/box2d.h"
+#include <random>
+
+namespace
+{
+     // 产生一个在a±x范围内的符合正态分布的随机数
+     double sample_normal_in_range(double a, double x)
+     {
+          if (x <= 0.1)
+               return a;
+          std::random_device rd;
+          std::mt19937 gen(rd());
+          std::normal_distribution<> dist(a, x / 2.0); // 均值a，标准差为x/2可以控制落点大部分在a±x
+
+          double value;
+          do
+          {
+               value = dist(gen);
+          } while (value < a - x || value > a + x); // 裁剪掉落点不在a±x范围内的部分
+
+          return value;
+     }
+}
 
 void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
 {
@@ -38,7 +60,13 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           {
                BulletParams params;
                params.parentEntity = parent->id;
-               params.angle = angle;
+               if (fabs(barrel->widthR - barrel->widthL) <= 1e-2)
+                    params.angle = angle;
+               else
+               {
+                    double delta = atanf((barrel->widthR) / 2.0 / barrel->length);
+                    params.angle = sample_normal_in_range(angle, delta);
+               }
                createEntityBullet(em, worldId, tick, params);
                barrel->LastTick = tick;
                assert(fabs(barrel->nowLength - barrel->length) <= 1e-5);

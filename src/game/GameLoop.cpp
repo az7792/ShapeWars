@@ -254,6 +254,8 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 15;
                // HACK:测试用
+               if(name.size()>=2 && name[1] == 'T') // 梯形炮管
+                    barrelParams.barrel.widthR = 0.8f;
                int barrelNum = rand() % 8 + 1;
                if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
                     addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
@@ -385,7 +387,9 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
      em_.getComponent<Score>(entity)->score /= 4;
      em_.getComponent<Score>(entity)->tick = tick_;
-     em_.getComponent<Attribute>(entity)->attr.fill(0);
+     em_.getComponent<Attribute>(entity)->attr.fill(0);// BUG：并没有重置属性
+     //TODO : 重置属性
+     //TODO ：死亡后的玩家生成逻辑需要修改
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
