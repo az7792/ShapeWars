@@ -54,7 +54,7 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      else if (attr == 3) // 子弹伤害
      {
      }
-     else if (attr == 4) // 子弹伤害判定次数
+     else if (attr == 4) // 子弹飞行时长
      {
      }
      else if (attr == 5) // 子弹血量
@@ -63,7 +63,7 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      else if (attr == 6) // 子弹速度
      {
      }
-     else if (attr == 7) // 子弹质量
+     else if (attr == 7) // 子弹密度
      {
      }
      else if (attr == 8 && em_.hasComponent<Children>(entity)) // 子弹射速
