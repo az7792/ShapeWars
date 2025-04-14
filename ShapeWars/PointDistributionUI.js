@@ -6,6 +6,22 @@ class PointDistributionUI {
           this.init();
      }
 
+     // 重置所有属性值
+     reset() {
+          this.attributes.forEach((attr, index) => {
+               attr.value = 0;
+
+               // 更新进度条块
+               const blocks = this.container.querySelectorAll(`.pd-attribute-item:nth-child(${index + 1}) .pd-progress-block`);
+               blocks.forEach((block, i) => block.classList.remove('active'));
+
+               // 更新按钮状态
+               const buttons = this.container.querySelectorAll(`.pd-attribute-item:nth-child(${index + 1}) .pd-btn`);
+               buttons[0].disabled = true;
+               buttons[1].disabled = false;
+          });
+     }
+
      init() {
           this.toggleBtn.addEventListener('click', () => this.toggleUI());
           this.renderAttributes();

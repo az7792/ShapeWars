@@ -105,6 +105,7 @@ function parseMessage(dataView, offset) {
                break;
           case 0x05://玩家死亡消息
                playerStatus.isAlive = false;
+               pointUI.reset();
                startButton.style.display = 'flex';
                nameInput.style.display = 'flex';
                playerInput.keyStatus = new Array(64).fill(false);

@@ -75,17 +75,16 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
                {
                     continue;
                }
-               if(attribute->attr[attr] == 0 && isUp == 1)
+               if (attribute->attr[attr] == 0 && isUp == 1)
                     em_.getComponent<Barrel>(e)->cooldown -= 3;
-               else if(attribute->attr[attr] == 1 && isUp == -1)
+               else if (attribute->attr[attr] == 1 && isUp == -1)
                     em_.getComponent<Barrel>(e)->cooldown += 3;
-               else if(attribute->attr[attr] == 1 && isUp == 1)
+               else if (attribute->attr[attr] == 1 && isUp == 1)
                     em_.getComponent<Barrel>(e)->cooldown -= 2;
-               else if(attribute->attr[attr] == 2 && isUp == -1)
+               else if (attribute->attr[attr] == 2 && isUp == -1)
                     em_.getComponent<Barrel>(e)->cooldown += 2;
                else
                     em_.getComponent<Barrel>(e)->cooldown -= isUp;
-               
           }
      }
      else if (attr == 9 && em_.hasComponent<Velocity>(entity)) // 角色移动速度
@@ -254,7 +253,7 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 15;
                // HACK:测试用
-               if(name.size()>=2 && name[1] == 'T') // 梯形炮管
+               if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
                     barrelParams.barrel.widthR = 0.8f;
                int barrelNum = rand() % 8 + 1;
                if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
@@ -329,6 +328,13 @@ void GameLoop::destroyEntitySys()
                em_.removeComponent<b2BodyId>(entity);
                em_.getComponent<ContactList>(entity)->list.clear();
                em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次
+               // 清除玩家的炮管
+               std::vector<ecs::Entity> &barrelEntities = em_.getComponent<Children>(entity)->children;
+               for (auto be : barrelEntities)
+               {
+                    em_.destroyEntity(be);
+               }
+               barrelEntities.clear();
                std::lock_guard<std::mutex> lock2(playerMutex_);
                playerMap_[*em_.getComponent<TcpConnection *>(entity)].second = 0; // 标记玩家为死亡
 
@@ -370,26 +376,32 @@ void GameLoop::deleteBody(b2BodyId bodyId)
 
 void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
 {
-     // em_.replaceComponent<Position>(entity);
-     // em_.replaceComponent<Velocity>(entity);
-     // em_.replaceComponent<HP>(entity, static_cast<int16_t>(100), static_cast<int16_t>(100));
-     em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP;
+     static PlayerParams playerParams;
+     static BarrelParams barrelParams;
+
+     barrelParams.parentEntity = entity;
+     barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.5f;
+     barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
+     barrelParams.barrel.offsetAngle = 0.f;
+     barrelParams.barrel.cooldown = 15;
+
+     em_.getComponent<Velocity>(entity)->maxSpeed = playerParams.maxSpeed;
+     em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP = playerParams.maxHP;
      em_.getComponent<HP>(entity)->tick = tick_;
-     // em_.replaceComponent<Attack>(entity, static_cast<int16_t>(2 * TPS));
-     // em_.replaceComponent<ContactList>(entity);
-     // em_.replaceComponent<PackData>(entity, "", "");
-     // em_.replaceComponent<Input>(entity, 0.f, 0.f, 0ull);
-     // em_.replaceComponent<TcpConnection *>(entity, tcpConnection);
-     // em_.replaceComponent<Type>(entity, static_cast<uint8_t>(CATEGORY_PLAYER));
-     // em_.getComponent<GroupIndex>(entity)->isDirty = true;
+     em_.getComponent<Attack>(entity)->damage = playerParams.attack;
      em_.replaceComponent<Name>(entity, name);
-     // em_.replaceComponent<RegularPolygon>(entity, static_cast<uint8_t>(64), 0.5f); //>=16为圆形
-     // em_.replaceComponent<Camera>(entity, 0.f, 0.f, 1.f);
      em_.getComponent<Score>(entity)->score /= 4;
      em_.getComponent<Score>(entity)->tick = tick_;
-     em_.getComponent<Attribute>(entity)->attr.fill(0);// BUG：并没有重置属性
-     //TODO : 重置属性
-     //TODO ：死亡后的玩家生成逻辑需要修改
+     em_.getComponent<Attribute>(entity)->attr.fill(0);
+
+     // HACK:测试用
+     if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
+          barrelParams.barrel.widthR = 0.8f;
+     if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
+          addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
+     else
+          addBarrelsToPlayer(em_, rand() % 8 + 1, barrelParams);
+
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
