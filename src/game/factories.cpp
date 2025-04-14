@@ -26,6 +26,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f);
      em.addComponent<Score>(e, static_cast<int32_t>(1e5)); // HACK : 1e5 测试用
      em.addComponent<Attribute>(e);
+     em.addComponent<HealingOverTime>(e,tick);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 
@@ -38,7 +39,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = 1.f;   // 默认为1
+     shapeDef.density = 4.f;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
@@ -85,6 +86,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<RegularPolygon>(e, params.polygon);
      em.addComponent<Style>(e, params.style);
      em.addComponent<Score>(e, params.score);
+     em.addComponent<HealingOverTime>(e,tick);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -117,6 +119,7 @@ ecs::Entity createEntityBarrel(ecs::EntityManager &em, const BarrelParams &param
 {
      ecs::Entity e = em.createEntity();
      em.addComponent<Barrel>(e, params.barrel);
+     em.addComponent<BulletParams>(e, params.bulletParams);
      em.addComponent<FireStatus>(e, static_cast<uint8_t>(0b00000000));
      em.addComponent<Parent>(e, params.parentEntity);
 
@@ -150,7 +153,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = 5.f;   // 默认为1
+     shapeDef.density = params.density;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
@@ -165,7 +168,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
 
      shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = e;
      b2Vec2 vel = (b2Vec2){cosf(params.angle), sinf(params.angle)};
-     vel = b2Normalize(vel) * 10.f;
+     vel = b2Normalize(vel) * params.speed;
      b2Body_SetLinearVelocity(bodyId, vel);
 
      em.addComponent<b2BodyId>(e, bodyId);

@@ -29,8 +29,18 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      // 可以更改
      std::string recvStr = {0x08, static_cast<char>(v)}; // 返回确认信息
 
-     if (attr == 0) // 回复速度
+     if (attr == 0 && em_.hasComponent<HealingOverTime>(entity)) // 回复速度
      {
+          HealingOverTime *healingOverTime = em_.getComponent<HealingOverTime>(entity);
+          if ((isUp == 1 && attribute->attr[attr] <= 4) ||
+              (isUp == -1 && attribute->attr[attr] <= 5))
+          {
+               healingOverTime->cooldownTick -= isUp * TPS;
+          }
+          else
+          {
+               healingOverTime->healingTarget += isUp * 10;
+          }
      }
      else if (attr == 1 && em_.hasComponent<HP>(entity)) // 最大生命值
      {
@@ -51,20 +61,37 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
           Attack *attack = em_.getComponent<Attack>(entity);
           attack->damage += isUp * TPS;
      }
-     else if (attr == 3) // 子弹伤害
+     else if (attr == 3 || attr == 4 || attr == 5 || attr == 6 || attr == 7) // 子弹伤害 | 子弹飞行时长 | 子弹血量 | 子弹速度 | 子弹密度
      {
-     }
-     else if (attr == 4) // 子弹飞行时长
-     {
-     }
-     else if (attr == 5) // 子弹血量
-     {
-     }
-     else if (attr == 6) // 子弹速度
-     {
-     }
-     else if (attr == 7) // 子弹密度
-     {
+          Children *children = em_.getComponent<Children>(entity);
+          for (ecs::Entity &e : children->children)
+          {
+               if (!em_.hasComponent<BulletParams>(e))
+               {
+                    continue;
+               }
+               BulletParams *bulletParams = em_.getComponent<BulletParams>(e);
+               if (attr == 3) // 子弹伤害
+               {
+                    bulletParams->attack += isUp * 2 * TPS;
+               }
+               else if (attr == 4) // 子弹飞行时长
+               {
+                    bulletParams->lifetime += isUp * 5;
+               }
+               else if (attr == 5) // 子弹血量
+               {
+                    bulletParams->maxHP += isUp * 5;
+               }
+               else if (attr == 6) // 子弹速度
+               {
+                    bulletParams->speed += isUp * 0.8f;
+               }
+               else if (attr == 7) // 子弹密度
+               {
+                    bulletParams->density += isUp * 0.5f;
+               }
+          }
      }
      else if (attr == 8 && em_.hasComponent<Children>(entity)) // 子弹射速
      {
@@ -252,6 +279,7 @@ void GameLoop::createPlayerSys()
                barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 15;
+               barrelParams.bulletParams.parentEntity = entity;
                // HACK:测试用
                if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
                     barrelParams.barrel.widthR = 0.8f;
@@ -326,6 +354,7 @@ void GameLoop::destroyEntitySys()
                b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
                deleteBody(*bodyId);
                em_.removeComponent<b2BodyId>(entity);
+               em_.removeComponent<HealingOverTime>(entity);
                em_.getComponent<ContactList>(entity)->list.clear();
                em_.removeComponent<DeleteFlag>(entity); // 需要在创建前移除，因为是先删再创建，因此在下一帧会被重复删第二次
                // 清除玩家的炮管
@@ -384,6 +413,7 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
      barrelParams.barrel.offsetAngle = 0.f;
      barrelParams.barrel.cooldown = 15;
+     barrelParams.bulletParams.parentEntity = entity;
 
      em_.getComponent<Velocity>(entity)->maxSpeed = playerParams.maxSpeed;
      em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP = playerParams.maxHP;
@@ -392,6 +422,7 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      em_.replaceComponent<Name>(entity, name);
      em_.getComponent<Score>(entity)->score /= 4;
      em_.getComponent<Score>(entity)->tick = tick_;
+     em_.addComponent<HealingOverTime>(entity,tick_);
      em_.getComponent<Attribute>(entity)->attr.fill(0);
 
      // HACK:测试用
@@ -401,7 +432,6 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
           addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
      else
           addBarrelsToPlayer(em_, rand() % 8 + 1, barrelParams);
-
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -589,7 +619,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))
          .addSystem(std::bind(&GameLoop::attributeSys, this))
-         .addSystem(std::bind(&lifeTimeSys,std::ref(em_),std::ref(tick_)))
+         .addSystem(std::bind(&lifeTimeSys, std::ref(em_), std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))

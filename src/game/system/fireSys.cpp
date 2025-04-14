@@ -55,19 +55,18 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           Parent *parent = em.getComponent<Parent>(entity);
           FireStatus *fireStatus = em.getComponent<FireStatus>(entity);
           float angle = em.getComponent<Angle>(parent->id)->angle + barrel->offsetAngle;
+          BulletParams *params = em.getComponent<BulletParams>(entity);
 
           if (fireStatus->status & 0b00000001) // 可以发设
           {
-               BulletParams params;
-               params.parentEntity = parent->id;
                if (fabs(barrel->widthR - barrel->widthL) <= 1e-2)
-                    params.angle = angle;
+                    params->angle = angle;
                else
                {
                     double delta = atanf((barrel->widthR) / 2.0 / barrel->length);
-                    params.angle = sample_normal_in_range(angle, delta);
+                    params->angle = sample_normal_in_range(angle, delta);
                }
-               createEntityBullet(em, worldId, tick, params);
+               createEntityBullet(em, worldId, tick, *params);
                barrel->LastTick = tick;
                assert(fabs(barrel->nowLength - barrel->length) <= 1e-5);
                if (barrel->cooldown <= 2)

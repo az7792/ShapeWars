@@ -15,12 +15,6 @@ inline std::unordered_map<uint64_t, ecs::Entity> shapeEntityMap;
 // willDeleteShapes中保存将要删除的形状ID
 inline std::vector<b2ShapeId> willDeleteShapes;
 
-// 炮管实体的配置参数
-struct BarrelParams
-{
-     Barrel barrel;                              // 炮管的配置参数
-     ecs::Entity parentEntity = ecs::nullEntity; // 炮管的父实体
-};
 
 // 玩家实体的配置参数
 struct PlayerParams
@@ -40,14 +34,22 @@ struct PlayerParams
 struct BulletParams
 {
      ecs::Entity parentEntity;  // 子弹的父实体
-     int16_t attack = 13 * TPS; // 子弹的攻击力
-     int16_t initialHP = 100;   // 子弹的初始血量
-     int16_t maxHP = 100;       // 子弹的最大血量
-     uint32_t lifetime = 30;    // 子弹的存活时间
-     float density = 5.0f;      // 子弹的密度
-     float speed = 10.0f;       // 子弹的速度
+     int16_t attack = 2 * TPS; // 子弹的攻击力 +=2
+     int16_t initialHP = 10;   // 子弹的初始血量 
+     int16_t maxHP = 10;       // 子弹的最大血量 += 5
+     uint32_t lifetime = 30;    // 子弹的存活时间 += 5
+     float density = 3.0f;      // 子弹的密度 += 0.5
+     float speed = 6.0f;       // 子弹的速度 += 0.8
      float radius = 0.2f;       // 子弹的半径
      float angle = 0.0f;        // 子弹的发射角度
+};
+
+// 炮管实体的配置参数
+struct BarrelParams
+{
+     Barrel barrel;                              // 炮管的配置参数
+     BulletParams bulletParams;                  // 炮管的子弹配置参数
+     ecs::Entity parentEntity = ecs::nullEntity; // 炮管的父实体
 };
 
 // 方块实体的配置参数

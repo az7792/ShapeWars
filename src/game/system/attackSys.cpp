@@ -29,9 +29,10 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                     hp->hp = std::max(0, hp->hp - attack->damage / TPS);
                     hp->tick = tick;
 
-                    if (em.hasComponent<HealingOverTime>(attackId) && em.getComponent<HealingOverTime>(attackId)->healing > 0) // 打断回复
+                    if (em.hasComponent<HealingOverTime>(attackId) && em.getComponent<HealingOverTime>(attackId)->healing >= 0) // 打断回复
                     {
-                         em.removeComponent<HealingOverTime>(attackId);
+                         em.getComponent<HealingOverTime>(attackId)->healing = 0;
+                         em.getComponent<HealingOverTime>(attackId)->startTick = tick;
                     }
 
                }
