@@ -589,6 +589,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))
          .addSystem(std::bind(&GameLoop::attributeSys, this))
+         .addSystem(std::bind(&lifeTimeSys,std::ref(em_),std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))

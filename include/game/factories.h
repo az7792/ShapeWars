@@ -43,6 +43,7 @@ struct BulletParams
      int16_t attack = 13 * TPS; // 子弹的攻击力
      int16_t initialHP = 100;   // 子弹的初始血量
      int16_t maxHP = 100;       // 子弹的最大血量
+     uint32_t lifetime = 30;    // 子弹的存活时间
      float speed = 10.0f;       // 子弹的速度
      float radius = 0.2f;       // 子弹的半径
      float angle = 0.0f;        // 子弹的发射角度

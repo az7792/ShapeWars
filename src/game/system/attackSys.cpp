@@ -13,7 +13,6 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           auto contactList = em.getComponent<ContactList>(entity);
           auto attack = em.getComponent<Attack>(entity);
           auto type = em.getComponent<Type>(entity)->id;
-          bool needBreak = false;
 
           for (auto shapeId : contactList->list)
           {
@@ -35,19 +34,7 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                          em.removeComponent<HealingOverTime>(attackId);
                     }
 
-                    // 处理子弹的判断次数
-                    if (type == CATEGORY_BULLET)
-                    {
-                         BulletAttackNum *bulletAttackNum = em.getComponent<BulletAttackNum>(entity);
-                         bulletAttackNum->num--;
-                         if (bulletAttackNum->num <= 0)
-                         {
-                              em.addComponent<DeleteFlag>(entity);
-                              needBreak = true;
-                         }
-                    }
                }
-
                if (hp->hp <= 0)
                {
                     em.addComponent<DeleteFlag>(attackId);
@@ -61,11 +48,9 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                          score->tick = tick;
                     }
 
-                    assert(type != CATEGORY_BULLET || em.getComponent<Score>(entity)->score == 0);
+                    assert(type != CATEGORY_BULLET || em.getComponent<Score>(entity)->score == 0);//如果是子弹，则积分不能加在子弹上
                }
 
-               if (needBreak)
-                    break;
           } // end for contactList->list
      } // end for group
 }

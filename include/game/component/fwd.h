@@ -23,7 +23,7 @@
 #include "flag/deleteFlag.h"
 #include "fireStatus.h"
 #include "healingOverTime.h"
-#include "bulletAttackNum.h"
+#include "lifeTime.h"
 #include "blockRotationCtrl.h"
 #include "blockRevolutionCtrl.h"
 #include "barrel.h"
