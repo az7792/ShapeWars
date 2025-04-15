@@ -37,6 +37,7 @@
   - f32 widthR
   - f32 nowLength
   - f32 offsetAngle
+  - f32 offsetY
   - ...data2
 - 10 : 得分
   - i32 得分

@@ -92,6 +92,7 @@ namespace
                strAppend(*data, barrel->widthR);
                strAppend(*data, barrel->nowLength);
                strAppend(*data, barrel->offsetAngle);
+               strAppend(*data, barrel->offsetY);
           }
      }
 

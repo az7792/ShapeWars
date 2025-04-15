@@ -207,6 +207,7 @@ class Barrel {
           this.widthR = 0.5;
           this.length = [0.5, 0.5];
           this.offsetAngle = 0;
+          this.offsetY = 0;
      }
 
      update(dataView, offset) {
@@ -219,6 +220,8 @@ class Barrel {
           this.length[1] = dataView.getFloat32(offset.value, true);
           offset.value += 4;
           this.offsetAngle = dataView.getFloat32(offset.value, true);
+          offset.value += 4;
+          this.offsetY = dataView.getFloat32(offset.value, true);
           offset.value += 4;
      }
 
@@ -245,10 +248,13 @@ class Barrel {
           const right2X = endX + sinTheta * (this.widthR / 2);
           const right2Y = endY - cosTheta * (this.widthR / 2);
 
-          points.push([left1X, left1Y]);
-          points.push([right1X, right1Y]);
-          points.push([right2X, right2Y]);
-          points.push([left2X, left2Y]);
+          const offsetx = -Math.sin(angle) * this.offsetY;
+          const offsety = Math.cos(angle) * this.offsetY;
+
+          points.push([left1X + offsetx, left1Y + offsety]);
+          points.push([right1X + offsetx, right1Y + offsety]);
+          points.push([right2X + offsetx, right2Y + offsety]);
+          points.push([left2X + offsetx, left2Y + offsety]);
           drawPolygon(points, COLORS.barrelFillColor, COLORS.barrelStrokeColor);          
      }
 }

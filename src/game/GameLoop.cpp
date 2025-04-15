@@ -275,7 +275,7 @@ void GameLoop::createPlayerSys()
 
                BarrelParams barrelParams;
                barrelParams.parentEntity = entity;
-               barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.5f;
+               barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.45f;
                barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
                barrelParams.barrel.offsetAngle = 0.f;
                barrelParams.barrel.cooldown = 15;

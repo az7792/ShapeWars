@@ -34,16 +34,35 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
      for (auto entity : *group)
      {
           Input *input = em.getComponent<Input>(entity);
+          auto &barrelList = em.getComponent<Children>(entity)->children;
           if (input->state & 0b01) // 左键
           {
-               auto &barrelList = em.getComponent<Children>(entity)->children;
                for (auto barrelEntity : barrelList)
                {
                     auto *barrel = em.getComponent<Barrel>(barrelEntity);
                     auto *fireStatus = em.getComponent<FireStatus>(barrelEntity);
-                    //由于加点系统，可能在子弹发射中途出现发射间隔小于冷却时间的情况，所以这里需要判断一下
-                    if (tick - barrel->LastTick >= barrel->cooldown && fireStatus->status == static_cast<uint8_t>(0b00000000))
-                         fireStatus->status = static_cast<uint8_t>(0b00000001);
+                    // 由于加点系统，可能在子弹发射中途出现发射间隔小于冷却时间的情况，所以这里需要判断一下
+                    if (fireStatus->status == static_cast<uint8_t>(0b00000000))
+                    {
+                         if (barrel->delay <= 0)
+                              fireStatus->status = static_cast<uint8_t>(0b00000100); // 进入可以开火状态
+                         else
+                              fireStatus->status = static_cast<uint8_t>(0b00000001), barrel->LastTick = tick;// 进入等待delay状态
+                    }
+                    else if (fireStatus->status == static_cast<uint8_t>(0b00000001) && tick >= barrel->LastTick + barrel->delay)
+                         fireStatus->status = static_cast<uint8_t>(0b00000100); // 延迟结束，进入可以开火状态
+                    else if (fireStatus->status == static_cast<uint8_t>(0b00000010) && tick >= barrel->LastTick + barrel->cooldown)
+                         fireStatus->status = static_cast<uint8_t>(0b00000100); // 冷却结束，进入可以开火状态
+               }
+          }
+          else if (!(input->state & 0b01)) // 左键松开
+          {
+               auto &barrelList = em.getComponent<Children>(entity)->children;
+               for (auto barrelEntity : barrelList)
+               {
+                    auto *fireStatus = em.getComponent<FireStatus>(barrelEntity);
+                    if (fireStatus->status == static_cast<uint8_t>(0b00000001) || fireStatus->status == static_cast<uint8_t>(0b00000010))
+                         fireStatus->status = static_cast<uint8_t>(0b00000000);
                }
           }
      }
@@ -57,44 +76,48 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           float angle = em.getComponent<Angle>(parent->id)->angle + barrel->offsetAngle;
           BulletParams *params = em.getComponent<BulletParams>(entity);
 
-          if (fireStatus->status & 0b00000001) // 可以发设
+          if (fireStatus->status & 0b00000100) // 可以发设
           {
-               if (fabs(barrel->widthR - barrel->widthL) <= 1e-2)
+               if (barrel->widthR - barrel->widthL <= 1e-2)
                     params->angle = angle;
                else
                {
                     double delta = atanf((barrel->widthR) / 2.0 / barrel->length);
                     params->angle = sample_normal_in_range(angle, delta);
                }
+               params->radius = barrel->widthL / 2.f * 0.9f;
+               params->position = b2Body_GetPosition(*em.getComponent<b2BodyId>(parent->id));
+               params->position.x += -sinf(angle) * barrel->offsetY;
+               params->position.y += cosf(angle) * barrel->offsetY;
                createEntityBullet(em, worldId, tick, *params);
                barrel->LastTick = tick;
                assert(fabs(barrel->nowLength - barrel->length) <= 1e-5);
                if (barrel->cooldown <= 2)
                {
-                    fireStatus->status = static_cast<uint8_t>(0b00000100);
+                    fireStatus->status = static_cast<uint8_t>(0b00010000);
                     barrel->nowLength = (1.f - 0.1f) * barrel->length;
                }
                else
                {
                     barrel->nowLength -= 0.1f * barrel->length / (barrel->cooldown / 2);
-                    fireStatus->status = static_cast<uint8_t>(0b00000010);
+                    fireStatus->status = static_cast<uint8_t>(0b00001000);
                }
           }
-          else if (fireStatus->status & 0b00000010) // 发射中，第一段
+          else if (fireStatus->status & 0b00001000) // 发射中，第一段
           {
                if (tick - barrel->LastTick + 1 >= barrel->cooldown / 2)
                {
-                    fireStatus->status = static_cast<uint8_t>(0b00000100);
+                    fireStatus->status = static_cast<uint8_t>(0b00010000);
                     barrel->nowLength = (1.f - 0.1f) * barrel->length;
                }
                else
                     barrel->nowLength -= 0.1f * barrel->length / (barrel->cooldown / 2);
           }
-          else if (fireStatus->status & 0b00000100) // 发射中，第二段
+          else if (fireStatus->status & 0b00010000) // 发射中，第二段
           {
                if (tick - barrel->LastTick + 1 >= barrel->cooldown)
                {
-                    fireStatus->status = static_cast<uint8_t>(0b00000000);
+                    fireStatus->status = static_cast<uint8_t>(0b00000010);
                     barrel->nowLength = barrel->length;
                }
                else

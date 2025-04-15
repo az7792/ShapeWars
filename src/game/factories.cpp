@@ -148,7 +148,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
      bodyDef.fixedRotation = true;
-     bodyDef.position = b2Body_GetPosition(*em.getComponent<b2BodyId>(params.parentEntity));
+     bodyDef.position = params.position;
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 

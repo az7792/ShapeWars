@@ -11,7 +11,10 @@ namespace
 {
      BlockParams getSidesAndStyle()
      {
-          //TODO:根据区域密度来生成方块
+          //DONE:根据区域密度来生成方块
+          /*
+               均匀分布即可，玩家在一个地方清的差不多了会自发前往其他地区
+          */
           BlockParams params;
 
           params.position.x = (std::rand() % 960) / 10 - 48.f;
