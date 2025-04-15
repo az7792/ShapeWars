@@ -20,7 +20,7 @@ struct Barrel
      float length;          // 梯形长度
      float nowLength;       // 当前长度
      float offsetAngle = 0; // 相对玩家朝向的偏移角度
-     float offsetY = 0.3;   // 相对玩家位置的偏移量(>0 向上移动 , <0 向下移动)
+     float offsetY = 0;   // 相对玩家位置的偏移量(>0 向上移动 , <0 向下移动)
      uint32_t delay = 0;    // 发射延迟(tick)
      uint32_t cooldown = 0; // 冷却时间(tick)
      uint32_t LastTick = 0; // 上一次发射的时间(tick)

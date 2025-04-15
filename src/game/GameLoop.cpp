@@ -8,6 +8,7 @@
 #include "game/factories.h"
 #include "game/utils.h"
 #include "lz4/lz4.h"
+#include "game/tankFactory/tankFactory.h"
 #include <cstring>
 
 void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
@@ -271,23 +272,32 @@ void GameLoop::createPlayerSys()
                playerParams.tcpConnection = tcpConnection;
                playerParams.groupIndex = groupIndex--;
                playerParams.name = name;
-               ecs::Entity entity = createEntityPlayer(em_, worldId_, tick_, playerParams);
 
-               BarrelParams barrelParams;
-               barrelParams.parentEntity = entity;
-               barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.45f;
-               barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
-               barrelParams.barrel.offsetAngle = 0.f;
-               barrelParams.barrel.cooldown = 15;
-               barrelParams.bulletParams.parentEntity = entity;
-               // HACK:测试用
-               if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
-                    barrelParams.barrel.widthR = 0.8f;
-               int barrelNum = rand() % 8 + 1;
-               if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
-                    addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
+               ecs::Entity entity = ecs::nullEntity;
+
+               if (name == "double")
+                    entity = doubleTank(em_, worldId_, tick_, playerParams);
                else
-                    addBarrelsToPlayer(em_, barrelNum, barrelParams);
+               {
+
+                    entity = createEntityPlayer(em_, worldId_, tick_, playerParams);
+
+                    BarrelParams barrelParams;
+                    barrelParams.parentEntity = entity;
+                    barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.45f;
+                    barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
+                    barrelParams.barrel.offsetAngle = 0.f;
+                    barrelParams.barrel.cooldown = 15;
+                    barrelParams.bulletParams.parentEntity = entity;
+                    // HACK:测试用
+                    if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
+                         barrelParams.barrel.widthR = 0.8f;
+                    int barrelNum = rand() % 8 + 1;
+                    if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
+                         addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
+                    else
+                         addBarrelsToPlayer(em_, barrelNum, barrelParams);
+               }
 
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
@@ -422,7 +432,7 @@ void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
      em_.replaceComponent<Name>(entity, name);
      em_.getComponent<Score>(entity)->score /= 4;
      em_.getComponent<Score>(entity)->tick = tick_;
-     em_.addComponent<HealingOverTime>(entity,tick_);
+     em_.addComponent<HealingOverTime>(entity, tick_);
      em_.getComponent<Attribute>(entity)->attr.fill(0);
 
      // HACK:测试用
