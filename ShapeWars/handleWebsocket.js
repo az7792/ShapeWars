@@ -1,11 +1,41 @@
 // SPDX-FileCopyrightText: 2025 Xuefei Ai
 // SPDX-License-Identifier: MIT
 
+socket = new WebSocket("ws://localhost:7792");
+socket.binaryType = 'arraybuffer';
+
 // 连接打开时触发
 socket.onopen = () => {
      console.log("WebSocket 连接已建立");
      performanceMetrics.isConnected = true;
 };
+
+socket.onmessage = (event) => {
+     //原始数据
+     let offset = { value: 0 };
+     const dataView = new DataView(event.data);
+     parseMessage(dataView, offset);
+};
+
+// 连接关闭时触发
+socket.onclose = () => {
+     console.log("WebSocket 连接已关闭");
+     performanceMetrics.isConnected = false;
+};
+
+// 发生错误时触发
+socket.onerror = (error) => {
+     console.error("WebSocket 错误：", error);
+};
+
+//发送
+function sendMessage(messageText) {
+     if (socket.readyState === WebSocket.OPEN) {
+          socket.send(messageText);
+     } else {
+          //alert("WebSocket 连接未打开");
+     }
+}
 
 function popBuf() {
      if (wsBuf.length >= 1) {
@@ -67,6 +97,7 @@ function parseMessage(dataView, offset) {
                offset.value += 4;
                miniMap.reset(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
                //TODO : 同步地图背景
+               miniMap.fillRect(0, 0, 100, 100, [227, 227, 227, 255]);//HACK: 临时设置背景色
                break;
           case 0x01: // 更新实体
                //计算平均帧间隔
@@ -118,36 +149,9 @@ function parseMessage(dataView, offset) {
           case 0x07://排行榜消息
                readStandings(dataView, offset);
                break;
-          case 0x08:
+          case 0x08://更新玩家属性消息
                let [isUp, index] = readAttributes(dataView, offset);
                pointUI.updateValue(isUp, index);
                break;
-     }
-}
-
-socket.onmessage = (event) => {
-     //原始数据
-     let offset = { value: 0 };
-     const dataView = new DataView(event.data);
-     parseMessage(dataView, offset);
-};
-
-// 连接关闭时触发
-socket.onclose = () => {
-     console.log("WebSocket 连接已关闭");
-     performanceMetrics.isConnected = false;
-};
-
-// 发生错误时触发
-socket.onerror = (error) => {
-     console.error("WebSocket 错误：", error);
-};
-
-//发送
-function sendMessage(messageText) {
-     if (socket.readyState === WebSocket.OPEN) {
-          socket.send(messageText);
-     } else {
-          //alert("WebSocket 连接未打开");
      }
 }

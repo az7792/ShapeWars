@@ -8,8 +8,7 @@ canvas.addEventListener("contextmenu", function (event) {//禁用浏览器右键
 const ctx = canvas.getContext("2d");
 const miniMap = new MiniMap(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
 const entityManager = new EntityManager();
-const socket = new WebSocket("ws://localhost:7792");
-socket.binaryType = 'arraybuffer';
+let socket = undefined;
 const playerInput = new PlayerInput();
 const wsBuf = new Queue(10, [null, { value: 0 }, null]);//webSocket缓冲区
 
