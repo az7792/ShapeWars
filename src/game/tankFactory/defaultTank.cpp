@@ -16,6 +16,6 @@ ecs::Entity defaultTank(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tic
      barrelParams.barrel.cooldown = 15;
 
      // 创建炮管并添加到玩家子实体中
-     ecs::Entity barrel1 = createEntityBarrel(em, barrelParams);
+     createEntityBarrel(em, barrelParams);
      return player;
 }

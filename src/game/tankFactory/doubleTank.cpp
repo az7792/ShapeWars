@@ -17,10 +17,10 @@ ecs::Entity doubleTank(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick
      barrelParams.barrel.offsetY = 0.25f;
 
      // 创建炮管并添加到玩家子实体中
-     ecs::Entity barrel1 = createEntityBarrel(em, barrelParams);
+     createEntityBarrel(em, barrelParams);
      barrelParams.barrel.offsetY = -0.25f;
      barrelParams.barrel.delay = 10;
-     ecs::Entity barrel2 = createEntityBarrel(em, barrelParams);
+     createEntityBarrel(em, barrelParams);
 
      return player;
 }
