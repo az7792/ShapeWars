@@ -15,25 +15,28 @@ inline std::unordered_map<uint64_t, ecs::Entity> shapeEntityMap;
 // willDeleteShapes中保存将要删除的形状ID
 inline std::vector<b2ShapeId> willDeleteShapes;
 
-// 玩家实体的配置参数
+/**
+ * 玩家实体的配置参数
+ * 仅需提供前4个参数即可
+ */
 struct PlayerParams
 {
      TcpConnection *tcpConnection = nullptr; // 玩家的TCP连接
      int32_t groupIndex = 0;                 // 玩家所在碰撞组的索引
      std::string name;                       // 玩家的名字
-     int16_t attack = 1 * TPS;               // 玩家刚体的攻击力
-     float maxSpeed = 5.f;                   // 玩家的最大线速度
      b2Vec2 position{0.f, 0.f};              // 玩家的初始位置
-     int16_t initialHP = 1000;               // 玩家的初始血量
-     int16_t maxHP = 1000;                   // 玩家的最大血量
-     float polygonRadius = 0.5f;             // 玩家的刚体半径
+     int16_t attack = 1;                     // 玩家刚体的攻击力 from json
+     float maxSpeed = 5.f;                   // 玩家的最大线速度 from json
+     int16_t initialHP = 1000;               // 玩家的初始血量 from json
+     int16_t maxHP = 1000;                   // 玩家的最大血量 from json
+     float polygonRadius = 0.5f;             // 玩家的刚体半径 from json
 };
 
 // 子弹实体的配置参数
 struct BulletParams
 {
      ecs::Entity parentEntity;  // 子弹的父实体
-     int16_t attack = 2 * TPS;  // 子弹的攻击力 +=2
+     int16_t attack = 2;        // 子弹的攻击力 +=2
      int16_t initialHP = 10;    // 子弹的初始血量
      int16_t maxHP = 10;        // 子弹的最大血量 += 5
      uint32_t lifetime = 30;    // 子弹的存活时间 += 5
@@ -59,7 +62,7 @@ struct BlockParams
      Style style;               // 方块的样式
      b2Vec2 position{0.f, 0.f}; // 方块的初始位置
      int32_t score = 10;        // 方块的分数
-     int16_t attack = 2 * TPS;  // 方块的攻击力
+     int16_t attack = 2;        // 方块的攻击力
      int16_t initialHP = 100;   // 方块的初始血量
      int16_t maxHP = 100;       // 方块的最大血量
 };
@@ -76,7 +79,7 @@ bool addBarrelsToPlayer(ecs::EntityManager &em, uint8_t num, BarrelParams params
 // 创建资源方块
 ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, const BlockParams &params);
 
-// 创建炮管
+// 创建炮管并添加到父实体
 ecs::Entity createEntityBarrel(ecs::EntityManager &em, const BarrelParams &params);
 
 // 创建子弹

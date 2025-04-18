@@ -1,0 +1,107 @@
+[
+     {
+          "id": 0,
+          "name": "0",
+          "radius": 0.5,
+          "maxHP": 1000,
+          "maxSpeed": 5.0,
+          "damage": 1,
+          "upgrades": [
+               1
+          ],
+          "barrels": [
+               {
+                    "widthL": 0.45,
+                    "widthR": 0.45,
+                    "length": 1.0,
+                    "offsetAngle": 0.0,
+                    "offsetY": 0.0,
+                    "delay": 0,
+                    "cooldown": 15,
+                    "bullet": {
+                         "damage": 2,
+                         "maxHP": 10,
+                         "lifetime": 30,
+                         "density": 3.0,
+                         "speed": 6.0,
+                         "radius": 0.2
+                    }
+               }
+          ]
+     },
+     {
+          "id": 1,
+          "name": "1",
+          "radius": 0.5,
+          "maxHP": 1000,
+          "maxSpeed": 5.0,
+          "damage": 1,
+          "upgrades": [
+               1
+          ],
+          "barrels": [
+               {
+                    "widthL": 0.45,
+                    "widthR": 0.8,
+                    "length": 1.0,
+                    "offsetAngle": 0.0,
+                    "offsetY": 0.0,
+                    "delay": 0,
+                    "cooldown": 15,
+                    "bullet": {
+                         "damage": 2,
+                         "maxHP": 10,
+                         "lifetime": 30,
+                         "density": 3.0,
+                         "speed": 6.0,
+                         "radius": 0.2
+                    }
+               }
+          ]
+     },
+     {
+          "id": 2,
+          "name": "2",
+          "radius": 0.5,
+          "maxHP": 1000,
+          "maxSpeed": 5.0,
+          "damage": 1,
+          "upgrades": [],
+          "barrels": [
+               {
+                    "widthL": 0.45,
+                    "widthR": 0.45,
+                    "length": 1.0,
+                    "offsetAngle": 0.0,
+                    "offsetY": 0.25,
+                    "delay": 0,
+                    "cooldown": 15,
+                    "bullet": {
+                         "damage": 2,
+                         "maxHP": 10,
+                         "lifetime": 30,
+                         "density": 3.0,
+                         "speed": 6.0,
+                         "radius": 0.2
+                    }
+               },
+               {
+                    "widthL": 0.45,
+                    "widthR": 0.45,
+                    "length": 1.0,
+                    "offsetAngle": 0.0,
+                    "offsetY": -0.25,
+                    "delay": 10,
+                    "cooldown": 15,
+                    "bullet": {
+                         "damage": 2,
+                         "maxHP": 10,
+                         "lifetime": 30,
+                         "density": 3.0,
+                         "speed": 6.0,
+                         "radius": 0.2
+                    }
+               }
+          ]
+     }
+]

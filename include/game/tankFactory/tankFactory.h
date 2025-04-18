@@ -5,9 +5,41 @@
 #include "ecs/EntityManager.h"
 #include "box2d/box2d.h"
 #include "game/factories.h"
+#include "json/json.hpp"
 
-// 创建默认坦克
-ecs::Entity defaultTank(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, const PlayerParams &params);
+class TankFactory
+{
+     ecs::EntityManager *em;
+     b2WorldId *worldId;
+     nlohmann::json tankdefs;
 
-// 创建双管坦克
-ecs::Entity doubleTank(ecs::EntityManager &em, b2WorldId &worldId, uint32_t tick, const PlayerParams &params);
+     TankFactory &operator=(const TankFactory &) = delete;
+     TankFactory(const TankFactory &) = delete;
+     TankFactory();
+     ~TankFactory() = default;
+
+     BarrelParams createBarrelParams(const nlohmann::json &barreldef);
+
+public:
+     static TankFactory &instence()
+     {
+          static TankFactory instance;
+          return instance;
+     }
+
+     /**
+      * @brief 初始化tank工厂
+      * @param em 实体管理器
+      * @param worldId 世界id
+      * @param tankdefsPath tank定义的json文件路径
+      */
+     void init(ecs::EntityManager *em, b2WorldId *worldId, std::string tankdefsPath);
+
+     /**
+      * @brief 创建坦克实体
+      * @param tick 时间戳
+      * @param id 坦克id
+      * @param params 玩家参数
+      */
+     ecs::Entity createTank(uint32_t tick, int id,PlayerParams &params);
+};

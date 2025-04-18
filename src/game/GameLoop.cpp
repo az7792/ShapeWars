@@ -10,6 +10,7 @@
 #include "lz4/lz4.h"
 #include "game/tankFactory/tankFactory.h"
 #include <cstring>
+#include "game/tankFactory/tankFactory.h"
 
 void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
 {
@@ -60,7 +61,7 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      else if (attr == 2 && em_.hasComponent<Attack>(entity)) // 身体碰撞伤害
      {
           Attack *attack = em_.getComponent<Attack>(entity);
-          attack->damage += isUp * TPS;
+          attack->damage += isUp;
      }
      else if (attr == 3 || attr == 4 || attr == 5 || attr == 6 || attr == 7) // 子弹伤害 | 子弹飞行时长 | 子弹血量 | 子弹速度 | 子弹密度
      {
@@ -74,7 +75,7 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
                BulletParams *bulletParams = em_.getComponent<BulletParams>(e);
                if (attr == 3) // 子弹伤害
                {
-                    bulletParams->attack += isUp * 2 * TPS;
+                    bulletParams->attack += isUp * 2;
                }
                else if (attr == 4) // 子弹飞行时长
                {
@@ -275,29 +276,12 @@ void GameLoop::createPlayerSys()
 
                ecs::Entity entity = ecs::nullEntity;
 
-               if (name == "double")
-                    entity = doubleTank(em_, worldId_, tick_, playerParams);
+               if (name == "0")
+                    entity = TankFactory::instence().createTank(tick_, 0, playerParams);
+               else if (name == "1")
+                    entity = TankFactory::instence().createTank(tick_, 1, playerParams);
                else
-               {
-
-                    entity = createEntityPlayer(em_, worldId_, tick_, playerParams);
-
-                    BarrelParams barrelParams;
-                    barrelParams.parentEntity = entity;
-                    barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.45f;
-                    barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
-                    barrelParams.barrel.offsetAngle = 0.f;
-                    barrelParams.barrel.cooldown = 15;
-                    barrelParams.bulletParams.parentEntity = entity;
-                    // HACK:测试用
-                    if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
-                         barrelParams.barrel.widthR = 0.8f;
-                    int barrelNum = rand() % 8 + 1;
-                    if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
-                         addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
-                    else
-                         addBarrelsToPlayer(em_, barrelNum, barrelParams);
-               }
+                    entity = TankFactory::instence().createTank(tick_, 2, playerParams);
 
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
@@ -415,6 +399,7 @@ void GameLoop::deleteBody(b2BodyId bodyId)
 
 void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
 {
+     // TODO : 使用新的玩家创建方法
      static PlayerParams playerParams;
      static BarrelParams barrelParams;
 
@@ -622,6 +607,9 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      b2WorldDef worldDef = b2DefaultWorldDef();
      worldDef.gravity = {0.0f, 0.0f};
      worldId_ = b2CreateWorld(&worldDef);
+
+     //初始化坦克工厂
+     TankFactory::instence().init(&em_, &worldId_, "./entityDefs/tankdefs.json");
 
      // 创建墙
      createEntityBrderWall(em_, worldId_, 50.f, 50.f);
