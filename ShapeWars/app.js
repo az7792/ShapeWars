@@ -93,6 +93,15 @@ setInterval(() => {
      pingTime = Date.now();
 }, 1000);
 
+fetch("../entityDefs/tankdefs.json")
+     .then(response => response.json())
+     .then(data => {
+          tankdefs = data;
+          update();
+     })
+     .catch(error => {
+          console.error("tankdefs.json 读取失败：", error);
+     });
+
 //启动
 resizeCanvas();
-update();

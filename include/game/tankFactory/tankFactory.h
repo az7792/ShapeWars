@@ -42,4 +42,12 @@ public:
       * @param params 玩家参数
       */
      ecs::Entity createTank(uint32_t tick, int id,PlayerParams &params);
+
+     /**
+      * @brief 切换坦克
+      * @param e 实体
+      * @param tick 时间戳
+      * @param id 坦克id
+     */
+     void upgradeTank(ecs::Entity e, uint32_t tick, int id);
 };

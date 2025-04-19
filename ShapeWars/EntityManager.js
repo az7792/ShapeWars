@@ -7,6 +7,14 @@ class EntityManager {
           this.SparseSet = [new SparseSet(), new SparseSet(), new SparseSet()]; //[资源方块，玩家，子弹] 分层渲染，越小越先渲染
           this.deadEntities = []; //待删除的实体列表,用于播放动画
      }
+     //清空实体管理器
+     clear() {
+          for (let i = 0; i < this.SparseSet.length; i++) {
+               this.SparseSet[i].clear();
+          }
+          this.deadEntities = [];
+     }
+
      //添加实体
      addEntityByDataView(dataView, offset) {
           let entityId = readEntityIDIndex(dataView, offset);//实体id的index部分
@@ -158,5 +166,10 @@ class SparseSet {
           if (this.has(id)) {
                this.remove(id);
           }
+     }
+
+     clear() {
+          this.sparse = [];
+          this.dense = [];
      }
 }

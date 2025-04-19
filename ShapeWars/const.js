@@ -9,11 +9,13 @@ const ctx = canvas.getContext("2d");
 const miniMap = new MiniMap(MAPINFO.width * MAPINFO.kScale / MAPINFO.kGridSize, MAPINFO.height * MAPINFO.kScale / MAPINFO.kGridSize);
 const entityManager = new EntityManager();
 let socket = undefined;
+let tankdefs = undefined;
 const playerInput = new PlayerInput();
 const wsBuf = new Queue(10, [null, { value: 0 }, null]);//webSocket缓冲区
 
 // 加点UI
 const pointUI = new PointDistributionUI(pdAttributes, 'pd-attributeUI', 'pd-toggleBtn');
+const upgradeUI = new UpgradeMenu([], 'upgradeMenu', 'upgradeToggle');
 
 
 const CATEGORY_PLAYER = 0;
@@ -31,3 +33,4 @@ const COMP_NAME = BigInt(1 << 7);   // 0b10000000 名称
 const COMP_STYLE = BigInt(1 << 8);  //0b100000000 填充样式
 const COMP_BARRELLIST = BigInt(1 << 9); // 枪管列表
 const COMP_SCORE = BigInt(1 << 10); // 得分
+const COMP_TANKID = BigInt(1 << 11); // 坦克ID

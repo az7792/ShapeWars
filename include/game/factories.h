@@ -25,6 +25,7 @@ struct PlayerParams
      int32_t groupIndex = 0;                 // 玩家所在碰撞组的索引
      std::string name;                       // 玩家的名字
      b2Vec2 position{0.f, 0.f};              // 玩家的初始位置
+     uint8_t tankID = 0;                     // 玩家的坦克ID from json
      int16_t attack = 1;                     // 玩家刚体的攻击力 from json
      float maxSpeed = 5.f;                   // 玩家的最大线速度 from json
      int16_t initialHP = 1000;               // 玩家的初始血量 from json

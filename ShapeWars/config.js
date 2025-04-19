@@ -59,6 +59,7 @@ playerStatus = {
      //当前玩家所属碰撞组
      nowGroupIndex: 0,
      nowEntityId: 0,
+     nowTankID: -1,
      //当前玩家死活状态
      isAlive: false,
 }

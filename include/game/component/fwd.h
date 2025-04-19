@@ -29,6 +29,7 @@
 #include "barrel.h"
 #include "score.h"
 #include "attribute.h"
+#include "tankID.h"
 
 #include <cstdint>
 
@@ -43,3 +44,4 @@ const uint64_t COMP_NAME = (1ull << 7);       // 0b10000000 名称
 const uint64_t COMP_STYLE = (1ull << 8);      //0b100000000 填充样式
 const uint64_t COMP_BARRELLIST = (1ull << 9);      //枪管列表
 const uint64_t COMP_SCORE = (1ull << 10);      //得分
+const uint64_t COMP_TANKID = (1ull << 11);      //坦克ID

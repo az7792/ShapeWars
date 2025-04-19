@@ -120,6 +120,7 @@ class PlayerEntity extends BaseEntity {
           this.Barrels = [];
           this.isOperator = false;
           this.score = 0;
+          this.tankID = 0;
      }
 
      showMe(deltaTime) {
@@ -153,6 +154,9 @@ class PlayerEntity extends BaseEntity {
                while (this.Barrels.length < size) {
                     this.Barrels.push(new Barrel());
                }
+               while (this.Barrels.length > size) {
+                    this.Barrels.pop();
+               }
                for (let i = 0; i < size; i++) {
                     this.Barrels[i].update(dataView, offset);
                }
@@ -160,6 +164,19 @@ class PlayerEntity extends BaseEntity {
 
           if (componentState & COMP_SCORE) {
                this.score = readScore(dataView, offset);
+          }
+
+          if (componentState & COMP_TANKID) {
+               this.tankID = readTankID(dataView, offset);
+               
+               const tankBarrels = tankdefs[this.tankID].barrels;
+
+               for(let i = 0; i < this.Barrels.length; i++){
+                    this.Barrels[i].widthL = tankBarrels[i].widthL;
+                    this.Barrels[i].widthR = tankBarrels[i].widthR;
+                    this.Barrels[i].offsetAngle = tankBarrels[i].offsetAngle;
+                    this.Barrels[i].offsetY = tankBarrels[i].offsetY;
+               }
           }
      }
 }
@@ -213,15 +230,7 @@ class Barrel {
      update(dataView, offset) {
           this.length[0] = this.length[1];
 
-          this.widthL = dataView.getFloat32(offset.value, true);
-          offset.value += 4;
-          this.widthR = dataView.getFloat32(offset.value, true);
-          offset.value += 4;
           this.length[1] = dataView.getFloat32(offset.value, true);
-          offset.value += 4;
-          this.offsetAngle = dataView.getFloat32(offset.value, true);
-          offset.value += 4;
-          this.offsetY = dataView.getFloat32(offset.value, true);
           offset.value += 4;
      }
 

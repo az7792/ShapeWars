@@ -1,0 +1,49 @@
+/* 升级菜单容器 */
+.upgrade-menu-container {
+     position: fixed;
+     left: -300px;
+     top: 56px;
+     width: 210px;
+     height: 110px;
+     padding: 5px 10px;
+     transition: left 0.3s ease;
+     z-index: 1000;
+}
+
+.upgrade-menu-container.active {
+     left: 0;
+}
+
+/* 展开按钮（左上角） */
+.upgrade-toggle-btn {
+     position: fixed;
+     left: 0;
+     top: 10px;
+     background: rgba(0, 0, 0, 0.8);
+     color: white;
+     padding: 10px;
+     border-radius: 0 10px 10px 0;
+     cursor: pointer;
+     user-select: none;
+     z-index: 1001;
+}
+
+/* Canvas网格布局 */
+.upgrade-canvas-grid {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 10px;
+     justify-content: start;
+}
+
+/* 单个Canvas容器 */
+.canvas-item {
+     width: 100px;
+     height: 100px;
+     cursor: pointer;
+     transition: transform 0.2s;
+}
+
+.canvas-item:hover {
+     transform: scale(1.05);
+}

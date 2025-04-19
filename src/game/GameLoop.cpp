@@ -162,6 +162,25 @@ void GameLoop::attributeSys()
      }
 }
 
+void GameLoop::upgradeSys()
+{
+     auto group = em_.group<Input, b2BodyId>();
+     std::unique_lock<std::mutex> lock(playerMutex_);
+     for (auto &entity : *group)
+     {
+          int index = inputMap_[entity];
+          std::unique_lock<std::shared_mutex> lock2(inputMutex_[index]); // 写锁
+          std::deque<uint8_t> &dq = upgradeBuf_[index];
+          while (!dq.empty())
+          {
+               uint8_t id = dq.front();
+               dq.pop_front();
+               TankFactory::instence().upgradeTank(entity, tick_, id);
+          }
+          assert(dq.empty() && dq.size() == 0);
+     }
+}
+
 void GameLoop::outputSys()
 {
      static std::string message = ""; // 原始数据
@@ -175,6 +194,8 @@ void GameLoop::outputSys()
           strAppend<uint8_t>(message, 0x01); // 更新实体数据
           // 玩家ID
           strAppend<uint32_t>(message, entity);
+          // 玩家坦克ID
+          strAppend<uint8_t>(message, em_.getComponent<TankID>(entity)->id);
           // 操作的玩家所属碰撞组
           strAppend<int32_t>(message, em_.getComponent<GroupIndex>(entity)->index);
 
@@ -182,6 +203,9 @@ void GameLoop::outputSys()
           b2Vec2 cameraPos = b2Body_GetPosition(camera->bodyId);
           strAppend<float>(message, cameraPos.x);
           strAppend<float>(message, cameraPos.y);
+          // 摄像机是否是瞬移
+          strAppend<uint8_t>(message, camera->isTeleport? 1 : 0);
+          em_.getComponent<Camera>(entity)->isTeleport = false;
 
           // 移出实体列表
           uint16_t len = camera->removeEntities.size();
@@ -296,8 +320,13 @@ void GameLoop::createPlayerSys()
                TcpConnection *tcpConnection = std::get<0>(createPlayerQueue_.front());
                std::string name = std::get<1>(createPlayerQueue_.front());
                ecs::Entity entity = it->second.first;
-               createPlayBody(entity, name);
-               it->second.second = 1;                         // 标记玩家存活
+               it->second.first = createNewPlayer(entity, name);
+               it->second.second = 1; // 标记玩家存活
+
+               // 重置新实体输入
+               inputMap_[it->second.first] = inputMap_[entity];
+               inputMap_.erase(entity);
+
                ws_.send(std::string(1, 0x06), tcpConnection); // 通知客户端玩家已创建
                createPlayerQueue_.pop_front();
           }
@@ -397,62 +426,28 @@ void GameLoop::deleteBody(b2BodyId bodyId)
      b2DestroyBody(bodyId);
 }
 
-void GameLoop::createPlayBody(ecs::Entity entity, std::string name)
+ecs::Entity GameLoop::createNewPlayer(ecs::Entity entity, std::string name)
 {
-     // TODO : 使用新的玩家创建方法
      static PlayerParams playerParams;
-     static BarrelParams barrelParams;
 
-     barrelParams.parentEntity = entity;
-     barrelParams.barrel.widthL = barrelParams.barrel.widthR = 0.5f;
-     barrelParams.barrel.length = barrelParams.barrel.nowLength = 1.f;
-     barrelParams.barrel.offsetAngle = 0.f;
-     barrelParams.barrel.cooldown = 15;
-     barrelParams.bulletParams.parentEntity = entity;
+     // 保留原有属性
+     playerParams.tcpConnection = *em_.getComponent<TcpConnection *>(entity);
+     playerParams.groupIndex = em_.getComponent<GroupIndex>(entity)->index;
+     playerParams.name = name;
+     playerParams.position = {0.f, 0.f}; // TODO : 随机位置
+     Score score = *em_.addComponent<Score>(entity);
+     score.score /= 4;
+     score.tick = tick_;
 
-     em_.getComponent<Velocity>(entity)->maxSpeed = playerParams.maxSpeed;
-     em_.getComponent<HP>(entity)->hp = em_.getComponent<HP>(entity)->maxHP = playerParams.maxHP;
-     em_.getComponent<HP>(entity)->tick = tick_;
-     em_.getComponent<Attack>(entity)->damage = playerParams.attack;
-     em_.replaceComponent<Name>(entity, name);
-     em_.getComponent<Score>(entity)->score /= 4;
-     em_.getComponent<Score>(entity)->tick = tick_;
-     em_.addComponent<HealingOverTime>(entity, tick_);
-     em_.getComponent<Attribute>(entity)->attr.fill(0);
+     // 清除摄像机刚与旧玩家实体
+     b2DestroyBody(em_.getComponent<Camera>(entity)->bodyId);
+     em_.destroyEntity(entity);
 
-     // HACK:测试用
-     if (name.size() >= 2 && name[1] == 'T') // 梯形炮管
-          barrelParams.barrel.widthR = 0.8f;
-     if (name.size() >= 1 && '1' <= name[0] && name[0] <= '8')
-          addBarrelsToPlayer(em_, name[0] - '0', barrelParams);
-     else
-          addBarrelsToPlayer(em_, rand() % 8 + 1, barrelParams);
+     // 创建新坦克
+     ecs::Entity newEntity = TankFactory::instence().createTank(tick_, 0, playerParams);
+     em_.replaceComponent<Score>(newEntity, score);
 
-     // 定义刚体
-     b2BodyDef bodyDef = b2DefaultBodyDef();
-     bodyDef.type = b2_dynamicBody;
-     bodyDef.fixedRotation = true;
-     bodyDef.position = {0.f, 0.f};
-     bodyDef.userData = static_cast<void *>(em_.getEntityPtr(entity));
-     b2BodyId bodyId = b2CreateBody(worldId_, &bodyDef);
-
-     b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = 1.f;   // 默认为1
-     shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
-     shapeDef.userData = bodyDef.userData;
-     shapeDef.enableContactEvents = true;
-     shapeDef.filter.categoryBits = CATEGORY_PLAYER;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
-     shapeDef.filter.groupIndex = em_.getComponent<GroupIndex>(entity)->index;
-
-     // 圆形
-     b2Circle circle;
-     circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
-     circle.radius = em_.getComponent<RegularPolygon>(entity)->radius;
-
-     shapeEntityMap[b2StoreShapeId(b2CreateCircleShape(bodyId, &shapeDef, &circle))] = entity;
-
-     em_.addComponent<b2BodyId>(entity, bodyId);
+     return newEntity;
 }
 
 void GameLoop::outputStandingsSys()
@@ -556,6 +551,18 @@ void GameLoop::handleOnMessage(TcpConnection *conn, Buffer &buffer)
           }
           break;
      }
+     case 0x06: // 更改角色
+     {
+          std::unique_lock<std::mutex> lock(playerMutex_);
+          if (playerMap_.find(conn) != playerMap_.end())
+          {
+               int index = inputMap_[playerMap_[conn].first];
+               lock.unlock();
+               std::unique_lock<std::shared_mutex> lock2(inputMutex_[index]); // 写锁
+               upgradeBuf_[index].push_back(buffer.readValue<uint8_t>());     // 缓存起来由ecs系统处理
+          }
+          break;
+     }
      default:
           break;
      }
@@ -608,7 +615,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      worldDef.gravity = {0.0f, 0.0f};
      worldId_ = b2CreateWorld(&worldDef);
 
-     //初始化坦克工厂
+     // 初始化坦克工厂
      TankFactory::instence().init(&em_, &worldId_, "./entityDefs/tankdefs.json");
 
      // 创建墙
@@ -617,6 +624,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
      // 注册系统
      em_.addSystem(std::bind(&GameLoop::inputSys, this))
          .addSystem(std::bind(&GameLoop::attributeSys, this))
+         .addSystem(std::bind(&GameLoop::upgradeSys, this))
          .addSystem(std::bind(&lifeTimeSys, std::ref(em_), std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::destroyEntitySys, this))
          .addSystem(std::bind(&GameLoop::createPlayerSys, this)) // 先删再创建能回收一部分实体标识符

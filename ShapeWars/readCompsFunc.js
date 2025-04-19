@@ -168,3 +168,12 @@ function readAttributes(dataView, offset) {
 
      return [isUp, attrIndex];
 }
+
+/**
+ * 读取坦克ID
+ */
+function readTankID(dataView, offset) {
+     let tankID = dataView.getUint8(offset.value, true);
+     offset.value += 1;
+     return tankID;
+}

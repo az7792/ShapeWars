@@ -37,7 +37,7 @@
           "maxSpeed": 5.0,
           "damage": 1,
           "upgrades": [
-               1
+               2
           ],
           "barrels": [
                {

@@ -23,10 +23,11 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Name>(e, params.name);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), params.polygonRadius); //>=16为圆形
      em.addComponent<Children>(e);
-     em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f);
+     em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f, true);
      em.addComponent<Score>(e, static_cast<int32_t>(1e5)); // HACK : 1e5 测试用
      em.addComponent<Attribute>(e);
      em.addComponent<HealingOverTime>(e,tick);
+     em.addComponent<TankID>(e, params.tankID, tick);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 
@@ -86,7 +87,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      em.addComponent<RegularPolygon>(e, params.polygon);
      em.addComponent<Style>(e, params.style);
      em.addComponent<Score>(e, params.score);
-     em.addComponent<HealingOverTime>(e,tick);
+     em.addComponent<HealingOverTime>(e, tick);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -153,8 +154,8 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef();
-     shapeDef.density = params.density;   // 默认为1
-     shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
+     shapeDef.density = params.density; // 默认为1
+     shapeDef.friction = 0.1f;          // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_BULLET;

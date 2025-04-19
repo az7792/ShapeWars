@@ -33,14 +33,12 @@
   - ui32 strokeColor
 - 9 : 炮管列表
   - ui8 炮管数量
-  - f32 widthL
-  - f32 widthR
   - f32 nowLength
-  - f32 offsetAngle
-  - f32 offsetY
   - ...data2
 - 10 : 得分
   - i32 得分
+- 11 : 坦克ID
+  - ui8 id
 
 ## client to server protocol
 
@@ -51,7 +49,7 @@
 - 0x03: Pong包
 - 0x04: lz4压缩包
 - 0x05: 属性升级
-- 0x06:
+- 0x06: 更改角色
 - 0x07:
 - 0x08:
 - 0x09:
@@ -102,6 +100,12 @@ data
   - 8 ：子弹射速
   - 9 ：角色移动速度
 ```
+
+**0x09: 更改角色**
+```
+- uint8 坦克ID
+```
+
 ## server to client protocol
 ### Header
 - 0x00: 初始化地图数据
@@ -134,9 +138,11 @@ data
 
 ```
 - ui32 操作的玩家ID
+- ui8 玩家的tankID
 - i32 玩家所在碰撞组
 - f32 摄像机坐标 x
 - f32 摄像机坐标 y
+- ui8 该摄像机是否瞬移
 - ui16 需要移出的实体列表长度(remove)
 - data
 - ui16 需要删除的实体列表长度(delete)

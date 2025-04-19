@@ -53,6 +53,7 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
      params.attack = tankdef["damage"];
      params.maxSpeed = tankdef["maxSpeed"];
      params.polygonRadius = tankdef["radius"];
+     params.tankID = tankdef["id"];
      ecs::Entity e = createEntityPlayer(*em, *worldId, tick, params);
 
      for(auto &barreldef : tankdef["barrels"])
@@ -63,4 +64,44 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
      }
 
      return e;
+}
+
+void TankFactory::upgradeTank(ecs::Entity e, uint32_t tick, int id)
+{
+     auto &tankdef = tankdefs[id];
+
+     // 更新属性
+     auto hp = em->getComponent<HP>(e);
+     hp->maxHP = hp->hp = tankdef["maxHP"];
+     hp->tick = tick;
+     em->addComponent<Attack>(e)->damage = tankdef["damage"];
+     em->addComponent<Velocity>(e)->maxSpeed = tankdef["maxSpeed"];
+     em->addComponent<RegularPolygon>(e)->radius = tankdef["radius"];
+     em->addComponent<TankID>(e)->id = tankdef["id"];
+     em->addComponent<TankID>(e)->tick = tick;
+
+     // 更新球体大小
+     std::vector<b2ShapeId> shapes;
+     shapes.resize(b2Body_GetShapeCount(*em->getComponent<b2BodyId>(e)));
+     b2Body_GetShapes(*em->getComponent<b2BodyId>(e), shapes.data(), shapes.size());
+
+     b2Circle circle = {b2Vec2_zero, tankdef["radius"]};
+     for (auto &shapeId : shapes)
+     {
+          b2Shape_SetCircle(shapeId, &circle);
+     }
+
+     // 更新炮管
+     auto ch = em->getComponent<Children>(e);
+     for (auto child : ch->children)
+     {
+          em->destroyEntity(child);
+     }
+     ch->children.clear();
+     for (auto &barreldef : tankdef["barrels"])
+     {
+          auto barrelParams = createBarrelParams(barreldef);
+          barrelParams.parentEntity = barrelParams.bulletParams.parentEntity = e;
+          createEntityBarrel(*em, barrelParams);
+     }
 }

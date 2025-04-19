@@ -48,12 +48,23 @@ function popBuf() {
 function parseEntity(dataView, offset) {
      //当前玩家ID
      playerStatus.nowEntityId = readEntityIDIndex(dataView, offset);
+     //当前玩家坦克ID
+     let tankID = readTankID(dataView, offset);
+     if(tankID != playerStatus.tankID){
+          playerStatus.tankID = tankID;
+          upgradeUI.reinit(tankID);
+     }
      //当前玩家所在碰撞组
      playerStatus.nowGroupIndex = readGroupIndex(dataView, offset);
      // 摄像机位置
      camera.lerpX[0] = camera.lerpX[1];
      camera.lerpY[0] = camera.lerpY[1];
      [camera.lerpX[1], camera.lerpY[1]] = readPosition(dataView, offset);
+     let isTeleport = dataView.getUint8(offset.value, true);
+     offset.value++;
+     if (isTeleport == 1) {
+          entityManager.clear();
+     }
      //需要移出的实体列表
      let listLen = dataView.getUint16(offset.value, true);
      offset.value += 2;

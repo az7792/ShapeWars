@@ -13,8 +13,8 @@ class GameLoop
 private:
      // 删除一个刚体并清理shapeEntityMap
      void deleteBody(b2BodyId bodyId);
-     // 根据实体创建玩家刚体
-     void createPlayBody(ecs::Entity entity, std::string name);
+     // 从已死亡玩家创建新的玩家实体
+     ecs::Entity createNewPlayer(ecs::Entity entity, std::string name);
      // 为一个实体修改属性
      void modifyAttribute(ecs::Entity entity, uint8_t v);
 
@@ -23,6 +23,8 @@ private:
      void inputSys();
      // 处理玩家属性加点
      void attributeSys();
+     // 处理玩家切换角色
+     void upgradeSys();
      // 处理ecs的输出与网络发送的同步
      void outputSys();
      // 处理延迟创建玩家实体
@@ -43,6 +45,7 @@ private:
      std::array<std::shared_mutex, MAX_CONNECTED> inputMutex_;     // 玩家输入读写锁(管理下面所有输入，加点，升级...)
      std::array<atomicInput, MAX_CONNECTED> input_;                // 玩家输入
      std::array<std::deque<uint8_t>, MAX_CONNECTED> attributeBuf_; // 玩家属性加点缓存
+     std::array<std::deque<uint8_t>, MAX_CONNECTED> upgradeBuf_;   // 玩家升级缓存
      std::deque<int> freeInputsQueue_;                             // 空闲索引队列
 
 private:

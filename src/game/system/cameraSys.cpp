@@ -88,11 +88,7 @@ namespace
           for (size_t i = 0; i < barrelList->size(); ++i)
           {
                Barrel *barrel = em.getComponent<Barrel>(barrelList->at(i));
-               strAppend(*data, barrel->widthL);
-               strAppend(*data, barrel->widthR);
                strAppend(*data, barrel->nowLength);
-               strAppend(*data, barrel->offsetAngle);
-               strAppend(*data, barrel->offsetY);
           }
      }
 
@@ -103,6 +99,16 @@ namespace
           {
                componentState |= COMP_SCORE;
                strAppend(*data, score->score);
+          }
+     }
+
+     //11
+     void appendTankID11(uint32_t tick, std::string *data, uint64_t &componentState, TankID *id, bool isCreate = false)
+     {
+          if (id->tick == tick || isCreate) // 创建时无论是否变换都需要打包
+          {
+               componentState |= COMP_TANKID;
+               strAppend(*data, id->id);
           }
      }
 
@@ -149,6 +155,7 @@ namespace
                appendName7(data, componentState, em.getComponent<Name>(targetEntity), isCreate);
                appendBarrelList9(em, data, componentState, &(em.getComponent<Children>(targetEntity)->children));
                appendScore10(tick, data, componentState, em.getComponent<Score>(targetEntity), isCreate);
+               appendTankID11(tick, data, componentState, em.getComponent<TankID>(targetEntity), isCreate);
           }
           else if (type->id == CATEGORY_BLOCK) // 处理方块实体
           {

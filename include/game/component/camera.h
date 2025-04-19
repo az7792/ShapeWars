@@ -15,6 +15,7 @@ struct Camera
      float x;
      float y;
      float fov;
+     bool isTeleport; // 是否是瞬移
 
      std::vector<ecs::Entity> delEntities;    // 当前帧需要删除的实体(在视野中被销毁的实体)
      std::vector<ecs::Entity> removeEntities; // 当前帧需要移出的实体(移动到视野外的实体)
@@ -27,8 +28,8 @@ struct Camera
 
      ~Camera() = default;
 
-     Camera(float x_, float y_, float fov_)
-         : x(x_), y(y_), fov(fov_), inEntities(1) {}
+     Camera(float x_, float y_, float fov_, bool isTeleport_ = true)
+         : x(x_), y(y_), fov(fov_), isTeleport(isTeleport_), inEntities(1) {}
 
      // 为了隐式弃置移动赋值运算符，保证在插入或者替换组件时调用拷贝赋值，这样可以保留旧实体中动态容器已分配的空间
      Camera &operator=(const Camera &) = default;
