@@ -124,11 +124,25 @@ class PlayerEntity extends BaseEntity {
      }
 
      showMe(deltaTime) {
-          for (let i = 0; i < this.Barrels.length; i++)
-               this.Barrels[i].showMe(deltaTime, lerp(this.x, deltaTime), lerp(this.y, deltaTime), lerp(this.angle, deltaTime));
+          let lerpX = lerp(this.x, deltaTime);
+          let lerpY = lerp(this.y, deltaTime);
+          let lerpAngle = lerp(this.angle, deltaTime);
+
+
+          if (!this.isOperator) {
+               for (let i = 0; i < this.Barrels.length; i++)
+                    this.Barrels[i].showMe(deltaTime, lerpX, lerpY, lerpAngle);
+          } else {
+               // 玩家操作的角色炮管朝向在本地计算
+               let box2dPos = screenToBox2D(playerInput.mouseXInScreen, playerInput.mouseYInScreen);
+               let localAngle = Math.atan2(box2dPos.y - lerpY, box2dPos.x - lerpX);
+               for (let i = 0; i < this.Barrels.length; i++)
+                    this.Barrels[i].showMe(deltaTime, lerpX, lerpY, localAngle);
+          }
+
           super.showMe(deltaTime);
           if (!this.isOperator)
-               drawNameAndScore(lerp(this.x, deltaTime), lerp(this.y, deltaTime) + this.r, this.name,this.score);
+               drawNameAndScore(lerpX, lerpY + this.r, this.name,this.score);
      }
 
 
