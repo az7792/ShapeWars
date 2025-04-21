@@ -79,7 +79,7 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
                }
                else if (attr == 4) // 子弹飞行时长
                {
-                    bulletParams->lifetime += isUp * 5;
+                    bulletParams->lifetime += isUp * 2;
                }
                else if (attr == 5) // 子弹血量
                {
@@ -631,6 +631,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&playerMovementSys, std::ref(em_), std::ref(worldId_)))
          .addSystem(std::bind(&regularPolygonGenSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&fireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&bulletAccelCtrlSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&blockRotationCtrlSys, std::ref(em_)))
          .addSystem(std::bind(&blockRevolutionCtrlSys, std::ref(em_), std::ref(worldId_)))

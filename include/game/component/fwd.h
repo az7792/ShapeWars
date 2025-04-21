@@ -30,6 +30,7 @@
 #include "score.h"
 #include "attribute.h"
 #include "tankID.h"
+#include "flag/bulletAccelerationFlag.h"
 
 #include <cstdint>
 

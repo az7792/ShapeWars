@@ -134,6 +134,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      ecs::Entity e = em.createEntity();
      em.addComponent<Position>(e);
      em.addComponent<Velocity>(e);
+     em.addComponent<Angle>(e, params.angle);
      em.addComponent<HP>(e, params.initialHP, params.maxHP, tick);
      em.addComponent<Attack>(e, params.attack);
      em.addComponent<LifeTime>(e, tick, params.lifetime);
@@ -144,6 +145,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Parent>(e, params.parentEntity);
      em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), params.radius); //>=16为圆形
      em.addComponent<Score>(e, 0);
+     em.addComponent<BulletAccelerationFlag>(e);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -151,6 +153,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      bodyDef.fixedRotation = true;
      bodyDef.position = params.position;
      bodyDef.userData = static_cast<void *>(em.getEntityPtr(e));
+     bodyDef.linearDamping = 0.7f;
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
      b2ShapeDef shapeDef = b2DefaultShapeDef();

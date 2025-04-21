@@ -21,9 +21,9 @@
                     "bullet": {
                          "damage": 2,
                          "maxHP": 10,
-                         "lifetime": 30,
+                         "lifetime": 60,
                          "density": 3.0,
-                         "speed": 6.0,
+                         "speed": 10.0,
                          "radius": 0.2
                     }
                }
@@ -51,9 +51,9 @@
                     "bullet": {
                          "damage": 2,
                          "maxHP": 10,
-                         "lifetime": 30,
+                         "lifetime": 60,
                          "density": 3.0,
-                         "speed": 6.0,
+                         "speed": 10.0,
                          "radius": 0.2
                     }
                }
@@ -79,9 +79,9 @@
                     "bullet": {
                          "damage": 2,
                          "maxHP": 10,
-                         "lifetime": 30,
+                         "lifetime": 60,
                          "density": 3.0,
-                         "speed": 6.0,
+                         "speed": 10.0,
                          "radius": 0.2
                     }
                },
@@ -96,9 +96,9 @@
                     "bullet": {
                          "damage": 2,
                          "maxHP": 10,
-                         "lifetime": 30,
+                         "lifetime": 60,
                          "density": 3.0,
-                         "speed": 6.0,
+                         "speed": 10.0,
                          "radius": 0.2
                     }
                }
