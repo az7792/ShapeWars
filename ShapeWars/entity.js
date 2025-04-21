@@ -30,9 +30,15 @@ class BaseEntity {
 
 
      showMe(deltaTime) {
-          drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
+          let lerpX = lerp(this.x, deltaTime);
+          let lerpY = lerp(this.y, deltaTime);
+          let lerpAngle = lerp(this.angle, deltaTime);
+          if ((this.sides & 0x80) == 0x80) //n角星
+               drawRegularStar(this.sides & 0x7F, lerpX, lerpY, this.r, lerpAngle, this.fillColor, this.strokeColor);
+          else
+               drawRegularPolygon(this.sides, lerpX, lerpY, this.r, lerpAngle, this.fillColor, this.strokeColor);
           if (this.HP < this.maxHP)
-               drawHealthBar(lerp(this.x, deltaTime), lerp(this.y, deltaTime) - (this.sides >= 16 ? this.r : (this.r / Math.cos(Math.PI / this.sides))), this.HP, this.maxHP);
+               drawHealthBar(lerpX, lerpY - (this.sides >= 16 ? this.r : (this.r / Math.cos(Math.PI / this.sides))), this.HP, this.maxHP);
      }
 
      initDeadStatus() {
@@ -50,7 +56,10 @@ class BaseEntity {
           let rgbaFillColor = this.updateRGBA(this.fillColor, alpha);
           let rgbaStrokeColor = this.updateRGBA(this.strokeColor, alpha);
           currentTime -= serverTime.avgFrameInterval;//修正时间,当实体死亡时,客户端会在一个服务器tick后才知道实体死亡
-          drawRegularPolygon(this.sides, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
+          if ((this.sides & 0x80) == 0x80)
+               drawRegularStar(this.sides & 0x7F, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
+          else
+               drawRegularPolygon(this.sides, predict(this.x, this.deadPrevTime, this.deadTime, currentTime), predict(this.y, this.deadPrevTime, this.deadTime, currentTime), deadR, this.angle[1], rgbaFillColor, rgbaStrokeColor);
      }
 
      update(dataView, offset) {
@@ -142,7 +151,7 @@ class PlayerEntity extends BaseEntity {
 
           super.showMe(deltaTime);
           if (!this.isOperator)
-               drawNameAndScore(lerpX, lerpY + this.r, this.name,this.score);
+               drawNameAndScore(lerpX, lerpY + this.r, this.name, this.score);
      }
 
 
@@ -182,10 +191,10 @@ class PlayerEntity extends BaseEntity {
 
           if (componentState & COMP_TANKID) {
                this.tankID = readTankID(dataView, offset);
-               
+
                const tankBarrels = tankdefs[this.tankID].barrels;
 
-               for(let i = 0; i < this.Barrels.length; i++){
+               for (let i = 0; i < this.Barrels.length; i++) {
                     this.Barrels[i].widthL = tankBarrels[i].widthL;
                     this.Barrels[i].widthR = tankBarrels[i].widthR;
                     this.Barrels[i].offsetAngle = tankBarrels[i].offsetAngle;
@@ -201,23 +210,18 @@ class BulletEntity extends PolygonEntity {
      }
 
      showMe(deltaTime) {
-          drawRegularPolygon(this.sides, lerp(this.x, deltaTime), lerp(this.y, deltaTime), this.r, lerp(this.angle, deltaTime), this.fillColor, this.strokeColor);
+          let lerpX = lerp(this.x, deltaTime);
+          let lerpY = lerp(this.y, deltaTime);
+          let lerpAngle = lerp(this.angle, deltaTime);
+
+          if ((this.sides & 0x80) == 0x80) //n角星
+               drawRegularStar(this.sides & 0x7F, lerpX, lerpY, this.r, lerpAngle, this.fillColor, this.strokeColor);
+          else
+               drawRegularPolygon(this.sides, lerpX, lerpY, this.r, lerpAngle, this.fillColor, this.strokeColor);
      }
 
      update(dataView, offset) {
-          this.x[0] = this.x[1];
-          this.y[0] = this.y[1];
-
-          let componentState = dataView.getBigUint64(offset.value, true);
-          offset.value += 8;
-
-          if (componentState & COMP_POSITION) {
-               [this.x[1], this.y[1]] = readPosition(dataView, offset, 2);
-          }
-
-          if (componentState & COMP_POLYGON) {
-               [this.sides, this.r] = readPolygon(dataView, offset);
-          }
+          let componentState = super.update(dataView, offset);
 
           if (componentState & COMP_GROUPINDEX) {
                this.groupIndex = readGroupIndex(dataView, offset);
@@ -278,6 +282,6 @@ class Barrel {
           points.push([right1X + offsetx, right1Y + offsety]);
           points.push([right2X + offsetx, right2Y + offsety]);
           points.push([left2X + offsetx, left2Y + offsety]);
-          drawPolygon(points, COLORS.barrelFillColor, COLORS.barrelStrokeColor);          
+          drawPolygon(points, COLORS.barrelFillColor, COLORS.barrelStrokeColor);
      }
 }

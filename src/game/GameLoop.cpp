@@ -289,8 +289,14 @@ void GameLoop::createPlayerSys()
                     entity = TankFactory::instence().createTank(tick_, 0, playerParams);
                else if (name == "1")
                     entity = TankFactory::instence().createTank(tick_, 1, playerParams);
-               else
+               else if(name == "2")
                     entity = TankFactory::instence().createTank(tick_, 2, playerParams);
+               else if(name == "3")
+                    entity = TankFactory::instence().createTank(tick_, 3, playerParams);
+               else if(name == "4")
+                    entity = TankFactory::instence().createTank(tick_, 4, playerParams);
+               else
+                    entity = TankFactory::instence().createTank(tick_, 0, playerParams);
 
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();

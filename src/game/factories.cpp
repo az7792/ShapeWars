@@ -26,7 +26,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Camera>(e, params.position.x, params.position.y, 1.f, true);
      em.addComponent<Score>(e, static_cast<int32_t>(1e5)); // HACK : 1e5 测试用
      em.addComponent<Attribute>(e);
-     em.addComponent<HealingOverTime>(e,tick);
+     em.addComponent<HealingOverTime>(e, tick);
      em.addComponent<TankID>(e, params.tankID, tick);
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
@@ -143,9 +143,10 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Type>(e, static_cast<uint8_t>(CATEGORY_BULLET));
      em.addComponent<GroupIndex>(e, em.getComponent<GroupIndex>(params.parentEntity)->index);
      em.addComponent<Parent>(e, params.parentEntity);
-     em.addComponent<RegularPolygon>(e, static_cast<uint8_t>(64), params.radius); //>=16为圆形
+     em.addComponent<RegularPolygon>(e, params.sides, params.radius); //>=16为圆形
      em.addComponent<Score>(e, 0);
-     em.addComponent<BulletAccelerationFlag>(e);
+     if (params.sides >= 16) // 只控制圆形子弹的生命周期
+          em.addComponent<BulletAccelerationFlag>(e);
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();

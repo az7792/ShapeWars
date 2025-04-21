@@ -37,12 +37,13 @@ struct PlayerParams
 struct BulletParams
 {
      ecs::Entity parentEntity;  // 子弹的父实体
-     int16_t attack = 2;        // 子弹的攻击力 +=2
+     int16_t attack = 2;        // 子弹的攻击力
      int16_t initialHP = 10;    // 子弹的初始血量
-     int16_t maxHP = 10;        // 子弹的最大血量 += 5
-     uint32_t lifetime = 30;    // 子弹的存活时间 += 5
-     float density = 3.0f;      // 子弹的密度 += 0.5
-     float speed = 6.0f;        // 子弹的速度 += 0.8
+     int16_t maxHP = 10;        // 子弹的最大血量
+     uint8_t sides = 16;        // 子弹的边数
+     uint32_t lifetime = 30;    // 子弹的存活时间
+     float density = 3.0f;      // 子弹的密度
+     float speed = 6.0f;        // 子弹的速度
      float radius = 0.2f;       // 子弹的半径
      float angle = 0.0f;        // 子弹的发射角度
      b2Vec2 position{0.f, 0.f}; // 子弹的初始位置

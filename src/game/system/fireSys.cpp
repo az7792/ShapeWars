@@ -85,7 +85,6 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
                     double delta = atanf((barrel->widthR) / 2.0 / barrel->length);
                     params->angle = sample_normal_in_range(angle, delta);
                }
-               params->radius = barrel->widthL / 2.f * 0.9f;
                params->position = b2Body_GetPosition(*em.getComponent<b2BodyId>(parent->id));
                params->position.x += -sinf(angle) * barrel->offsetY;
                params->position.y += cosf(angle) * barrel->offsetY;

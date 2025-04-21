@@ -7,7 +7,7 @@
           "maxSpeed": 5.0,
           "damage_m": 1,
           "upgrades": [
-               1
+               1,2
           ],
           "barrels": [
                {
@@ -24,7 +24,9 @@
                          "lifetime_m": 1,
                          "density": 3.0,
                          "speed_m": 1.0,
-                         "radius": 0.2
+                         "radius": 0.2,
+                         "sides" : 16,
+                         "isStar" : false
                     }
                }
           ]
@@ -32,12 +34,12 @@
      {
           "id": 1,
           "name": "1",
-          "radius": 0.5,
+          "radius": 0.55,
           "maxHP_m": 1,
           "maxSpeed": 5.0,
           "damage_m": 1,
           "upgrades": [
-               2
+               3,4
           ],
           "barrels": [
                {
@@ -54,7 +56,9 @@
                          "lifetime_m": 1,
                          "density": 3.0,
                          "speed_m": 1.0,
-                         "radius": 0.2
+                         "radius": 0.2,
+                         "sides" : 16,
+                         "isStar" : false
                     }
                }
           ]
@@ -62,11 +66,11 @@
      {
           "id": 2,
           "name": "2",
-          "radius": 0.5,
+          "radius": 0.55,
           "maxHP_m": 1,
           "maxSpeed": 5.0,
           "damage_m": 1,
-          "upgrades": [],
+          "upgrades": [3,4],
           "barrels": [
                {
                     "widthL": 0.45,
@@ -82,7 +86,9 @@
                          "lifetime_m": 1,
                          "density": 3.0,
                          "speed_m": 1.0,
-                         "radius": 0.2
+                         "radius": 0.2,
+                         "sides" : 16,
+                         "isStar" : false
                     }
                },
                {
@@ -99,7 +105,73 @@
                          "lifetime_m": 1,
                          "density": 3.0,
                          "speed_m": 1.0,
-                         "radius": 0.2
+                         "radius": 0.2,
+                         "sides" : 16,
+                         "isStar" : false
+                    }
+               }
+          ]
+     },
+     {
+          "id": 3,
+          "name": "3",
+          "radius": 0.55,
+          "maxHP_m": 1,
+          "maxSpeed": 5.0,
+          "damage_m": 1,
+          "upgrades": [
+               
+          ],
+          "barrels": [
+               {
+                    "widthL": 0.5,
+                    "widthR": 0.8,
+                    "length": 0.8,
+                    "offsetAngle": 0.0,
+                    "offsetY": 0.0,
+                    "delay": 0,
+                    "cooldown": 15,
+                    "bullet": {
+                         "damage_m": 2,
+                         "maxHP_m": 5,
+                         "lifetime_m": 20,
+                         "density": 10.0,
+                         "speed_m": 0.4,
+                         "radius": 0.2,
+                         "sides" : 4,
+                         "isStar" : true
+                    }
+               }
+          ]
+     },
+     {
+          "id": 4,
+          "name": "4",
+          "radius": 0.55,
+          "maxHP_m": 1,
+          "maxSpeed": 5.0,
+          "damage_m": 1,
+          "upgrades": [
+               
+          ],
+          "barrels": [
+               {
+                    "widthL": 0.8,
+                    "widthR": 0.8,
+                    "length": 1.0,
+                    "offsetAngle": 0.0,
+                    "offsetY": 0.0,
+                    "delay": 0,
+                    "cooldown": 30,
+                    "bullet": {
+                         "damage_m": 5,
+                         "maxHP_m": 5,
+                         "lifetime_m": 1,
+                         "density": 3.0,
+                         "speed_m": 1.0,
+                         "radius": 0.4,
+                         "sides" : 16,
+                         "isStar" : false
                     }
                }
           ]

@@ -293,7 +293,7 @@ function drawPerformance() {
      ctx.stroke();
      for (let i = 0; i < 150; i += 10) {//绘制参考线值
           const lineYi = chartY + chartHeight - mapValue(i, 10, 50, 30, 150) + 30;
-          ctx.fillText(i, chartX + chartWidth, lineYi);     
+          ctx.fillText(i, chartX + chartWidth, lineYi);
      }
 
      // 绘制帧间隔折线
@@ -432,6 +432,40 @@ function drawRegularPolygon(sides, x, y, r, angle, fillColor, strokeColor) {
      ctx.lineWidth = 3 / camera.fov;
      ctx.stroke();
      ctx.restore();
+}
+
+/**
+ * 绘制正多角星
+ * @param {uint} stars - 角数
+ * @param {f32} x - box2d x坐标
+ * @param {f32} y - box2d y坐标
+ * @param {f32} r - 内接圆半径
+ * @param {f32}  angle - 旋转角度
+ * @param {string} fillColor - 填充颜色
+ * @param {string} strokeColor - 描边颜色
+ * @returns 
+ */
+function drawRegularStar(stars, x, y, r, angle, fillColor, strokeColor) {
+     // 确保角数至少为3
+     if (stars < 3) return;
+
+     let points = [];
+     let R = r / Math.cos(Math.PI / stars);//外接圆半径
+     let dAngle = 2 * Math.PI / stars;
+
+     for (let i = 0; i < stars; ++i) {
+          let tAngle = angle + i * dAngle;
+          // 外接n边形的顶点坐标
+          let tx = x + R * Math.cos(tAngle);
+          let ty = y + R * Math.sin(tAngle);
+          points.push([tx, ty]);
+          tAngle += dAngle / 2;
+          // 内接n边形的边的中点坐标
+          tx = x + r * Math.cos(dAngle / 2) * Math.cos(tAngle);
+          ty = y + r * Math.cos(dAngle / 2) * Math.sin(tAngle);
+          points.push([tx, ty]);
+     }
+     drawPolygon(points, fillColor, strokeColor);
 }
 
 //绘制名字和分数

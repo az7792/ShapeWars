@@ -24,6 +24,10 @@ BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef, At
      params.bulletParams.speed = (10 + 0.8 * attribute->attr[6]) * barreldef["bullet"]["speed_m"].get<float>();
      params.bulletParams.density = barreldef["bullet"]["density"];
      params.bulletParams.radius = barreldef["bullet"]["radius"];
+     params.bulletParams.sides = barreldef["bullet"]["sides"];
+     bool isStar = barreldef["bullet"]["isStar"];
+     if(isStar)
+          params.bulletParams.sides |= 0x80;
 
      return params;
 }
@@ -63,7 +67,7 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
 
      for (auto &barreldef : tankdef["barrels"])
      {
-          auto barrelParams = createBarrelParams(barreldef,em->getComponent<Attribute>(e));
+          auto barrelParams = createBarrelParams(barreldef, em->getComponent<Attribute>(e));
           barrelParams.parentEntity = barrelParams.bulletParams.parentEntity = e;
           createEntityBarrel(*em, barrelParams);
      }
@@ -106,7 +110,7 @@ void TankFactory::upgradeTank(ecs::Entity e, uint32_t tick, int id)
      ch->children.clear();
      for (auto &barreldef : tankdef["barrels"])
      {
-          auto barrelParams = createBarrelParams(barreldef,attribute);
+          auto barrelParams = createBarrelParams(barreldef, attribute);
           barrelParams.parentEntity = barrelParams.bulletParams.parentEntity = e;
           createEntityBarrel(*em, barrelParams);
      }

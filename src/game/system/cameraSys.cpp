@@ -168,6 +168,7 @@ namespace
           else if (type->id == CATEGORY_BULLET) // 处理子弹实体
           {
                appendPosition0(data, b2Body_GetPosition(*bodyId), componentState);
+               appendAngle2(data, em.getComponent<Angle>(targetEntity), componentState);
                appendRegularPolygon3(data, componentState, em.getComponent<RegularPolygon>(targetEntity), isCreate);
                appendGroupIndex6(data, componentState, em.getComponent<GroupIndex>(targetEntity), isCreate);
           }
