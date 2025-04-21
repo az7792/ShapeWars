@@ -512,7 +512,7 @@ function drawPlayerInfo() {
      ctx.textBaseline = "middle"; // 设置文本垂直居中     
 
      //--------血条----------
-     let width = Math.min(300, player.maxHP); // 血条宽度
+     let width = 300; // 血条宽度
      let height = 20; // 血条高度
      let barWidth = width * player.HP / player.maxHP; // 当前血量对应的宽度
      let radius = 10; // 圆角半径

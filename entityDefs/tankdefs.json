@@ -3,9 +3,9 @@
           "id": 0,
           "name": "0",
           "radius": 0.5,
-          "maxHP": 1000,
+          "maxHP_m": 1,
           "maxSpeed": 5.0,
-          "damage": 1,
+          "damage_m": 1,
           "upgrades": [
                1
           ],
@@ -19,11 +19,11 @@
                     "delay": 0,
                     "cooldown": 15,
                     "bullet": {
-                         "damage": 2,
-                         "maxHP": 10,
-                         "lifetime": 60,
+                         "damage_m": 1,
+                         "maxHP_m": 1,
+                         "lifetime_m": 1,
                          "density": 3.0,
-                         "speed": 10.0,
+                         "speed_m": 1.0,
                          "radius": 0.2
                     }
                }
@@ -33,9 +33,9 @@
           "id": 1,
           "name": "1",
           "radius": 0.5,
-          "maxHP": 1000,
+          "maxHP_m": 1,
           "maxSpeed": 5.0,
-          "damage": 1,
+          "damage_m": 1,
           "upgrades": [
                2
           ],
@@ -49,11 +49,11 @@
                     "delay": 0,
                     "cooldown": 15,
                     "bullet": {
-                         "damage": 2,
-                         "maxHP": 10,
-                         "lifetime": 60,
+                         "damage_m": 1,
+                         "maxHP_m": 1,
+                         "lifetime_m": 1,
                          "density": 3.0,
-                         "speed": 10.0,
+                         "speed_m": 1.0,
                          "radius": 0.2
                     }
                }
@@ -63,9 +63,9 @@
           "id": 2,
           "name": "2",
           "radius": 0.5,
-          "maxHP": 1000,
+          "maxHP_m": 1,
           "maxSpeed": 5.0,
-          "damage": 1,
+          "damage_m": 1,
           "upgrades": [],
           "barrels": [
                {
@@ -77,11 +77,11 @@
                     "delay": 0,
                     "cooldown": 15,
                     "bullet": {
-                         "damage": 2,
-                         "maxHP": 10,
-                         "lifetime": 60,
+                         "damage_m": 1,
+                         "maxHP_m": 1,
+                         "lifetime_m": 1,
                          "density": 3.0,
-                         "speed": 10.0,
+                         "speed_m": 1.0,
                          "radius": 0.2
                     }
                },
@@ -94,11 +94,11 @@
                     "delay": 10,
                     "cooldown": 15,
                     "bullet": {
-                         "damage": 2,
-                         "maxHP": 10,
-                         "lifetime": 60,
+                         "damage_m": 1,
+                         "maxHP_m": 1,
+                         "lifetime_m": 1,
                          "density": 3.0,
-                         "speed": 10.0,
+                         "speed_m": 1.0,
                          "radius": 0.2
                     }
                }

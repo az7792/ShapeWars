@@ -31,6 +31,9 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      // 可以更改
      std::string recvStr = {0x08, static_cast<char>(v)}; // 返回确认信息
 
+     auto tankId = em_.getComponent<TankID>(entity)->id;
+     auto &tankDef = TankFactory::instence().getTankDefs()[tankId];
+
      if (attr == 0 && em_.hasComponent<HealingOverTime>(entity)) // 回复速度
      {
           HealingOverTime *healingOverTime = em_.getComponent<HealingOverTime>(entity);
@@ -47,79 +50,61 @@ void GameLoop::modifyAttribute(ecs::Entity entity, uint8_t v)
      else if (attr == 1 && em_.hasComponent<HP>(entity)) // 最大生命值
      {
           HP *hp = em_.getComponent<HP>(entity);
-          hp->maxHP += isUp * 100;
-          if (isUp == 1)
-          {
-               hp->hp += 100;
-          }
-          else //-1
-          {
-               hp->hp = hp->hp > hp->maxHP ? hp->maxHP : hp->hp;
-          }
+          hp->maxHP = (100 + 50 * (attribute->attr[attr] + isUp)) * tankDef["maxHP_m"].get<int>();
+          hp->hp = std::min(hp->hp, hp->maxHP);
           hp->tick = tick_;
      }
      else if (attr == 2 && em_.hasComponent<Attack>(entity)) // 身体碰撞伤害
      {
           Attack *attack = em_.getComponent<Attack>(entity);
-          attack->damage += isUp;
+          attack->damage = (1 + 1 * (attribute->attr[attr] + isUp)) * tankDef["damage_m"].get<int>();
      }
-     else if (attr == 3 || attr == 4 || attr == 5 || attr == 6 || attr == 7) // 子弹伤害 | 子弹飞行时长 | 子弹血量 | 子弹速度 | 子弹密度
+     else if (attr == 3 || attr == 4 || attr == 5 || attr == 6) // 子弹伤害 | 子弹飞行时长 | 子弹血量 | 子弹速度
      {
           Children *children = em_.getComponent<Children>(entity);
-          for (ecs::Entity &e : children->children)
+          for (size_t i = 0; i < children->children.size(); i++)
           {
+               ecs::Entity e = children->children[i];
                if (!em_.hasComponent<BulletParams>(e))
                {
                     continue;
                }
                BulletParams *bulletParams = em_.getComponent<BulletParams>(e);
+               auto &bulletDef = tankDef["barrels"][i]["bullet"];
                if (attr == 3) // 子弹伤害
                {
-                    bulletParams->attack += isUp * 2;
+                    bulletParams->attack = (2 + 3 * (attribute->attr[attr] + isUp)) * bulletDef["damage_m"].get<int>();
                }
                else if (attr == 4) // 子弹飞行时长
                {
-                    bulletParams->lifetime += isUp * 2;
+                    bulletParams->lifetime = (40 + 2 * (attribute->attr[attr] + isUp)) * bulletDef["lifetime_m"].get<int>();
                }
                else if (attr == 5) // 子弹血量
                {
-                    bulletParams->maxHP += isUp * 5;
+                    bulletParams->maxHP = (10 + 2 * (attribute->attr[attr] + isUp)) * bulletDef["maxHP_m"].get<int>();
                }
                else if (attr == 6) // 子弹速度
                {
-                    bulletParams->speed += isUp * 0.8f;
-               }
-               else if (attr == 7) // 子弹密度
-               {
-                    bulletParams->density += isUp * 0.5f;
+                    bulletParams->speed = (10 + 0.8 * (attribute->attr[attr] + isUp)) * bulletDef["speed_m"].get<float>();
                }
           }
      }
-     else if (attr == 8 && em_.hasComponent<Children>(entity)) // 子弹射速
+     else if (attr == 7 && em_.hasComponent<Children>(entity)) // 子弹射速
      {
           Children *children = em_.getComponent<Children>(entity);
-          for (ecs::Entity &e : children->children)
+          for (size_t i = 0; i < children->children.size(); i++)
           {
-               if (!em_.hasComponent<Barrel>(e))
+               ecs::Entity e = children->children[i];
+               if (em_.hasComponent<Barrel>(e))
                {
-                    continue;
+                    em_.getComponent<Barrel>(e)->cooldown = tankDef["barrels"][i]["cooldown"].get<uint32_t>() - (attribute->attr[attr] + isUp);
                }
-               if (attribute->attr[attr] == 0 && isUp == 1)
-                    em_.getComponent<Barrel>(e)->cooldown -= 3;
-               else if (attribute->attr[attr] == 1 && isUp == -1)
-                    em_.getComponent<Barrel>(e)->cooldown += 3;
-               else if (attribute->attr[attr] == 1 && isUp == 1)
-                    em_.getComponent<Barrel>(e)->cooldown -= 2;
-               else if (attribute->attr[attr] == 2 && isUp == -1)
-                    em_.getComponent<Barrel>(e)->cooldown += 2;
-               else
-                    em_.getComponent<Barrel>(e)->cooldown -= isUp;
           }
      }
-     else if (attr == 9 && em_.hasComponent<Velocity>(entity)) // 角色移动速度
+     else if (attr == 8 && em_.hasComponent<Velocity>(entity)) // 角色移动速度
      {
           Velocity *vel = em_.getComponent<Velocity>(entity);
-          vel->maxSpeed += isUp * 0.5;
+          vel->maxSpeed = tankDef["maxSpeed"].get<float>() + 0.5f * (attribute->attr[attr] + isUp);
      }
 
      attribute->attr[attr] += isUp;
@@ -204,7 +189,7 @@ void GameLoop::outputSys()
           strAppend<float>(message, cameraPos.x);
           strAppend<float>(message, cameraPos.y);
           // 摄像机是否是瞬移
-          strAppend<uint8_t>(message, camera->isTeleport? 1 : 0);
+          strAppend<uint8_t>(message, camera->isTeleport ? 1 : 0);
           em_.getComponent<Camera>(entity)->isTeleport = false;
 
           // 移出实体列表

@@ -7,7 +7,7 @@ TankFactory::TankFactory() : em(nullptr), worldId(nullptr), tankdefs()
 {
 }
 
-BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef)
+BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef, Attribute *attribute)
 {
      BarrelParams params;
      params.barrel.widthL = barreldef["widthL"];
@@ -16,16 +16,21 @@ BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef)
      params.barrel.offsetAngle = barreldef["offsetAngle"];
      params.barrel.offsetY = barreldef["offsetY"];
      params.barrel.delay = barreldef["delay"];
-     params.barrel.cooldown = barreldef["cooldown"];
+     params.barrel.cooldown = barreldef["cooldown"].get<int>() - attribute->attr[7];
 
-     params.bulletParams.attack = barreldef["bullet"]["damage"];
-     params.bulletParams.initialHP = params.bulletParams.maxHP = barreldef["bullet"]["maxHP"];
-     params.bulletParams.lifetime = barreldef["bullet"]["lifetime"];
+     params.bulletParams.attack = (2 + 3 * attribute->attr[3]) * barreldef["bullet"]["damage_m"].get<int>();
+     params.bulletParams.lifetime = (40 + 2 * attribute->attr[4]) * barreldef["bullet"]["lifetime_m"].get<int>();
+     params.bulletParams.initialHP = params.bulletParams.maxHP = (10 + 2 * attribute->attr[5]) * barreldef["bullet"]["maxHP_m"].get<int>();
+     params.bulletParams.speed = (10 + 0.8 * attribute->attr[6]) * barreldef["bullet"]["speed_m"].get<float>();
      params.bulletParams.density = barreldef["bullet"]["density"];
-     params.bulletParams.speed = barreldef["bullet"]["speed"];
      params.bulletParams.radius = barreldef["bullet"]["radius"];
 
      return params;
+}
+
+nlohmann::json &TankFactory::getTankDefs()
+{
+     return tankdefs;
 }
 
 void TankFactory::init(ecs::EntityManager *em, b2WorldId *worldId, std::string tankdefsPath)
@@ -49,16 +54,16 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
 
      auto &tankdef = tankdefs[id];
 
-     params.initialHP = params.maxHP = tankdef["maxHP"];
-     params.attack = tankdef["damage"];
+     params.initialHP = params.maxHP = 100 * tankdef["maxHP_m"].get<int>();
+     params.attack = 1 * tankdef["damage_m"].get<int>();
      params.maxSpeed = tankdef["maxSpeed"];
      params.polygonRadius = tankdef["radius"];
      params.tankID = tankdef["id"];
      ecs::Entity e = createEntityPlayer(*em, *worldId, tick, params);
 
-     for(auto &barreldef : tankdef["barrels"])
+     for (auto &barreldef : tankdef["barrels"])
      {
-          auto barrelParams = createBarrelParams(barreldef);
+          auto barrelParams = createBarrelParams(barreldef,em->getComponent<Attribute>(e));
           barrelParams.parentEntity = barrelParams.bulletParams.parentEntity = e;
           createEntityBarrel(*em, barrelParams);
      }
@@ -69,13 +74,14 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
 void TankFactory::upgradeTank(ecs::Entity e, uint32_t tick, int id)
 {
      auto &tankdef = tankdefs[id];
+     Attribute *attribute = em->getComponent<Attribute>(e);
 
      // 更新属性
      auto hp = em->getComponent<HP>(e);
-     hp->maxHP = hp->hp = tankdef["maxHP"];
+     hp->maxHP = hp->hp = (100 + 50 * attribute->attr[1]) * tankdef["maxHP_m"].get<int>();
      hp->tick = tick;
-     em->addComponent<Attack>(e)->damage = tankdef["damage"];
-     em->addComponent<Velocity>(e)->maxSpeed = tankdef["maxSpeed"];
+     em->addComponent<Attack>(e)->damage = (1 + 1 * attribute->attr[2]) * tankdef["damage_m"].get<int>();
+     em->addComponent<Velocity>(e)->maxSpeed = tankdef["maxSpeed"].get<float>() + 0.5f * attribute->attr[8];
      em->addComponent<RegularPolygon>(e)->radius = tankdef["radius"];
      em->addComponent<TankID>(e)->id = tankdef["id"];
      em->addComponent<TankID>(e)->tick = tick;
@@ -100,7 +106,7 @@ void TankFactory::upgradeTank(ecs::Entity e, uint32_t tick, int id)
      ch->children.clear();
      for (auto &barreldef : tankdef["barrels"])
      {
-          auto barrelParams = createBarrelParams(barreldef);
+          auto barrelParams = createBarrelParams(barreldef,attribute);
           barrelParams.parentEntity = barrelParams.bulletParams.parentEntity = e;
           createEntityBarrel(*em, barrelParams);
      }

@@ -79,7 +79,6 @@ let pdAttributes = [
      { id: 4, name: "子弹飞行时长", value: 0, max: 8, progressColor: '#92A8D1', btnColor: '#92A8D1' },
      { id: 5, name: "子弹血量", value: 0, max: 8, progressColor: '#955251', btnColor: '#955251' },
      { id: 6, name: "子弹速度", value: 0, max: 8, progressColor: '#B565A7', btnColor: '#B565A7' },
-     { id: 7, name: "子弹密度", value: 0, max: 8, progressColor: '#009B77', btnColor: '#009B77' },
-     { id: 8, name: "子弹射速", value: 0, max: 8, progressColor: '#DD4124', btnColor: '#DD4124' },
-     { id: 9, name: "角色移动速度", value: 0, max: 8, progressColor: '#D65076', btnColor: '#D65076' }
+     { id: 7, name: "子弹射速", value: 0, max: 8, progressColor: '#DD4124', btnColor: '#DD4124' },
+     { id: 8, name: "角色移动速度", value: 0, max: 8, progressColor: '#D65076', btnColor: '#D65076' }
 ];

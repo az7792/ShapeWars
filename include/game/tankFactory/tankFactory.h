@@ -18,7 +18,7 @@ class TankFactory
      TankFactory();
      ~TankFactory() = default;
 
-     BarrelParams createBarrelParams(const nlohmann::json &barreldef);
+     BarrelParams createBarrelParams(const nlohmann::json &barreldef, Attribute *attribute);
 
 public:
      static TankFactory &instence()
@@ -26,6 +26,8 @@ public:
           static TankFactory instance;
           return instance;
      }
+
+     nlohmann::json &getTankDefs();
 
      /**
       * @brief 初始化tank工厂
@@ -41,13 +43,13 @@ public:
       * @param id 坦克id
       * @param params 玩家参数
       */
-     ecs::Entity createTank(uint32_t tick, int id,PlayerParams &params);
+     ecs::Entity createTank(uint32_t tick, int id, PlayerParams &params);
 
      /**
       * @brief 切换坦克
       * @param e 实体
       * @param tick 时间戳
       * @param id 坦克id
-     */
+      */
      void upgradeTank(ecs::Entity e, uint32_t tick, int id);
 };
