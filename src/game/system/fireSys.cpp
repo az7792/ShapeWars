@@ -35,32 +35,59 @@ void fireSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
      {
           Input *input = em.getComponent<Input>(entity);
           auto &barrelList = em.getComponent<Children>(entity)->children;
-          if (input->state & 0b01) // 左键
+
+          for (auto barrelEntity : barrelList)
           {
-               for (auto barrelEntity : barrelList)
+               auto *barrel = em.getComponent<Barrel>(barrelEntity);
+               auto *fireStatus = em.getComponent<FireStatus>(barrelEntity);
+               bool bulletLimitCanFire = false;
+               if (barrel->isCtrl == false)
                {
-                    auto *barrel = em.getComponent<Barrel>(barrelEntity);
-                    auto *fireStatus = em.getComponent<FireStatus>(barrelEntity);
+                    auto *bulletLimit = em.getComponent<BulletLimit>(entity);
+                    if (bulletLimit->num >= bulletLimit->max)
+                         continue;
+                    else
+                         bulletLimitCanFire = true;
+               }
+
+               if ((input->state & 0b01) || bulletLimitCanFire) // 左键
+               {
                     // 由于加点系统，可能在子弹发射中途出现发射间隔小于冷却时间的情况，所以这里需要判断一下
                     if (fireStatus->status == static_cast<uint8_t>(0b00000000))
                     {
-                         if (barrel->delay <= 0)
-                              fireStatus->status = static_cast<uint8_t>(0b00000100); // 进入可以开火状态
+                         if (barrel->delay <= 0) // 进入可以开火状态
+                         {
+                              fireStatus->status = static_cast<uint8_t>(0b00000100);
+                              if (bulletLimitCanFire)
+                              {
+                                   auto *bulletLimit = em.getComponent<BulletLimit>(entity);
+                                   bulletLimit->num++;
+                              }
+                         }
                          else
-                              fireStatus->status = static_cast<uint8_t>(0b00000001), barrel->LastTick = tick;// 进入等待delay状态
+                              fireStatus->status = static_cast<uint8_t>(0b00000001), barrel->LastTick = tick; // 进入等待delay状态
                     }
                     else if (fireStatus->status == static_cast<uint8_t>(0b00000001) && tick >= barrel->LastTick + barrel->delay)
-                         fireStatus->status = static_cast<uint8_t>(0b00000100); // 延迟结束，进入可以开火状态
+                    { // 延迟结束，进入可以开火状态
+                         fireStatus->status = static_cast<uint8_t>(0b00000100);
+                         if (bulletLimitCanFire)
+                         {
+                              auto *bulletLimit = em.getComponent<BulletLimit>(entity);
+                              bulletLimit->num++;
+                         }
+                    }
                     else if (fireStatus->status == static_cast<uint8_t>(0b00000010) && tick >= barrel->LastTick + barrel->cooldown)
-                         fireStatus->status = static_cast<uint8_t>(0b00000100); // 冷却结束，进入可以开火状态
+                    { // 冷却结束，进入可以开火状态
+                         fireStatus->status = static_cast<uint8_t>(0b00000100);
+                         if (bulletLimitCanFire)
+                         {
+                              auto *bulletLimit = em.getComponent<BulletLimit>(entity);
+                              bulletLimit->num++;
+                         }
+                    }
                }
-          }
-          else if (!(input->state & 0b01)) // 左键松开
-          {
-               auto &barrelList = em.getComponent<Children>(entity)->children;
-               for (auto barrelEntity : barrelList)
+               else if (!(input->state & 0b01)) // 左键松开
                {
-                    auto *fireStatus = em.getComponent<FireStatus>(barrelEntity);
                     if (fireStatus->status == static_cast<uint8_t>(0b00000001) || fireStatus->status == static_cast<uint8_t>(0b00000010))
                          fireStatus->status = static_cast<uint8_t>(0b00000000);
                }

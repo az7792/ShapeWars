@@ -17,6 +17,15 @@ void attackSys(ecs::EntityManager &em, b2WorldId &worldId, uint32_t &tick)
           for (auto shapeId : contactList->list)
           {
                auto attackId = *static_cast<ecs::Entity *>(b2Shape_GetUserData(shapeId));
+
+               if (em.hasComponent<AttackFilter>(entity) && em.hasComponent<AttackFilter>(attackId))
+               {
+                    AttackFilter *filter1 = em.getComponent<AttackFilter>(entity);
+                    AttackFilter *filter2 = em.getComponent<AttackFilter>(attackId);
+                    if (filter1->groupIndex == filter2->groupIndex && filter1->groupIndex < 0)
+                         continue;
+               }
+
                if (!em.hasComponent<HP>(attackId))
                     continue;
                auto hp = em.getComponent<HP>(attackId);

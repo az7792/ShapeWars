@@ -24,6 +24,7 @@
 #define CATEGORY_BULLET (1u << 2)
 #define CATEGORY_CAMERA (1u << 3)
 #define CATEGORY_BORDER_WALL (1u << 4)
+#define CATEGORY_DRONE (1u << 5)
 
 //方块填充颜色
 #define BOLCK_FILL_GREEN 0x99cc33ff

@@ -28,6 +28,11 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Attribute>(e);
      em.addComponent<HealingOverTime>(e, tick);
      em.addComponent<TankID>(e, params.tankID, tick);
+     em.addComponent<AttackFilter>(e, params.groupIndex);
+     if (params.isDrone)
+     {
+          em.addComponent<BulletLimit>(e, static_cast<uint8_t>(0), static_cast<uint8_t>(10));
+     }
      Camera *camera = em.getComponent<Camera>(e);
      camera->bodyId = camera->createSensor(worldId);
 
@@ -45,7 +50,7 @@ ecs::Entity createEntityPlayer(ecs::EntityManager &em, b2WorldId &worldId, uint3
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_PLAYER;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL | CATEGORY_DRONE;
      shapeDef.filter.groupIndex = params.groupIndex;
 
      // 圆形
@@ -103,7 +108,7 @@ ecs::Entity createEntityBlock(ecs::EntityManager &em, b2WorldId &worldId, uint32
      shapeDef.userData = bodyDef.userData;
      // shapeDef.enableContactEvents = true;
      shapeDef.filter.categoryBits = CATEGORY_BLOCK;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_BORDER_WALL | CATEGORY_DRONE;
 
      // 圆形
      b2Circle circle;
@@ -145,8 +150,13 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Parent>(e, params.parentEntity);
      em.addComponent<RegularPolygon>(e, params.sides, params.radius); //>=16为圆形
      em.addComponent<Score>(e, 0);
-     if (params.sides >= 16) // 只控制圆形子弹的生命周期
+     if (params.sides >= 16 && params.isCtrl == false) // 只控制圆形子弹的生命周期
           em.addComponent<BulletAccelerationFlag>(e);
+     if (params.isCtrl)
+     {
+          em.addComponent<DroneFlag>(e);
+          em.addComponent<AttackFilter>(e, em.getComponent<GroupIndex>(params.parentEntity)->index);
+     }
 
      // 定义刚体
      b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -162,9 +172,13 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      shapeDef.friction = 0.1f;          // 动态物体需要设置密度和摩擦系数
      shapeDef.userData = bodyDef.userData;
      shapeDef.enableContactEvents = true;
-     shapeDef.filter.categoryBits = CATEGORY_BULLET;
-     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET;
-     shapeDef.filter.groupIndex = em.getComponent<GroupIndex>(params.parentEntity)->index;
+     if (params.isCtrl)
+          shapeDef.filter.categoryBits = CATEGORY_DRONE;
+     else
+          shapeDef.filter.categoryBits = CATEGORY_BULLET;
+     shapeDef.filter.maskBits = CATEGORY_BLOCK | CATEGORY_PLAYER | CATEGORY_BULLET | CATEGORY_DRONE;
+     if (!params.isCtrl)
+          shapeDef.filter.groupIndex = em.getComponent<GroupIndex>(params.parentEntity)->index;
 
      // 圆形
      b2Circle circle;

@@ -283,20 +283,7 @@ void GameLoop::createPlayerSys()
                playerParams.groupIndex = groupIndex--;
                playerParams.name = name;
 
-               ecs::Entity entity = ecs::nullEntity;
-
-               if (name == "0")
-                    entity = TankFactory::instence().createTank(tick_, 0, playerParams);
-               else if (name == "1")
-                    entity = TankFactory::instence().createTank(tick_, 1, playerParams);
-               else if(name == "2")
-                    entity = TankFactory::instence().createTank(tick_, 2, playerParams);
-               else if(name == "3")
-                    entity = TankFactory::instence().createTank(tick_, 3, playerParams);
-               else if(name == "4")
-                    entity = TankFactory::instence().createTank(tick_, 4, playerParams);
-               else
-                    entity = TankFactory::instence().createTank(tick_, 0, playerParams);
+               ecs::Entity entity = TankFactory::instence().createTank(tick_, 0, playerParams);
 
                int inputIndex = freeInputsQueue_.front();
                freeInputsQueue_.pop_front();
@@ -385,6 +372,14 @@ void GameLoop::destroyEntitySys()
           }
           else if (type->id == CATEGORY_BLOCK || type->id == CATEGORY_BULLET) // 处理方块实体 与 子弹实体
           {
+               if (type->id == CATEGORY_BULLET && em_.hasComponent<DroneFlag>(entity))
+               {
+                    ecs::Entity parent = em_.getComponent<Parent>(entity)->id;
+                    if (em_.hasComponent<BulletLimit>(parent))
+                    {
+                         em_.getComponent<BulletLimit>(parent)->num--;
+                    }
+               }
                b2BodyId *bodyId = em_.getComponent<b2BodyId>(entity);
                deleteBody(*bodyId);
                em_.destroyEntity(entity);
@@ -623,6 +618,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&regularPolygonGenSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&fireSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&bulletAccelCtrlSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
+         .addSystem(std::bind(&droneCtrlSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&physicsSys, std::ref(worldId_)))
          .addSystem(std::bind(&blockRotationCtrlSys, std::ref(em_)))
          .addSystem(std::bind(&blockRevolutionCtrlSys, std::ref(em_), std::ref(worldId_)))

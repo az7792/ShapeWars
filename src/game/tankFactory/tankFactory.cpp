@@ -17,6 +17,7 @@ BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef, At
      params.barrel.offsetY = barreldef["offsetY"];
      params.barrel.delay = barreldef["delay"];
      params.barrel.cooldown = barreldef["cooldown"].get<int>() - attribute->attr[7];
+     params.barrel.isCtrl = barreldef["isCtrl"];
 
      params.bulletParams.attack = (2 + 3 * attribute->attr[3]) * barreldef["bullet"]["damage_m"].get<int>();
      params.bulletParams.lifetime = (40 + 2 * attribute->attr[4]) * barreldef["bullet"]["lifetime_m"].get<int>();
@@ -25,6 +26,7 @@ BarrelParams TankFactory::createBarrelParams(const nlohmann::json &barreldef, At
      params.bulletParams.density = barreldef["bullet"]["density"];
      params.bulletParams.radius = barreldef["bullet"]["radius"];
      params.bulletParams.sides = barreldef["bullet"]["sides"];
+     params.bulletParams.isCtrl = barreldef["bullet"]["isCtrl"];
      bool isStar = barreldef["bullet"]["isStar"];
      if(isStar)
           params.bulletParams.sides |= 0x80;
@@ -63,6 +65,7 @@ ecs::Entity TankFactory::createTank(uint32_t tick, int id, PlayerParams &params)
      params.maxSpeed = tankdef["maxSpeed"];
      params.polygonRadius = tankdef["radius"];
      params.tankID = tankdef["id"];
+     params.isDrone = tankdef["isDrone"];
      ecs::Entity e = createEntityPlayer(*em, *worldId, tick, params);
 
      for (auto &barreldef : tankdef["barrels"])
@@ -89,6 +92,15 @@ void TankFactory::upgradeTank(ecs::Entity e, uint32_t tick, int id)
      em->addComponent<RegularPolygon>(e)->radius = tankdef["radius"];
      em->addComponent<TankID>(e)->id = tankdef["id"];
      em->addComponent<TankID>(e)->tick = tick;
+
+     if (tankdef["isDrone"].get<bool>() == true)
+     {
+          em->addComponent<BulletLimit>(e, static_cast<uint8_t>(0), static_cast<uint8_t>(10));
+     }
+     else if (em->hasComponent<BulletLimit>(e))
+     {
+          em->removeComponent<BulletLimit>(e);
+     }
 
      // 更新球体大小
      std::vector<b2ShapeId> shapes;

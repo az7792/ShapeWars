@@ -31,6 +31,7 @@ struct PlayerParams
      int16_t initialHP = 1000;               // 玩家的初始血量 from json
      int16_t maxHP = 1000;                   // 玩家的最大血量 from json
      float polygonRadius = 0.5f;             // 玩家的刚体半径 from json
+     bool isDrone = false;                   // 玩家是否为无人机 from json
 };
 
 // 子弹实体的配置参数
@@ -47,6 +48,7 @@ struct BulletParams
      float radius = 0.2f;       // 子弹的半径
      float angle = 0.0f;        // 子弹的发射角度
      b2Vec2 position{0.f, 0.f}; // 子弹的初始位置
+     bool isCtrl = false;       // 子弹是否受控制
 };
 
 // 炮管实体的配置参数

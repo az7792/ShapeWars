@@ -30,7 +30,10 @@
 #include "score.h"
 #include "attribute.h"
 #include "tankID.h"
+#include "bulletLimit.h"
 #include "flag/bulletAccelerationFlag.h"
+#include "flag/droneFlag.h"
+#include "attackFilter.h"
 
 #include <cstdint>
 

@@ -24,4 +24,5 @@ struct Barrel
      uint32_t delay = 0;    // 发射延迟(tick)
      uint32_t cooldown = 0; // 冷却时间(tick)
      uint32_t LastTick = 0; // 上一次发射的时间(tick)
+     bool isCtrl = true;    // 子弹发射是否被控制
 };
