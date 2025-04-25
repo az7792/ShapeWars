@@ -207,6 +207,7 @@ class PlayerEntity extends BaseEntity {
 class BulletEntity extends PolygonEntity {
      constructor() {
           super();
+          this.groupIndex = 0;
      }
 
      showMe(deltaTime) {
