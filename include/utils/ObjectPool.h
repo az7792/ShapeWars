@@ -74,6 +74,7 @@ public:
      void release(T *obj)
      {
           std::lock_guard<std::mutex> lock(poolMutex);
+          assert(used.find(obj) != used.end());
           if (obj)
           {
                pool.emplace(obj);
