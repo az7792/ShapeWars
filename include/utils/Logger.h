@@ -57,9 +57,9 @@ class Logger : public NonCopyable
      void log(const Time &tm, LogLevel logLevel, const std::string &message); // 输出日志
 
      Logger();
+     ~Logger();
 
 public:
-     ~Logger();
 
      /// @brief 获取Logger单例
      static Logger &instance();
