@@ -107,9 +107,9 @@ std::string WebSocketServer::base64Encode(const std::vector<uint8_t> &input)
 
      std::string encoded;
      int num = input.size() % 3; // 空余的字节数
-     if (num == 1)               // 最后一组有8位(占用12位)，因此需要补两个'='(12位) ⌈8 / 6⌉ * 6 = 12
+     if (num == 1)               // 最后一组有8位(占用12位)，因此需要补两个'='(12位) = 24 - ⌈8 / 6⌉ * 6
           num = 2;
-     else if (num == 2) // 最后一组有16位(占用18位)，因此需要补一个'='(6位) ⌈16 / 6⌉ * 6 = 18
+     else if (num == 2) // 最后一组有16位(占用18位)，因此需要补一个'='(6位) = 24 - ⌈16 / 6⌉ * 6
           num = 1;
      size_t i = 0;
      while (i < input.size())
