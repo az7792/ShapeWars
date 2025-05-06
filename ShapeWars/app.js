@@ -34,7 +34,7 @@ let serverTimeCurr_ = 0;
 let avg = 33;//实际用于插值间隔的值
 function update() {
      let Len = 1;//MAYBE : 动态调整缓冲区大小
-     if (serverTime.deltaTime >= 1) {          
+     if (serverTime.deltaTime >= 1) {
           if (wsBuf.length >= Len) {
                popBuf();
                let offset = (serverTime.deltaTime - 1) * avg; // 由于渲染帧间隔往往不为服务器帧间隔的倍数，因此插值进度不会刚到为1，而是>1
@@ -55,7 +55,7 @@ function update() {
           }
      }
      currTime = Date.now();
-     serverTime.deltaTime = Math.max(0, Math.min(2, (currTime - serverTime.curr) / avg));   
+     serverTime.deltaTime = Math.max(0, Math.min(2, (currTime - serverTime.curr) / avg));
 
 
      //更新客户端帧率(服务器帧率在网络部分更新)
@@ -80,6 +80,8 @@ function update() {
      drawPlayerInfo();//绘制操作者的信息(在屏幕底部显示)
      drawStandings(); //绘制排名
      drawDeath();//绘制玩家死亡画面
+     //绘制摄像机坐标
+     drawRegularPolygon(16, camera.x, camera.y, 0.1, 0, "red", "red");
 
      requestAnimationFrame(update);
 }
