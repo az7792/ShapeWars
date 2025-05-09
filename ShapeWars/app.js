@@ -76,12 +76,15 @@ function update() {
      drawBackground();//更新背景
      entityManager.update(serverTime.deltaTime);//更新实体(插值)
      drawMiniMap();//更新小地图
-     drawPerformance();//更新性能参数
+     if (setting.showPerformance) {
+          drawPerformance();//更新性能参数
+     }
      drawPlayerInfo();//绘制操作者的信息(在屏幕底部显示)
      drawStandings(); //绘制排名
      drawDeath();//绘制玩家死亡画面
-     //绘制摄像机坐标
-     drawRegularPolygon(16, camera.x, camera.y, 0.1, 0, "red", "red");
+     if (setting.showCameraPos) {//绘制摄像机坐标
+          drawRegularPolygon(16, camera.x, camera.y, 0.1, 0, "red", "red");
+     }
 
      requestAnimationFrame(update);
 }

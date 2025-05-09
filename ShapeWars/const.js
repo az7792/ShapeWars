@@ -15,8 +15,28 @@ const wsBuf = new Queue(10, [null, { value: 0 }, null]);//webSocket缓冲区
 
 // 加点UI
 const pointUI = new PointDistributionUI(pdAttributes, 'pd-attributeUI', 'pd-toggleBtn');
+//升级
 const upgradeUI = new UpgradeMenu([], 'upgradeMenu', 'upgradeToggle');
-
+//是否显示摄像机位置开关
+const showCameraPosSwitch = new ToggleSwitch(document.getElementById('showCameraPosSwitch'), {
+     defaultOn: setting.showCameraPos,
+     onEnable: () => {
+          setting.showCameraPos = true;
+     },
+     onDisable: () => {
+          setting.showCameraPos = false;
+     }
+});
+//是否显示性能参数
+const showPerformanceSwitch = new ToggleSwitch(document.getElementById('showPerformanceSwitch'), {
+     defaultOn: setting.showPerformance,
+     onEnable: () => {
+          setting.showPerformance = true;
+     },
+     onDisable: () => {
+          setting.showPerformance = false;
+     }
+});
 
 const CATEGORY_PLAYER = 0;
 const CATEGORY_BLOCK = 1;

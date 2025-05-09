@@ -33,6 +33,11 @@ camera = {
      lerpY: [0, 0],//每帧插值更新x坐标
 };
 
+setting = {
+     showCameraPos: false,//是否显示相机位置
+     showPerformance: false,//是否显示性能指标
+};
+
 //TODO：同步其他服务器数据
 //       - TPS,MSPT
 serverTime = {
@@ -43,7 +48,7 @@ serverTime = {
      historyFrameInterval: new Queue(120, 33),//历史帧间隔
      historyFrameIntervalRecv: new Queue(120, 33),//历史帧接收间隔
      avgFrameInterval: 33,//平均帧间隔
-     deltaTime:1.1,
+     deltaTime: 1.1,
 }
 
 performanceMetrics = {

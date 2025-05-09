@@ -7,6 +7,11 @@ document.addEventListener("keydown", (event) => {
      if (event.key === 'e') {
           playerInput.autoFire = !playerInput.autoFire;
      }
+     if(event.key === '`'){
+          const isVisible = document.getElementById('settingMenu').style.top === '0px';
+          const settingMenu = document.getElementById('settingMenu');
+          settingMenu.style.top = isVisible ? '-100px' : '0px';
+     }
 });
 
 document.addEventListener("keyup", (event) => {

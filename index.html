@@ -9,6 +9,7 @@
      <link id="dynamic-favicon" rel="icon" type="image/png" href="./ShapeWars/favicon/6.png">
      <link rel="stylesheet" href="./ShapeWars/css/PointDistributionUI.css">
      <link rel="stylesheet" href="./ShapeWars/css/UpgradeMenu.css">
+     <link rel="stylesheet" href="./ShapeWars/css/ToggleSwitch.css">
      <style>
           html,
           body {
@@ -35,7 +36,8 @@
                padding: 10px 20px;
                /* 设置按钮的内边距 */
           }
-          #downFov{
+
+          #downFov {
                position: relative;
                z-index: 10;
                /* 确保按钮在canvas之上 */
@@ -86,6 +88,30 @@
                padding-left: 10px;
                box-sizing: border-box;
           }
+
+          #settingMenu {
+               display: inline-flex;
+               /* 内容自动撑开 + 横向排列 */
+               align-items: center;
+               /* 垂直居中对齐 */
+               gap: 10px;
+               /* 元素间距 */
+               padding: 0px 0px;
+
+               background-color: rgba(0, 0, 0, 0.5) !important;
+               /* 半透明背景 */
+               border-top-left-radius: 0;
+               border-top-right-radius: 0;
+               border-bottom-left-radius: 12px;
+               border-bottom-right-radius: 12px;
+               z-index: 10;
+               position: fixed;
+               top: -100px;
+               left: 50%;
+               /* 水平居中 */
+               transform: translateX(-50%);
+               /* 以自身宽度的一半左移，实现居中 */
+          }
      </style>
 </head>
 
@@ -98,8 +124,18 @@
      <div class="pd-ui-container" id="pd-attributeUI"></div>
      <div class="upgrade-toggle-btn" id="upgradeToggle">☰ 升级</div>
      <div class="upgrade-menu-container" id="upgradeMenu"></div>
-     <button id="upFov">upFov</button>
-     <button id="downFov">downFov</button>
+     <div class="setting" id="settingMenu">
+          <button id="upFov">upFov</button>
+          <button id="downFov">downFov</button>
+          <div id="showCameraPosSwitchItem" style="display: flex; flex-direction: column; align-items: center;">
+               <div id="showCameraPosSwitch"></div>
+               <span style="user-select: none; font-size: 12px;">显示相机位置</span>
+          </div>
+          <div id="showPerformanceSwitchItem" style="display: flex; flex-direction: column; align-items: center;">
+               <div id="showPerformanceSwitch"></div>
+               <span style="user-select: none; font-size: 12px;">显示性能参数</span>
+          </div>
+     </div>
      <canvas id="canvas" width="800" height="800">浏览器不支持canvas</canvas>
 
      <script>
@@ -110,7 +146,7 @@
                './ShapeWars/favicon/4.png',
                './ShapeWars/favicon/5.png',
                './ShapeWars/favicon/6.png'
-          ];     
+          ];
           faviconElement.href = favicons[Math.floor(Math.random() * favicons.length)];
 
           //获取名称输入框
@@ -129,6 +165,7 @@
 
      <script src="./ShapeWars/PointDistributionUI.js"></script> <!-- 加点分配UI -->
      <script src="./ShapeWars/UpgradeMenu.js"></script> <!-- 角色升级UI -->
+     <script src="./ShapeWars/ToggleSwitch.js"></script> <!-- 切换按钮UI -->
 
      <script src="./ShapeWars/config.js"></script> <!-- 配置文件 -->
      <script src="./ShapeWars/readCompsFunc.js"></script> <!-- 读取组件数据函数 -->

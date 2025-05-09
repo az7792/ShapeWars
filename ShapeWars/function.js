@@ -270,6 +270,11 @@ function drawPerformance() {
      // 绘制网络波动
      ctx.fillStyle = "#ffa500";
      ctx.fillText("网络帧间隔图表: ", x, y);
+     y += Fsize + 2;
+     // 绘制渲染用逻辑帧间隔
+     ctx.fillStyle = "#0000ff";
+     ctx.fillText("渲染用逻辑帧间隔图表: ", x, y);
+     y += Fsize + 2;
 
      // 绘制绿色参考线
      ctx.beginPath();
@@ -277,22 +282,24 @@ function drawPerformance() {
      ctx.setLineDash([5, 3]); // 虚线样式
 
      // 计算参考线位置（从底部向上计算）
-     const lineY28 = chartY + chartHeight - mapValue(28, 10, 50, 30, 150) + 30;
-     const lineY38 = chartY + chartHeight - mapValue(38, 10, 50, 30, 150) + 30;
+     const lower = 0;
+     const upper = 120;
+     const lineY28 = chartY + chartHeight - mapValue(28, 10, 50, lower, upper);
+     const lineY38 = chartY + chartHeight - mapValue(38, 10, 50, lower, upper);
      //console.log(lineY28, lineY38);
 
      ctx.moveTo(chartX, lineY28);
      ctx.lineTo(chartX + chartWidth, lineY28);
      ctx.moveTo(chartX, lineY38);
      ctx.lineTo(chartX + chartWidth, lineY38);
-     for (let i = 0; i < 150; i += 10) {//绘制参考线值
-          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, 30, 150) + 30;
+     for (let i = lower; i <= upper; i += 10) {//绘制参考线值
+          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, lower, upper);
           ctx.moveTo(chartX + chartWidth - 5, lineYi);
           ctx.lineTo(chartX + chartWidth, lineYi);
      }
      ctx.stroke();
-     for (let i = 0; i < 150; i += 10) {//绘制参考线值
-          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, 30, 150) + 30;
+     for (let i = lower; i <= upper; i += 10) {//绘制参考线值
+          const lineYi = chartY + chartHeight - mapValue(i, 10, 50, lower, upper);
           ctx.fillText(i, chartX + chartWidth, lineYi);
      }
 
