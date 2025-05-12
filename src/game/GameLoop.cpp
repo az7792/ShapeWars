@@ -436,13 +436,14 @@ ecs::Entity GameLoop::createNewPlayer(ecs::Entity entity, std::string name)
      return newEntity;
 }
 
-void GameLoop::outputStandingsSys()
+void GameLoop::outputServerInfoSys()
 {
      static uint32_t lastTick = 0;
      static std::vector<ecs::Entity> entities;
      std::string message;
      if (tick_ - lastTick >= TPS) // 1s同步一次
      {
+          // 排行榜
           entities.clear(), message.clear(), lastTick = tick_;
 
           auto group = em_.group<Input, b2BodyId>();
@@ -458,6 +459,10 @@ void GameLoop::outputStandingsSys()
 
           size_t len = std::min(entities.size(), static_cast<size_t>(5));
           strAppend<uint8_t>(message, static_cast<uint8_t>(0x07));
+
+          // MSPT
+          strAppend<int16_t>(message, MSPT_);
+
           strAppend<uint8_t>(message, static_cast<uint8_t>(len));
           for (size_t i = 0; i < len; i++)
           {
@@ -628,7 +633,7 @@ GameLoop::GameLoop() : em_(), ws_(InetAddress(LISTEN_IP, LISTEN_PORT)), isRunnin
          .addSystem(std::bind(&cameraSys, std::ref(em_), std::ref(worldId_), std::ref(tick_)))
          .addSystem(std::bind(&GameLoop::delayDeleteShapesSys, this))
          .addSystem(std::bind(&GameLoop::outputSys, this))
-         .addSystem(std::bind(&GameLoop::outputStandingsSys, this));
+         .addSystem(std::bind(&GameLoop::outputServerInfoSys, this));
 }
 
 GameLoop::~GameLoop()
@@ -648,6 +653,11 @@ void GameLoop::run()
 
           em_.updateSystems();
           tick_++;
+
+          // 计算MSPT
+          auto frameEnd = std::chrono::steady_clock::now();
+          auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd - lastTime_).count();
+          MSPT_ = static_cast<uint16_t>(frameDuration);
 
           std::this_thread::sleep_until(nextFrameTime);
           lastTime_ = nextFrameTime;

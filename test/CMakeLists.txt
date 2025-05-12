@@ -22,7 +22,7 @@ set(TEST_FILES
     #./testTcpServer.cpp
     # ./testSparseSet.cpp
     # ./testSparseMap.cpp
-    # ./testEntity.cpp
+     ./testEntity.cpp
     # ./testEntitySystem.cpp
     # ./testGameLoop.cpp
     #./testLz4.cpp

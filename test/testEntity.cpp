@@ -28,19 +28,19 @@ int main()
 {
      ecs::EntityManager em;
 
-     auto &G = em.group<Name>(ecs::type_list<Position, Velocity>{});
+     auto G = em.group<Name>(ecs::type_list<Position, Velocity>{});
 
      ecs::Entity e1 = em.createEntity();
      ecs::Entity e2 = em.createEntity();
      ecs::Entity e3 = em.createEntity();
-     ecs::Entity e4 = 4;
+     ecs::Entity e4 = em.createEntity();
      Position pos1{1.0f, 2.0f};
      Velocity vel1{3.0f, 4.0f};
      Name name1{"e1"};
      em.addComponent<Position>(e1, pos1);
      em.addComponent<Velocity>(e1, vel1);
      em.addComponent<Name>(e1, name1);
-     for (auto &entity : G)
+     for (auto &entity : *G)
      {
           cout << "NameEntity: " << entity << endl;
      }
@@ -51,8 +51,8 @@ int main()
 
      em.addComponent<Velocity>(e3, 33.0f, 4.0f);
      em.addComponent<Name>(e3, "e3");
-     cout<<"--------------\n";
-     for (auto &entity : G)
+     cout << "--------------\n";
+     for (auto &entity : *G)
      {
           cout << "NameEntity: " << entity << endl;
      }
@@ -96,6 +96,7 @@ int main()
      assert(name->name == "e1_new");
 
      // 测试实体是否有效
+     em.destroyEntity(e4);
      assert(em.entityIsValid(e1));
      assert(em.entityIsValid(e2));
      assert(em.entityIsValid(e3));
@@ -154,6 +155,7 @@ int main()
           cout << em.getComponent<Name>(entity)->name << endl;
      }
      cout << "-----------------\n";
+     assert(em.getEntityNum() == 2);
      em.destroyEntity(e2);
      em.destroyEntity(e3);
 

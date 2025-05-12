@@ -138,7 +138,10 @@ function readScore(dataView, offset) {
      return score;
 }
 
-function readStandings(dataView, offset) {
+function readServerInfo(dataView, offset) {
+     performanceMetrics.MSPT = dataView.getInt16(offset.value, true);
+     offset.value += 2;
+
      let len = dataView.getUint8(offset.value, true);
      offset.value += 1;
 

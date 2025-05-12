@@ -33,8 +33,8 @@ private:
      void destroyEntitySys();
      // 延迟删除形状映射
      void delayDeleteShapesSys();
-     // 同步排行榜
-     void outputStandingsSys();
+     // 同步服务器信息
+     void outputServerInfoSys();
 
 private:
      struct atomicInput
@@ -55,6 +55,7 @@ private:
      std::atomic<bool> isRunning_;                    // 游戏是否正在运行
      uint32_t tick_;                                  // 当前游戏tick
      std::chrono::steady_clock::time_point lastTime_; // 上次刷新的时间
+     int16_t MSPT_;                                   // MSPT
 
      std::unordered_map<TcpConnection *, std::pair<ecs::Entity, bool>> playerMap_; // 玩家连接到实体的映射 <连接, <实体ID, 玩家是否死亡>>
      std::unordered_map<ecs::Entity, int> inputMap_;                               // 玩家输入(输入，加点，升级...)映射

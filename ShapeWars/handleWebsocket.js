@@ -158,7 +158,7 @@ function parseMessage(dataView, offset) {
                nameInput.style.display = 'none';
                break;
           case 0x07://排行榜消息
-               readStandings(dataView, offset);
+               readServerInfo(dataView, offset);
                break;
           case 0x08://更新玩家属性消息
                let [isUp, index] = readAttributes(dataView, offset);

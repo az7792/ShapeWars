@@ -261,11 +261,11 @@ function drawPerformance() {
      y += Fsize + 2;
      //绘制TPS
      ctx.fillStyle = performanceMetrics.TPS <= 20 ? "#ff0000" : "#00ff00";
-     ctx.fillText("TPS: " + performanceMetrics.TPS + "  (近似值)", x, y);
+     ctx.fillText("TPS: " + performanceMetrics.TPS, x, y);
      y += Fsize + 2;
      //TODO：绘制MSPT
      ctx.fillStyle = performanceMetrics.MSPT >= 50 ? "#ff0000" : "#00ff00";
-     ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms(未同步)", x, y);
+     ctx.fillText("MSPT: " + performanceMetrics.MSPT + "ms", x, y);
      y += Fsize + 2;
      // 绘制网络波动
      ctx.fillStyle = "#ffa500";

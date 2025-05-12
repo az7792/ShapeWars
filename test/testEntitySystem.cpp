@@ -26,8 +26,8 @@ struct Empty
 
 void moveSystem(ecs::EntityManager &em, float dt)
 {
-     auto &G = em.group<Position, Velocity>();
-     for (auto entity : G)
+     auto G = em.group<Position, Velocity>();
+     for (auto entity : *G)
      {
           Position *pos = em.getComponent<Position>(entity);
           Velocity *vel = em.getComponent<Velocity>(entity);
