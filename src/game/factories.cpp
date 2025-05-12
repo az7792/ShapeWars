@@ -150,7 +150,7 @@ ecs::Entity createEntityBullet(ecs::EntityManager &em, b2WorldId &worldId, uint3
      em.addComponent<Parent>(e, params.parentEntity);
      em.addComponent<RegularPolygon>(e, params.sides, params.radius); //>=16为圆形
      em.addComponent<Score>(e, 0);
-     if (params.sides >= 16 && params.isCtrl == false) // 只控制圆形子弹的生命周期
+     if ((params.sides & 0x7F) >= 16 && params.isCtrl == false) // 只控制圆形子弹的生命周期
           em.addComponent<BulletAccelerationFlag>(e);
      if (params.isCtrl)
      {
